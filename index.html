@@ -1006,7 +1006,8 @@
         type: 'all',      // 'all', 'design', 'dev', 'client', 'admin'
         assignee: 'all',  // 'all', 'enzo', 'diego'
         status: 'all'     // 'all', 'todo', 'done'
-      }
+      },
+      taskSort: 'date'  // 'date', 'priority', 'urgence'
     };
 
     // === HELPERS ===
@@ -1421,10 +1422,6 @@ function initDashboard() {
   document.getElementById('btn-see-crm')?.addEventListener('click', () => navigate('crm'));
 }
 
-    // --- Agenda ---
-// À REMPLACER dans phosphor-os-supabase.html
-// Remplace renderAgenda (ligne 1415-1573) et initAgenda (ligne 1575-1696)
-
 function renderAgenda() {
   const hours = ['9h', '11h', '14h', '16h', '18h'];
   const days = ['lun', 'mar', 'mer', 'jeu', 'ven', 'sam'];
@@ -1452,10 +1449,46 @@ function renderAgenda() {
     calRows += row;
   });
 
-  // Filtres
-  const filteredTasks = filterTasks(appData.tasks);
+  // Appliquer filtres + tri
+  let filteredTasks = filterTasks(appData.tasks);
+  
+  // Tri selon state.taskSort
+  if (state.taskSort === 'date') {
+    filteredTasks.sort((a, b) => {
+      if (!a.deadline && !b.deadline) return 0;
+      if (!a.deadline) return 1;
+      if (!b.deadline) return -1;
+      return new Date(a.deadline) - new Date(b.deadline);
+    });
+  } else if (state.taskSort === 'priority') {
+    const prio = { 'Haute': 0, 'Moyenne': 1, 'Basse': 2 };
+    filteredTasks.sort((a, b) => prio[a.priority || 'Moyenne'] - prio[b.priority || 'Moyenne']);
+  } else if (state.taskSort === 'urgence') {
+    filteredTasks.sort((a, b) => {
+      const aScore = (a.priority === 'Haute' ? 10 : 0) + (a.deadline && new Date(a.deadline) < Date.now() ? 5 : 0);
+      const bScore = (b.priority === 'Haute' ? 10 : 0) + (b.deadline && new Date(b.deadline) < Date.now() ? 5 : 0);
+      return bScore - aScore;
+    });
+  }
+  
   const doneTasks = filteredTasks.filter(t => t.done).length;
 
+  // Couleurs types
+  const typeColors = {
+    design: '#8CB7F8',
+    dev: '#978CF8',
+    client: '#D4361B',
+    admin: '#D0D0D0'
+  };
+
+  // Couleurs priorités
+  const priorityColors = {
+    'Haute': '#D4361B',
+    'Moyenne': '#E88608',
+    'Basse': '#D0D0D0'
+  };
+
+  // Filtres sur UNE ligne
   const typeFilters = [
     { value: 'all', label: 'Tous' },
     { value: 'design', label: 'Design' },
@@ -1485,27 +1518,34 @@ function renderAgenda() {
     `<button class="btn btn-sm task-filter-status${state.taskFilters.status === f.value ? ' btn-lime' : ' btn-ghost'}" data-value="${f.value}">${f.label}</button>`
   ).join('');
 
-  // Tasks list
+  // Tri
+  const sortBtns = ['date', 'priority', 'urgence'].map(s =>
+    `<button class="btn btn-sm task-sort-btn${state.taskSort === s ? ' btn-lime' : ' btn-ghost'}" data-sort="${s}">${s === 'date' ? '📅 Date' : s === 'priority' ? '⚡ Priorité' : '🔥 Urgence'}</button>`
+  ).join('');
+
+  // Tasks list - NOUVELLE VERSION compacte
   const taskItems = filteredTasks.map(task => {
     const deadlineText = task.deadline ? formatDate(task.deadline) : '';
-    const priorityEmoji = getPriorityEmoji(task.priority);
     const isOverdue = task.deadline && new Date(task.deadline) < new Date() && !task.done;
+    const borderColor = typeColors[task.tag] || '#D0D0D0';
+    const priorityColor = priorityColors[task.priority || 'Moyenne'];
     
     return `
-      <div class="task-item-new" data-task-id="${task.id}" style="padding:12px;border:1px solid ${isOverdue ? 'var(--red)' : 'var(--border)'};border-radius:6px;cursor:pointer;transition:background 0.2s;" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='transparent'">
-        <div style="display:flex;gap:12px;">
-          <div class="task-checkbox-click" data-task-id="${task.id}" style="cursor:pointer;padding-top:2px;" onclick="event.stopPropagation()">
-            <span class="task-checkbox${task.done ? ' checked' : ''}" style="width:20px;height:20px;"></span>
+      <div class="task-item-compact" data-task-id="${task.id}" style="position:relative;padding:10px 12px;border:1px solid var(--border);border-left:4px solid ${borderColor};border-radius:4px;cursor:pointer;transition:all 0.2s;background:transparent;" onmouseover="this.style.background='var(--bg3)';this.querySelector('.task-actions').style.opacity='1'" onmouseout="this.style.background='transparent';this.querySelector('.task-actions').style.opacity='0'">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div class="task-checkbox-click" data-task-id="${task.id}" style="cursor:pointer;" onclick="event.stopPropagation()">
+            <span class="task-checkbox${task.done ? ' checked' : ''}" style="width:16px;height:16px;"></span>
           </div>
-          <div style="flex:1;">
-            <div style="font-size:14px;font-weight:600;margin-bottom:6px;" class="${task.done ? 'done' : ''}">${task.text}</div>
-            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-              <span class="tag tag-${task.tag}" style="font-size:11px;">${task.tag}</span>
-              <span class="avatar av-${task.assignee}" style="width:20px;height:20px;font-size:9px;"></span>
-              ${task.priority !== 'Moyenne' ? `<span style="font-size:11px;">${priorityEmoji} ${task.priority}</span>` : ''}
-              ${deadlineText ? `<span style="font-size:11px;color:${isOverdue ? 'var(--red)' : 'var(--text2)'};">${deadlineText}</span>` : ''}
-            </div>
-            ${task.notes ? `<div style="font-size:12px;color:var(--text2);margin-top:6px;font-style:italic;">"${task.notes}"</div>` : ''}
+          <div style="flex:1;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+            <span style="font-size:14px;font-weight:600;${task.done ? 'text-decoration:line-through;opacity:0.5;' : ''}">${task.text}</span>
+            <span style="font-size:11px;color:var(--text3);">${task.tag}</span>
+            <span class="avatar av-${task.assignee}" style="width:18px;height:18px;font-size:8px;"></span>
+            ${deadlineText ? `<span style="font-size:11px;color:${isOverdue ? 'var(--red)' : 'var(--text2)'};">${deadlineText}</span>` : ''}
+            <span style="font-size:11px;padding:2px 6px;border:1px solid ${priorityColor};border-radius:3px;color:${priorityColor};">${task.priority || 'Moyenne'}</span>
+          </div>
+          <div class="task-actions" style="display:flex;gap:8px;opacity:0;transition:opacity 0.2s;">
+            <button class="task-edit-btn" data-task-id="${task.id}" style="background:transparent;border:none;cursor:pointer;font-size:16px;padding:4px;" onclick="event.stopPropagation()">✏️</button>
+            <button class="task-delete-btn" data-task-id="${task.id}" style="background:transparent;border:none;cursor:pointer;font-size:16px;padding:4px;" onclick="event.stopPropagation()">🗑️</button>
           </div>
         </div>
       </div>`;
@@ -1541,22 +1581,18 @@ function renderAgenda() {
         <button class="btn btn-lime btn-sm" id="btn-add-task">+ Nouvelle tâche</button>
       </div>
 
-      <div style="margin-bottom:20px;">
-        <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;">
-          <span style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text3);min-width:60px;">Type</span>
-          <div style="display:flex;gap:6px;flex-wrap:wrap;">${typeFilterBtns}</div>
-        </div>
-        <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;">
-          <span style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text3);min-width:60px;">Assigné</span>
-          <div style="display:flex;gap:6px;">${assigneeFilterBtns}</div>
-        </div>
-        <div style="display:flex;align-items:center;gap:12px;">
-          <span style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text3);min-width:60px;">Statut</span>
-          <div style="display:flex;gap:6px;">${statusFilterBtns}</div>
-        </div>
+      <!-- Filtres + Tri sur UNE ligne -->
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap;">
+        <div style="display:flex;gap:4px;">${typeFilterBtns}</div>
+        <div style="width:1px;height:20px;background:var(--border);"></div>
+        <div style="display:flex;gap:4px;">${assigneeFilterBtns}</div>
+        <div style="width:1px;height:20px;background:var(--border);"></div>
+        <div style="display:flex;gap:4px;">${statusFilterBtns}</div>
+        <div style="width:1px;height:20px;background:var(--border);"></div>
+        <div style="display:flex;gap:4px;">${sortBtns}</div>
       </div>
 
-      <div style="display:flex;flex-direction:column;gap:8px;">${taskItems}${emptyState}</div>
+      <div style="display:flex;flex-direction:column;gap:6px;">${taskItems}${emptyState}</div>
     </div>
 
     <div class="divider"></div>
