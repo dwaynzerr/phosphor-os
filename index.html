@@ -1270,6 +1270,7 @@
       dashboard: 'Dashboard',
       agenda: 'Agenda & Tâches',
       projects: 'Projets',
+      project: 'Projet',
       finances: 'Finances & Facturation',
       crm: 'Démarchage CRM'
     };
@@ -1278,6 +1279,7 @@
       dashboard: '+ Ajouter',
       agenda: '+ Tâche',
       projects: '+ Projet',
+      project: '+ Document',
       finances: '+ Facture',
       crm: '+ Prospect'
     };
@@ -1558,24 +1560,28 @@ function renderAgenda() {
   // Appliquer filtres + tri
   let filteredTasks = filterTasks(appData.tasks);
   
-  // Tri selon state.taskSort
-  if (state.taskSort === 'date') {
-    filteredTasks.sort((a, b) => {
-      if (!a.deadline && !b.deadline) return 0;
-      if (!a.deadline) return 1;
-      if (!b.deadline) return -1;
-      return new Date(a.deadline) - new Date(b.deadline);
-    });
-  } else if (state.taskSort === 'priority') {
-    const prio = { 'Haute': 0, 'Moyenne': 1, 'Basse': 2 };
-    filteredTasks.sort((a, b) => prio[a.priority || 'Moyenne'] - prio[b.priority || 'Moyenne']);
-  } else if (state.taskSort === 'urgence') {
-    filteredTasks.sort((a, b) => {
-      const aScore = (a.priority === 'Haute' ? 10 : 0) + (a.deadline && new Date(a.deadline) < Date.now() ? 5 : 0);
-      const bScore = (b.priority === 'Haute' ? 10 : 0) + (b.deadline && new Date(b.deadline) < Date.now() ? 5 : 0);
-      return bScore - aScore;
-    });
-  }
+  // Tri automatique : non réalisées d'abord
+  filteredTasks.sort((a, b) => {
+    if (a.done === b.done) {
+      // Même statut → tri selon state.taskSort
+      if (state.taskSort === 'date') {
+        if (!a.deadline && !b.deadline) return 0;
+        if (!a.deadline) return 1;
+        if (!b.deadline) return -1;
+        return new Date(a.deadline) - new Date(b.deadline);
+      } else if (state.taskSort === 'priority') {
+        const prio = { 'Haute': 0, 'Moyenne': 1, 'Basse': 2 };
+        return prio[a.priority || 'Moyenne'] - prio[b.priority || 'Moyenne'];
+      } else if (state.taskSort === 'urgence') {
+        const aScore = (a.priority === 'Haute' ? 10 : 0) + (a.deadline && new Date(a.deadline) < Date.now() ? 5 : 0);
+        const bScore = (b.priority === 'Haute' ? 10 : 0) + (b.deadline && new Date(b.deadline) < Date.now() ? 5 : 0);
+        return bScore - aScore;
+      }
+      return 0;
+    }
+    // Statut différent → non réalisées d'abord
+    return a.done ? 1 : -1;
+  });
   
   const doneTasks = filteredTasks.filter(t => t.done).length;
 
@@ -1629,7 +1635,7 @@ function renderAgenda() {
     `<button class="btn btn-sm task-sort-btn${state.taskSort === s ? ' btn-lime' : ' btn-ghost'}" data-sort="${s}">${s === 'date' ? 'Date' : s === 'priority' ? 'Priorité' : 'Urgence'}</button>`
   ).join('');
 
-  // Tasks list - VERSION corrigée
+  // Tasks list - VERSION finale
   const taskItems = filteredTasks.map(task => {
     const deadlineText = task.deadline ? formatDate(task.deadline) : '';
     const isOverdue = task.deadline && new Date(task.deadline) < new Date() && !task.done;
@@ -1637,18 +1643,17 @@ function renderAgenda() {
     const priorityColor = priorityColors[task.priority || 'Moyenne'];
     
     return `
-      <div class="task-item-compact" data-task-id="${task.id}" style="position:relative;padding:10px 12px;border:1px solid var(--border);border-left:4px solid ${borderColor};border-radius:4px;cursor:pointer;transition:all 0.2s;background:transparent;" onmouseover="this.style.background='var(--bg3)';this.querySelector('.task-actions').style.opacity='1'" onmouseout="this.style.background='transparent';this.querySelector('.task-actions').style.opacity='0'">
+      <div class="task-item-compact" data-task-id="${task.id}" style="position:relative;padding:10px 12px;border:1px solid var(--border);border-left:4px solid ${priorityColor};border-radius:4px;cursor:pointer;transition:all 0.2s;background:transparent;${task.done ? 'opacity:0.5;' : ''}" onmouseover="this.style.background='var(--bg3)';this.querySelector('.task-actions').style.opacity='1'" onmouseout="this.style.background='transparent';this.querySelector('.task-actions').style.opacity='0'">
         <div style="display:flex;align-items:center;gap:10px;">
           <div class="task-checkbox-click" data-task-id="${task.id}" style="cursor:pointer;" onclick="event.stopPropagation()">
             <span class="task-checkbox${task.done ? ' checked' : ''}" style="width:16px;height:16px;"></span>
           </div>
           <div style="flex:1;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-            <span style="font-size:14px;font-weight:600;${task.done ? 'text-decoration:line-through;opacity:0.5;' : ''}">${task.text}</span>
+            <span style="font-size:14px;font-weight:600;${task.done ? 'text-decoration:line-through;' : ''}">${task.text}</span>
             <span style="font-size:11px;padding:2px 6px;border:1px solid ${borderColor};border-radius:3px;color:${borderColor};">${task.tag}</span>
+            <span style="font-size:11px;color:var(--text2);">${task.assignee}</span>
             ${deadlineText ? `<span style="font-size:11px;color:${isOverdue ? 'var(--red)' : 'var(--text2)'};">${deadlineText}</span>` : ''}
-            <span style="font-size:11px;color:${priorityColor};">${task.priority || 'Moyenne'}</span>
           </div>
-          <span class="avatar av-${task.assignee}" style="width:18px;height:18px;font-size:8px;margin-left:auto;"></span>
           <div class="task-actions" style="display:flex;gap:8px;opacity:0;transition:opacity 0.2s;">
             <button class="task-edit-btn" data-task-id="${task.id}" style="background:transparent;border:none;cursor:pointer;font-size:11px;padding:4px 8px;color:var(--text2);" onclick="event.stopPropagation()">Éditer</button>
             <button class="task-delete-btn" data-task-id="${task.id}" style="background:transparent;border:none;cursor:pointer;font-size:11px;padding:4px 8px;color:var(--red);" onclick="event.stopPropagation()">Supprimer</button>
@@ -1785,7 +1790,7 @@ function initAgenda() {
   });
 
   // Clic tâche → Modal édition
-  document.querySelectorAll('.task-item-new').forEach(el => {
+  document.querySelectorAll('.task-item-compact').forEach(el => {
     el.addEventListener('click', () => {
       const id = parseInt(el.dataset.taskId);
       const task = appData.tasks.find(t => t.id === id);
@@ -1874,6 +1879,102 @@ function initAgenda() {
           }
         }
       });
+    });
+  });
+
+  // Boutons Éditer tâche (depuis ligne)
+  document.querySelectorAll('.task-edit-btn').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      const id = parseInt(btn.dataset.taskId);
+      const task = appData.tasks.find(t => t.id === id);
+      if (!task) return;
+
+      openModal(`
+        <div class="modal-box">
+          <div class="modal-title">Éditer la tâche<button class="modal-close" onclick="closeModal()">×</button></div>
+          <div class="form-group"><label class="form-label">Texte *</label><input class="form-input" id="edit-text-2" value="${task.text}"></div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Type</label>
+              <select class="form-select" id="edit-tag-2">
+                <option value="design" ${task.tag === 'design' ? 'selected' : ''}>Design</option>
+                <option value="dev" ${task.tag === 'dev' ? 'selected' : ''}>Dev</option>
+                <option value="client" ${task.tag === 'client' ? 'selected' : ''}>Client</option>
+                <option value="admin" ${task.tag === 'admin' ? 'selected' : ''}>Admin</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Assigné</label>
+              <select class="form-select" id="edit-assignee-2">
+                <option value="enzo" ${task.assignee === 'enzo' ? 'selected' : ''}>Enzo</option>
+                <option value="diego" ${task.assignee === 'diego' ? 'selected' : ''}>Diego</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Deadline</label><input class="form-input" type="date" id="edit-deadline-2" value="${task.deadline || ''}"></div>
+            <div class="form-group">
+              <label class="form-label">Priorité</label>
+              <select class="form-select" id="edit-priority-2">
+                <option value="Haute" ${task.priority === 'Haute' ? 'selected' : ''}>Haute</option>
+                <option value="Moyenne" ${task.priority === 'Moyenne' ? 'selected' : ''}>Moyenne</option>
+                <option value="Basse" ${task.priority === 'Basse' ? 'selected' : ''}>Basse</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group"><label class="form-label">Notes</label><textarea class="form-input" id="edit-notes-2" rows="3" placeholder="Notes optionnelles...">${task.notes || ''}</textarea></div>
+          <div style="display:flex;gap:8px;margin-top:20px;">
+            <button class="btn btn-lime" id="save-task-edit-2">Sauvegarder</button>
+            <button class="btn btn-ghost" onclick="closeModal()">Annuler</button>
+          </div>
+        </div>
+      `);
+
+      document.getElementById('save-task-edit-2')?.addEventListener('click', async () => {
+        const text = document.getElementById('edit-text-2')?.value.trim();
+        if (!text) { toast('Texte requis'); return; }
+
+        const updates = {
+          text,
+          tag: document.getElementById('edit-tag-2').value,
+          assignee: document.getElementById('edit-assignee-2').value,
+          deadline: document.getElementById('edit-deadline-2').value || null,
+          priority: document.getElementById('edit-priority-2').value,
+          notes: document.getElementById('edit-notes-2').value.trim()
+        };
+
+        const saved = await Supabase.updateTask(id, updates);
+        if (saved) {
+          await Supabase.loadAllData();
+          closeModal();
+          toast('✓ Tâche mise à jour');
+          navigate('agenda');
+        } else {
+          toast('❌ Erreur');
+        }
+      });
+    });
+  });
+
+  // Boutons Supprimer tâche (depuis ligne)
+  document.querySelectorAll('.task-delete-btn').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      const id = parseInt(btn.dataset.taskId);
+      const task = appData.tasks.find(t => t.id === id);
+      if (!task) return;
+
+      if (confirm(`Supprimer la tâche "${task.text}" ?`)) {
+        const deleted = await Supabase.deleteTask(id);
+        if (deleted) {
+          await Supabase.loadAllData();
+          toast('✓ Tâche supprimée');
+          navigate('agenda');
+        } else {
+          toast('❌ Erreur');
+        }
+      }
     });
   });
 
@@ -2310,65 +2411,13 @@ function renderProjects() {
 }
 
 function initProjects() {
+  // Clic sur carte projet → page dédiée
   document.querySelectorAll('.project-card[data-project-id]').forEach(card => {
+    card.style.cursor = 'pointer';
     card.addEventListener('click', () => {
       const id = parseInt(card.dataset.projectId);
-      const p = appData.projects.find(x => x.id === id);
-      if (!p) return;
-
-      const projectTasks = [
-        { text: 'Brief client validé', done: true },
-        { text: 'Moodboard & direction artistique', done: id <= 2 },
-        { text: 'Charte graphique v1', done: id === 1 },
-        { text: 'Révisions client', done: false },
-        { text: 'Livraison finale', done: false }
-      ];
-
-      const doneCount = projectTasks.filter(t => t.done).length;
-
-      openModal(`
-        <div class="modal-box">
-          <div class="modal-title">
-            <span style="color:${p.color}">${p.name}</span>
-            <button class="modal-close" onclick="closeModal()">×</button>
-          </div>
-
-          <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;">
-            <span class="badge ${p.statusClass}">${p.status}</span>
-            <span style="font-size:12px;color:var(--text2);">${p.client} · ${p.type}</span>
-          </div>
-
-          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:20px;">
-            <div style="background:var(--bg3);padding:12px;border-radius:3px;">
-              <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;">Budget</div>
-              <div style="font-size:20px;font-weight:900;">${formatEuro(p.budget)}</div>
-            </div>
-            <div style="background:var(--bg3);padding:12px;border-radius:3px;">
-              <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;">Facturé</div>
-              <div style="font-size:20px;font-weight:900;color:var(--lime);">${formatEuro(p.billed)}</div>
-            </div>
-            <div style="background:var(--bg3);padding:12px;border-radius:3px;">
-              <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;">Avancement</div>
-              <div style="font-size:20px;font-weight:900;">${p.progress}%</div>
-            </div>
-          </div>
-
-          <div style="margin-bottom:16px;">
-            <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:8px;">Checklist (${doneCount}/${projectTasks.length})</div>
-            ${projectTasks.map(t => `
-              <div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border);">
-                <div style="width:16px;height:16px;border-radius:2px;border:1.5px solid ${t.done ? 'var(--lime)' : 'var(--border2)'};background:${t.done ? 'var(--lime)' : 'transparent'};display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:900;color:#1A1A1A;flex-shrink:0;">${t.done ? '✓' : ''}</div>
-                <span style="font-size:13px;${t.done ? 'text-decoration:line-through;opacity:0.4;' : ''}">${t.text}</span>
-              </div>
-            `).join('')}
-          </div>
-
-          <div style="display:flex;gap:8px;margin-top:20px;">
-            <button class="btn btn-lime btn-sm" onclick="closeModal();toast('Projet mis à jour');">Mettre à jour</button>
-            <button class="btn btn-ghost btn-sm" onclick="closeModal()">Fermer</button>
-          </div>
-        </div>
-      `);
+      state.currentProjectId = id;
+      navigate('project');
     });
   });
 
