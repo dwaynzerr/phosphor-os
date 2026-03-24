@@ -1414,12 +1414,17 @@ function initDashboard() {
     });
   });
 
-  // Navigate buttons
+  // Navigate to agenda
   document.getElementById('btn-see-tasks')?.addEventListener('click', () => navigate('agenda'));
+
+  // Navigate to CRM
   document.getElementById('btn-see-crm')?.addEventListener('click', () => navigate('crm'));
 }
 
     // --- Agenda ---
+// À REMPLACER dans phosphor-os-supabase.html
+// Remplace renderAgenda (ligne 1415-1573) et initAgenda (ligne 1575-1696)
+
 function renderAgenda() {
   const hours = ['9h', '11h', '14h', '16h', '18h'];
   const days = ['lun', 'mar', 'mer', 'jeu', 'ven', 'sam'];
@@ -1865,16 +1870,6 @@ function initAgenda() {
         navigate('agenda');
       } else {
         toast('❌ Erreur');
-      }
-    });
-  });
-}
-        await Supabase.loadAllData();
-        closeModal();
-        toast('✓ Événement ajouté');
-        navigate('agenda');
-      } else {
-        toast('❌ Erreur de sauvegarde');
       }
     });
   });
