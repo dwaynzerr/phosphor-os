@@ -389,6 +389,25 @@
       return await response.json();
     }
 
+    async function supabaseInsert(table, data) {
+      const response = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, {
+        method: 'POST',
+        headers: supabaseHeaders,
+        body: JSON.stringify(data)
+      });
+      if (!response.ok) throw new Error(`Erreur INSERT ${table}`);
+      return await response.json();
+    }
+
+    async function supabaseDelete(table, id) {
+      const response = await fetch(`${SUPABASE_URL}/rest/v1/${table}?id=eq.${id}`, {
+        method: 'DELETE',
+        headers: supabaseHeaders
+      });
+      if (!response.ok) throw new Error(`Erreur DELETE ${table}`);
+      return true;
+    }
+
     window.Supabase = {
       async loadAllData() {
         try {
@@ -457,6 +476,217 @@
           return true;
         } catch (error) {
           console.error('Erreur sauvegarde tâche:', error);
+          return false;
+        }
+      },
+      
+      // TASKS
+      async addTask(task) {
+        try {
+          const data = { text: task.text, done: false, tag: task.tag, assignee: task.assignee };
+          const result = await supabaseInsert('tasks', data);
+          console.log('✓ Tâche ajoutée');
+          return result[0];
+        } catch (error) {
+          console.error('Erreur ajout tâche:', error);
+          return null;
+        }
+      },
+      
+      async updateTask(taskId, updates) {
+        try {
+          await supabaseUpdate('tasks', taskId, updates);
+          console.log(`✓ Tâche ${taskId} mise à jour`);
+          return true;
+        } catch (error) {
+          console.error('Erreur update tâche:', error);
+          return false;
+        }
+      },
+      
+      async deleteTask(taskId) {
+        try {
+          await supabaseDelete('tasks', taskId);
+          console.log(`✓ Tâche ${taskId} supprimée`);
+          return true;
+        } catch (error) {
+          console.error('Erreur suppression tâche:', error);
+          return false;
+        }
+      },
+      
+      // PROJECTS
+      async addProject(project) {
+        try {
+          const data = {
+            name: project.name,
+            client: project.client,
+            type: project.type,
+            budget: project.budget || 0,
+            billed: project.billed || 0,
+            progress: project.progress || 0,
+            deadline: project.deadline || '',
+            status: project.status || 'EN ATTENTE',
+            status_class: project.statusClass || 'badge-gray',
+            color: project.color || '#D0D0D0',
+            gantt_start: project.ganttStart || 0,
+            gantt_end: project.ganttEnd || 1,
+            tasks: project.tasks || [],
+            notes: project.notes || ''
+          };
+          const result = await supabaseInsert('projects', data);
+          console.log('✓ Projet ajouté');
+          return result[0];
+        } catch (error) {
+          console.error('Erreur ajout projet:', error);
+          return null;
+        }
+      },
+      
+      async updateProject(projectId, updates) {
+        try {
+          const data = {};
+          if (updates.name !== undefined) data.name = updates.name;
+          if (updates.client !== undefined) data.client = updates.client;
+          if (updates.type !== undefined) data.type = updates.type;
+          if (updates.budget !== undefined) data.budget = updates.budget;
+          if (updates.billed !== undefined) data.billed = updates.billed;
+          if (updates.progress !== undefined) data.progress = updates.progress;
+          if (updates.deadline !== undefined) data.deadline = updates.deadline;
+          if (updates.status !== undefined) data.status = updates.status;
+          if (updates.statusClass !== undefined) data.status_class = updates.statusClass;
+          if (updates.color !== undefined) data.color = updates.color;
+          if (updates.ganttStart !== undefined) data.gantt_start = updates.ganttStart;
+          if (updates.ganttEnd !== undefined) data.gantt_end = updates.ganttEnd;
+          if (updates.tasks !== undefined) data.tasks = updates.tasks;
+          if (updates.notes !== undefined) data.notes = updates.notes;
+          
+          await supabaseUpdate('projects', projectId, data);
+          console.log(`✓ Projet ${projectId} mis à jour`);
+          return true;
+        } catch (error) {
+          console.error('Erreur update projet:', error);
+          return false;
+        }
+      },
+      
+      async deleteProject(projectId) {
+        try {
+          await supabaseDelete('projects', projectId);
+          console.log(`✓ Projet ${projectId} supprimé`);
+          return true;
+        } catch (error) {
+          console.error('Erreur suppression projet:', error);
+          return false;
+        }
+      },
+      
+      // INVOICES
+      async addInvoice(invoice) {
+        try {
+          const data = {
+            ref: invoice.ref,
+            client: invoice.client,
+            amount: invoice.amount || 0,
+            type: invoice.type || 'Facture',
+            status: invoice.status || 'BROUILLON',
+            status_class: invoice.statusClass || 'badge-gray'
+          };
+          const result = await supabaseInsert('invoices', data);
+          console.log('✓ Facture ajoutée');
+          return result[0];
+        } catch (error) {
+          console.error('Erreur ajout facture:', error);
+          return null;
+        }
+      },
+      
+      async updateInvoice(invoiceId, updates) {
+        try {
+          const data = {};
+          if (updates.ref !== undefined) data.ref = updates.ref;
+          if (updates.client !== undefined) data.client = updates.client;
+          if (updates.amount !== undefined) data.amount = updates.amount;
+          if (updates.type !== undefined) data.type = updates.type;
+          if (updates.status !== undefined) data.status = updates.status;
+          if (updates.statusClass !== undefined) data.status_class = updates.statusClass;
+          
+          await supabaseUpdate('invoices', invoiceId, data);
+          console.log(`✓ Facture ${invoiceId} mise à jour`);
+          return true;
+        } catch (error) {
+          console.error('Erreur update facture:', error);
+          return false;
+        }
+      },
+      
+      async deleteInvoice(invoiceId) {
+        try {
+          await supabaseDelete('invoices', invoiceId);
+          console.log(`✓ Facture ${invoiceId} supprimée`);
+          return true;
+        } catch (error) {
+          console.error('Erreur suppression facture:', error);
+          return false;
+        }
+      },
+      
+      // PROSPECTS
+      async addProspect(prospect) {
+        try {
+          const data = {
+            name: prospect.name,
+            company: prospect.company || prospect.name,
+            city: prospect.city || '',
+            sector: prospect.sector || '',
+            budget_est: prospect.budgetEst || 0,
+            source: prospect.source || 'Autre',
+            stage: prospect.stage || 'IDENTIFIÉ',
+            days_since: prospect.daysSince || 0,
+            email: prospect.email || '',
+            linkedin: prospect.linkedin || '',
+            notes: prospect.notes || ''
+          };
+          const result = await supabaseInsert('prospects', data);
+          console.log('✓ Prospect ajouté');
+          return result[0];
+        } catch (error) {
+          console.error('Erreur ajout prospect:', error);
+          return null;
+        }
+      },
+      
+      async updateProspect(prospectId, updates) {
+        try {
+          const data = {};
+          if (updates.name !== undefined) data.name = updates.name;
+          if (updates.company !== undefined) data.company = updates.company;
+          if (updates.city !== undefined) data.city = updates.city;
+          if (updates.sector !== undefined) data.sector = updates.sector;
+          if (updates.budgetEst !== undefined) data.budget_est = updates.budgetEst;
+          if (updates.source !== undefined) data.source = updates.source;
+          if (updates.stage !== undefined) data.stage = updates.stage;
+          if (updates.daysSince !== undefined) data.days_since = updates.daysSince;
+          if (updates.email !== undefined) data.email = updates.email;
+          if (updates.linkedin !== undefined) data.linkedin = updates.linkedin;
+          if (updates.notes !== undefined) data.notes = updates.notes;
+          
+          await supabaseUpdate('prospects', prospectId, data);
+          console.log(`✓ Prospect ${prospectId} mis à jour`);
+          return true;
+        } catch (error) {
+          console.error('Erreur update prospect:', error);
+          return false;
+        }
+      },
+      
+      async deleteProspect(prospectId) {
+        try {
+          await supabaseDelete('prospects', prospectId);
+          console.log(`✓ Prospect ${prospectId} supprimé`);
+          return true;
+        } catch (error) {
+          console.error('Erreur suppression prospect:', error);
           return false;
         }
       },
