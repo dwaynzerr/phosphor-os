@@ -642,7 +642,15 @@
           };
           tasks.push(newTask);
           
-          await this.updateProject(projectId, { projectTasks: tasks });
+          // Recalculer progression
+          const totalTasks = tasks.length;
+          const doneTasks = tasks.filter(t => t.done).length;
+          const progress = totalTasks > 0 ? Math.round((doneTasks / totalTasks) * 100) : 0;
+          
+          await this.updateProject(projectId, { 
+            projectTasks: tasks,
+            progress: progress
+          });
           return newTask;
         } catch (error) {
           console.error('Erreur ajout tâche projet:', error);
@@ -661,7 +669,16 @@
           if (!task) return false;
           
           task.done = !task.done;
-          await this.updateProject(projectId, { projectTasks: tasks });
+          
+          // Calculer progression automatique
+          const totalTasks = tasks.length;
+          const doneTasks = tasks.filter(t => t.done).length;
+          const progress = totalTasks > 0 ? Math.round((doneTasks / totalTasks) * 100) : 0;
+          
+          await this.updateProject(projectId, { 
+            projectTasks: tasks,
+            progress: progress
+          });
           return true;
         } catch (error) {
           console.error('Erreur toggle tâche projet:', error);
@@ -676,7 +693,16 @@
           if (!project) return false;
           
           const tasks = (project.project_tasks || []).filter(t => t.id !== taskId);
-          await this.updateProject(projectId, { projectTasks: tasks });
+          
+          // Recalculer progression
+          const totalTasks = tasks.length;
+          const doneTasks = tasks.filter(t => t.done).length;
+          const progress = totalTasks > 0 ? Math.round((doneTasks / totalTasks) * 100) : 0;
+          
+          await this.updateProject(projectId, { 
+            projectTasks: tasks,
+            progress: progress
+          });
           return true;
         } catch (error) {
           console.error('Erreur suppression tâche projet:', error);
@@ -697,15 +723,104 @@
             type: doc.type, // 'devis', 'facture', 'acompte'
             ref: doc.ref,
             amount: doc.amount,
-            date: doc.date
+            date: doc.date,
+            paid: doc.paid || false,
+            fileUrl: doc.fileUrl || null,
+            fileName: doc.fileName || null
           };
           documents.push(newDoc);
           
-          await this.updateProject(projectId, { documents });
+          // Synchroniser avec table invoices
+          const invoice = {
+            ref: doc.ref,
+            client: project.client,
+            amount: doc.amount,
+            type: doc.type,
+            status: doc.paid ? 'PAYÉ' : 'EN ATTENTE',
+            statusClass: doc.paid ? 'badge-lime' : 'badge-gray',
+            project_id: projectId,
+            date: doc.date,
+            paid: doc.paid || false,
+            file_url: doc.fileUrl || null,
+            file_name: doc.fileName || null
+          };
+          
+          await supabaseInsert('invoices', invoice);
+          
+          // Si devis, mettre à jour budget
+          if (doc.type === 'devis') {
+            await this.updateProject(projectId, { 
+              documents,
+              budget: doc.amount 
+            });
+          } else {
+            await this.updateProject(projectId, { documents });
+          }
+          
+          // Si document payé, mettre à jour billed
+          if (doc.paid && (doc.type === 'facture' || doc.type === 'acompte')) {
+            await this.syncProjectBilled(projectId);
+          }
+          
           return newDoc;
         } catch (error) {
           console.error('Erreur ajout document projet:', error);
           return null;
+        }
+      },
+      
+      // Synchroniser montant facturé depuis documents payés
+      async syncProjectBilled(projectId) {
+        try {
+          const projects = await supabaseGet('projects');
+          const project = projects.find(p => p.id === projectId);
+          if (!project) return false;
+          
+          const documents = project.documents || [];
+          const totalBilled = documents
+            .filter(d => d.paid && (d.type === 'facture' || d.type === 'acompte'))
+            .reduce((sum, d) => sum + d.amount, 0);
+          
+          await this.updateProject(projectId, { billed: totalBilled });
+          return true;
+        } catch (error) {
+          console.error('Erreur sync billed:', error);
+          return false;
+        }
+      },
+      
+      // Marquer document payé
+      async markDocumentPaid(projectId, docId, paid) {
+        try {
+          const projects = await supabaseGet('projects');
+          const project = projects.find(p => p.id === projectId);
+          if (!project) return false;
+          
+          const documents = project.documents || [];
+          const doc = documents.find(d => d.id === docId);
+          if (!doc) return false;
+          
+          doc.paid = paid;
+          await this.updateProject(projectId, { documents });
+          
+          // Synchroniser avec invoices
+          const invoices = await supabaseGet('invoices');
+          const invoice = invoices.find(i => i.ref === doc.ref && i.project_id === projectId);
+          if (invoice) {
+            await supabaseUpdate('invoices', invoice.id, {
+              paid: paid,
+              status: paid ? 'PAYÉ' : 'EN ATTENTE',
+              status_class: paid ? 'badge-lime' : 'badge-gray'
+            });
+          }
+          
+          // Recalculer billed
+          await this.syncProjectBilled(projectId);
+          
+          return true;
+        } catch (error) {
+          console.error('Erreur marquer payé:', error);
+          return false;
         }
       },
       
@@ -715,8 +830,22 @@
           const project = projects.find(p => p.id === projectId);
           if (!project) return false;
           
+          const doc = (project.documents || []).find(d => d.id === docId);
           const documents = (project.documents || []).filter(d => d.id !== docId);
           await this.updateProject(projectId, { documents });
+          
+          // Supprimer de invoices aussi
+          if (doc) {
+            const invoices = await supabaseGet('invoices');
+            const invoice = invoices.find(i => i.ref === doc.ref && i.project_id === projectId);
+            if (invoice) {
+              await supabaseDelete('invoices', invoice.id);
+            }
+          }
+          
+          // Recalculer billed
+          await this.syncProjectBilled(projectId);
+          
           return true;
         } catch (error) {
           console.error('Erreur suppression document projet:', error);
@@ -2146,6 +2275,12 @@ function renderProjectPage() {
   
   const projectTasks = project.projectTasks || [];
   const doneTasks = projectTasks.filter(t => t.done).length;
+  
+  // CALCUL AUTO PROGRESSION
+  const autoProgress = projectTasks.length > 0 
+    ? Math.round((doneTasks / projectTasks.length) * 100)
+    : project.progress || 0;
+  
   const documents = project.documents || [];
   
   const devis = documents.filter(d => d.type === 'devis');
@@ -2187,13 +2322,13 @@ function renderProjectPage() {
               </div>
               <div>
                 <div style="font-size:11px;color:var(--text3);text-transform:uppercase;margin-bottom:6px;">Avancement</div>
-                <div style="font-size:24px;font-weight:900;">${project.progress}%</div>
+                <div style="font-size:24px;font-weight:900;">${autoProgress}%</div>
               </div>
             </div>
             <div style="margin-top:20px;">
-              <div style="font-size:11px;color:var(--text3);text-transform:uppercase;margin-bottom:8px;">Progression</div>
+              <div style="font-size:11px;color:var(--text3);text-transform:uppercase;margin-bottom:8px;">Progression (${doneTasks}/${projectTasks.length} tâches)</div>
               <div style="height:12px;background:var(--border);border-radius:6px;overflow:hidden;">
-                <div style="height:100%;width:${project.progress}%;background:${project.color};transition:width 0.4s;"></div>
+                <div style="height:100%;width:${autoProgress}%;background:${project.color};transition:width 0.4s;"></div>
               </div>
             </div>
             ${project.startDate || project.endDate ? `
@@ -2243,14 +2378,20 @@ function renderProjectPage() {
               <button class="btn btn-ghost btn-sm" id="btn-add-devis">+</button>
             </div>
             ${devis.length === 0 ? `<div style="color:var(--text3);font-size:13px;">Aucun devis</div>` : devis.map(d => `
-              <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);">
-                <div>
-                  <div style="font-size:13px;font-weight:600;">${d.ref}</div>
-                  <div style="font-size:11px;color:var(--text2);">${new Date(d.date).toLocaleDateString('fr-FR')}</div>
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border);">
+                <div style="flex:1;">
+                  <div style="display:flex;align-items:center;gap:8px;">
+                    <div style="font-size:13px;font-weight:600;">${d.ref}</div>
+                    ${d.fileName ? `<span style="font-size:11px;color:var(--text3);">📎 ${d.fileName}</span>` : ''}
+                  </div>
+                  <div style="font-size:11px;color:var(--text2);margin-top:2px;">${new Date(d.date).toLocaleDateString('fr-FR')}</div>
                 </div>
-                <div style="text-align:right;">
-                  <div style="font-size:14px;font-weight:700;">${formatEuro(d.amount)}</div>
-                  <button class="doc-delete" data-doc-id="${d.id}" style="background:transparent;border:none;cursor:pointer;font-size:11px;color:var(--red);">×</button>
+                <div style="text-align:right;display:flex;align-items:center;gap:12px;">
+                  <div>
+                    <div style="font-size:14px;font-weight:700;">${formatEuro(d.amount)}</div>
+                    ${d.fileUrl ? `<a href="${d.fileUrl}" download="${d.fileName || 'document.pdf'}" style="font-size:10px;color:var(--blue);text-decoration:underline;">Télécharger</a>` : ''}
+                  </div>
+                  <button class="doc-delete" data-doc-id="${d.id}" style="background:transparent;border:none;cursor:pointer;font-size:11px;color:var(--red);padding:4px;">×</button>
                 </div>
               </div>
             `).join('')}
@@ -2263,14 +2404,21 @@ function renderProjectPage() {
               <button class="btn btn-ghost btn-sm" id="btn-add-facture">+</button>
             </div>
             ${factures.length === 0 ? `<div style="color:var(--text3);font-size:13px;">Aucune facture</div>` : factures.map(d => `
-              <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);">
-                <div>
-                  <div style="font-size:13px;font-weight:600;">${d.ref}</div>
-                  <div style="font-size:11px;color:var(--text2);">${new Date(d.date).toLocaleDateString('fr-FR')}</div>
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border);">
+                <div style="flex:1;">
+                  <div style="display:flex;align-items:center;gap:8px;">
+                    <div style="font-size:13px;font-weight:600;">${d.ref}</div>
+                    ${d.fileName ? `<span style="font-size:11px;color:var(--text3);">📎 ${d.fileName}</span>` : ''}
+                  </div>
+                  <div style="font-size:11px;color:var(--text2);margin-top:2px;">${new Date(d.date).toLocaleDateString('fr-FR')}</div>
+                  ${d.fileUrl ? `<a href="${d.fileUrl}" download="${d.fileName || 'document.pdf'}" style="font-size:10px;color:var(--blue);text-decoration:underline;">Télécharger PDF</a>` : ''}
                 </div>
-                <div style="text-align:right;">
-                  <div style="font-size:14px;font-weight:700;color:var(--lime);">${formatEuro(d.amount)}</div>
-                  <button class="doc-delete" data-doc-id="${d.id}" style="background:transparent;border:none;cursor:pointer;font-size:11px;color:var(--red);">×</button>
+                <div style="text-align:right;display:flex;align-items:center;gap:12px;">
+                  <div>
+                    <div style="font-size:14px;font-weight:700;color:var(--lime);">${formatEuro(d.amount)}</div>
+                    ${!d.paid ? `<button class="doc-mark-paid" data-doc-id="${d.id}" style="background:transparent;border:none;cursor:pointer;font-size:10px;color:var(--lime);text-decoration:underline;">Marquer payé</button>` : `<div style="font-size:10px;color:var(--lime);">✓ Payé</div>`}
+                  </div>
+                  <button class="doc-delete" data-doc-id="${d.id}" style="background:transparent;border:none;cursor:pointer;font-size:11px;color:var(--red);padding:4px;">×</button>
                 </div>
               </div>
             `).join('')}
@@ -2283,14 +2431,21 @@ function renderProjectPage() {
               <button class="btn btn-ghost btn-sm" id="btn-add-acompte">+</button>
             </div>
             ${acomptes.length === 0 ? `<div style="color:var(--text3);font-size:13px;">Aucun acompte</div>` : acomptes.map(d => `
-              <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);">
-                <div>
-                  <div style="font-size:13px;font-weight:600;">${d.ref}</div>
-                  <div style="font-size:11px;color:var(--text2);">${new Date(d.date).toLocaleDateString('fr-FR')}</div>
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border);">
+                <div style="flex:1;">
+                  <div style="display:flex;align-items:center;gap:8px;">
+                    <div style="font-size:13px;font-weight:600;">${d.ref}</div>
+                    ${d.fileName ? `<span style="font-size:11px;color:var(--text3);">📎 ${d.fileName}</span>` : ''}
+                  </div>
+                  <div style="font-size:11px;color:var(--text2);margin-top:2px;">${new Date(d.date).toLocaleDateString('fr-FR')}</div>
+                  ${d.fileUrl ? `<a href="${d.fileUrl}" download="${d.fileName || 'document.pdf'}" style="font-size:10px;color:var(--blue);text-decoration:underline;">Télécharger PDF</a>` : ''}
                 </div>
-                <div style="text-align:right;">
-                  <div style="font-size:14px;font-weight:700;color:var(--blue);">${formatEuro(d.amount)}</div>
-                  <button class="doc-delete" data-doc-id="${d.id}" style="background:transparent;border:none;cursor:pointer;font-size:11px;color:var(--red);">×</button>
+                <div style="text-align:right;display:flex;align-items:center;gap:12px;">
+                  <div>
+                    <div style="font-size:14px;font-weight:700;color:var(--blue);">${formatEuro(d.amount)}</div>
+                    ${!d.paid ? `<button class="doc-mark-paid" data-doc-id="${d.id}" style="background:transparent;border:none;cursor:pointer;font-size:10px;color:var(--lime);text-decoration:underline;">Marquer payé</button>` : `<div style="font-size:10px;color:var(--lime);">✓ Payé</div>`}
+                  </div>
+                  <button class="doc-delete" data-doc-id="${d.id}" style="background:transparent;border:none;cursor:pointer;font-size:11px;color:var(--red);padding:4px;">×</button>
                 </div>
               </div>
             `).join('')}
@@ -2610,13 +2765,28 @@ function initProjectPage() {
   
   // Ajouter document (devis/facture/acompte)
   const addDocHandler = (type) => {
+    const typeLabel = type === 'devis' ? 'devis' : type === 'facture' ? 'facture' : 'acompte';
+    const showPaid = type !== 'devis'; // Devis ne peut pas être payé
+    
     openModal(`
       <div class="modal-box">
-        <div class="modal-title">Nouveau ${type}<button class="modal-close" onclick="closeModal()">×</button></div>
+        <div class="modal-title">Nouveau ${typeLabel}<button class="modal-close" onclick="closeModal()">×</button></div>
         <div class="form-group"><label class="form-label">Référence</label><input class="form-input" id="new-doc-ref" placeholder="FAC-001"></div>
         <div class="form-row">
           <div class="form-group"><label class="form-label">Montant (€)</label><input class="form-input" type="number" id="new-doc-amount" placeholder="5000"></div>
           <div class="form-group"><label class="form-label">Date</label><input class="form-input" type="date" id="new-doc-date" value="${new Date().toISOString().split('T')[0]}"></div>
+        </div>
+        ${showPaid ? `
+          <div class="form-group">
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+              <input type="checkbox" id="new-doc-paid"> Marquer comme payé
+            </label>
+          </div>
+        ` : ''}
+        <div class="form-group">
+          <label class="form-label">Fichier PDF (optionnel)</label>
+          <input type="file" id="new-doc-file" accept=".pdf" class="form-input" style="padding:8px;">
+          <div style="font-size:11px;color:var(--text3);margin-top:4px;">Max 5 MB</div>
         </div>
         <div style="display:flex;gap:8px;margin-top:20px;">
           <button class="btn btn-lime" id="save-doc">Ajouter</button>
@@ -2630,19 +2800,51 @@ function initProjectPage() {
         type: type,
         ref: document.getElementById('new-doc-ref').value.trim(),
         amount: parseInt(document.getElementById('new-doc-amount').value) || 0,
-        date: document.getElementById('new-doc-date').value
+        date: document.getElementById('new-doc-date').value,
+        paid: showPaid ? document.getElementById('new-doc-paid')?.checked || false : false
       };
       
       if (!doc.ref) { toast('Référence requise'); return; }
       
-      const added = await Supabase.addProjectDocument(projectId, doc);
-      if (added) {
-        await Supabase.loadAllData();
-        closeModal();
-        toast('✓ Document ajouté');
-        navigate('project');
+      // Upload fichier si présent
+      const fileInput = document.getElementById('new-doc-file');
+      if (fileInput && fileInput.files && fileInput.files[0]) {
+        const file = fileInput.files[0];
+        
+        // Vérifier taille (5 MB max)
+        if (file.size > 5 * 1024 * 1024) {
+          toast('❌ Fichier trop volumineux (max 5 MB)');
+          return;
+        }
+        
+        // Convertir en base64
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+          doc.fileUrl = e.target.result;
+          doc.fileName = file.name;
+          
+          const added = await Supabase.addProjectDocument(projectId, doc);
+          if (added) {
+            await Supabase.loadAllData();
+            closeModal();
+            toast('✓ Document ajouté');
+            navigate('project');
+          } else {
+            toast('❌ Erreur');
+          }
+        };
+        reader.readAsDataURL(file);
       } else {
-        toast('❌ Erreur');
+        // Pas de fichier
+        const added = await Supabase.addProjectDocument(projectId, doc);
+        if (added) {
+          await Supabase.loadAllData();
+          closeModal();
+          toast('✓ Document ajouté');
+          navigate('project');
+        } else {
+          toast('❌ Erreur');
+        }
       }
     });
   };
@@ -2650,6 +2852,21 @@ function initProjectPage() {
   document.getElementById('btn-add-devis')?.addEventListener('click', () => addDocHandler('devis'));
   document.getElementById('btn-add-facture')?.addEventListener('click', () => addDocHandler('facture'));
   document.getElementById('btn-add-acompte')?.addEventListener('click', () => addDocHandler('acompte'));
+  
+  // Marquer document payé
+  document.querySelectorAll('.doc-mark-paid').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const docId = parseInt(btn.dataset.docId);
+      const marked = await Supabase.markDocumentPaid(projectId, docId, true);
+      if (marked) {
+        await Supabase.loadAllData();
+        toast('✓ Marqué payé');
+        navigate('project');
+      } else {
+        toast('❌ Erreur');
+      }
+    });
+  });
   
   // Supprimer document
   document.querySelectorAll('.doc-delete').forEach(btn => {
