@@ -1,0 +1,2110 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phosphor OS — Studio Management</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700;900&family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+  <style>
+
+    /* Section: CSS Variables */
+    :root {
+      --bg: #1A1A1A;
+      --bg2: #222222;
+      --bg3: #2A2A2A;
+      --border: #333333;
+      --border2: #3D3D3D;
+      --text: #F0F0F0;
+      --text2: #999999;
+      --text3: #555555;
+      --red: #D4361B;
+      --lime: #B1D418;
+      --blue: #8CB7F8;
+      --purple: #978CF8;
+      --gray: #D0D0D0;
+      --white: #F4F8FF;
+      --font: 'Neue Haas Grotesk Display Pro', 'Barlow Condensed', 'Inter', sans-serif;
+      --transition: all 0.2s ease;
+    }
+    [data-theme="light"] {
+      --bg: #F4F8FF;
+      --bg2: #FFFFFF;
+      --bg3: #F0F0F0;
+      --border: #E0E0E0;
+      --border2: #CCCCCC;
+      --text: #1A1A1A;
+      --text2: #666666;
+      --text3: #AAAAAA;
+    }
+
+    /* Section: Reset & Base */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--font); background: var(--bg); color: var(--text); transition: background 0.2s ease, color 0.2s ease; overflow-x: hidden; }
+    a { color: inherit; text-decoration: none; }
+    button { font-family: var(--font); }
+
+    /* Section: Layout — Sidebar */
+    .sidebar {
+      position: fixed; left: 0; top: 0; bottom: 0; width: 200px;
+      background: var(--bg2); border-right: 1px solid var(--border);
+      display: flex; flex-direction: column; z-index: 50;
+      transition: var(--transition);
+    }
+    .logo-area {
+      padding: 16px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 10px; min-height: 60px;
+    }
+    .logo-icon { width: 32px; height: 32px; flex-shrink: 0; }
+    .logo-text { font-size: 13px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.08em; color: var(--lime); }
+    .nav-list { padding: 12px 0; flex: 1; }
+    .nav-item {
+      display: flex; align-items: center; gap: 10px; padding: 10px 16px;
+      font-size: 12px; font-weight: 600; color: var(--text2); cursor: pointer;
+      transition: background 0.15s, color 0.15s; border: none; background: none;
+      width: 100%; text-align: left; position: relative;
+    }
+    .nav-item:hover { background: var(--bg3); color: var(--text); }
+    .nav-item.active { color: var(--lime); background: rgba(177,212,24,0.08); }
+    .nav-item.active::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 2px; background: var(--lime); }
+    .nav-icon { width: 18px; height: 18px; flex-shrink: 0; }
+    .nav-label { font-size: 12px; font-weight: 600; letter-spacing: 0.02em; }
+    .nav-badge {
+      margin-left: auto; background: var(--red); color: #fff;
+      font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 10px; min-width: 18px; text-align: center;
+    }
+    .team-section { padding: 12px; border-top: 1px solid var(--border); }
+    .team-title { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text3); margin-bottom: 10px; }
+    .member-row {
+      display: flex; align-items: center; gap: 8px; padding: 6px 4px; border-radius: 4px;
+      transition: background 0.15s; cursor: default;
+    }
+    .member-row:hover { background: var(--bg3); }
+    .member-avatar {
+      width: 28px; height: 28px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 9px; font-weight: 800; flex-shrink: 0; position: relative;
+    }
+    .av-enzo { background: var(--lime); color: #1A1A1A; }
+    .av-diego { background: var(--purple); color: #fff; }
+    .presence-dot {
+      position: absolute; bottom: 0; right: 0; width: 8px; height: 8px;
+      border-radius: 50%; background: #4ade80; border: 1.5px solid var(--bg2);
+    }
+    .member-info { overflow: hidden; }
+    .member-name { font-size: 11px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .member-role { font-size: 9px; color: var(--text3); }
+
+    /* Section: Layout — Topbar */
+    .topbar {
+      position: fixed; top: 0; left: 200px; right: 0; height: 44px;
+      background: var(--bg2); border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; padding: 0 20px; gap: 16px; z-index: 40;
+      transition: left 0.2s ease;
+    }
+    .topbar-title { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; flex: 1; }
+    .topbar-date { font-size: 11px; color: var(--text2); white-space: nowrap; }
+    .topbar-actions { display: flex; align-items: center; gap: 8px; }
+    .icon-btn {
+      width: 32px; height: 32px; border-radius: 4px; border: 1px solid var(--border);
+      background: transparent; color: var(--text2); cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: background 0.15s, color 0.15s; flex-shrink: 0;
+    }
+    .icon-btn:hover { background: var(--bg3); color: var(--text); }
+
+    /* Section: Layout — Main Wrapper */
+    .main-wrapper { margin-left: 200px; margin-top: 44px; transition: margin-left 0.2s ease; }
+    .main-content { padding: 24px; min-height: calc(100vh - 44px); }
+
+    /* Section: Badge — Phosphor signature chevron shape */
+    .badge {
+      display: inline-flex; align-items: center;
+      padding: 3px 14px 3px 16px;
+      font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; white-space: nowrap;
+      clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 50%, calc(100% - 6px) 100%, 0 100%, 6px 50%);
+    }
+    .badge-lime { background: var(--lime); color: #1A1A1A; }
+    .badge-red { background: var(--red); color: #fff; }
+    .badge-blue { background: var(--blue); color: #1A1A1A; }
+    .badge-gray { background: var(--gray); color: #1A1A1A; }
+    .badge-purple { background: var(--purple); color: #fff; }
+    .badge-orange { background: #E8820C; color: #fff; }
+
+    /* Section: Cards & Layout */
+    .card {
+      background: var(--bg2); border: 1px solid var(--border); border-radius: 4px; padding: 20px;
+      transition: border-color 0.15s ease, transform 0.15s ease;
+    }
+    .card-hover:hover { border-color: var(--border2); transform: translateY(-1px); }
+    .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
+    .kpi-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 4px; padding: 20px; }
+    .kpi-value { font-size: 32px; font-weight: 900; color: var(--text); line-height: 1; letter-spacing: -0.02em; }
+    .kpi-sub { font-size: 10px; color: var(--text2); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 6px; }
+    .kpi-trend { font-size: 11px; color: var(--lime); margin-top: 4px; font-weight: 600; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .section-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text3); margin: 24px 0 12px; }
+
+    /* Section: Progress Bars */
+    .progress { height: 5px; background: var(--border); border-radius: 10px; overflow: hidden; margin-top: 8px; }
+    .progress-fill { height: 100%; background: var(--lime); width: 0; transition: width 0.6s ease; border-radius: 10px; }
+    .progress-fill.red { background: var(--red); }
+    .progress-fill.blue { background: var(--blue); }
+
+    /* Section: Buttons */
+    .btn {
+      display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px;
+      font-size: 12px; font-weight: 600; border: none; cursor: pointer; border-radius: 3px;
+      transition: opacity 0.15s, transform 0.15s; font-family: var(--font); white-space: nowrap;
+    }
+    .btn:active { transform: scale(0.97); }
+    .btn:focus-visible { outline: 2px solid var(--lime); outline-offset: 2px; }
+    .btn-lime { background: var(--lime); color: #1A1A1A; }
+    .btn-ghost { background: transparent; color: var(--text2); border: 1px solid var(--border); }
+    .btn-red { background: var(--red); color: #fff; }
+    .btn-sm { padding: 5px 10px; font-size: 11px; }
+    .btn:hover { opacity: 0.85; }
+
+    /* Section: Tasks */
+    .task-item { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); cursor: pointer; user-select: none; }
+    .task-item:last-child { border-bottom: none; }
+    .task-checkbox { width: 18px; height: 18px; border: 1.5px solid var(--border2); border-radius: 3px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+    .task-checkbox.checked { background: var(--lime); border-color: var(--lime); }
+    .task-checkbox.checked::after { content: '✓'; font-size: 10px; color: #1A1A1A; font-weight: 900; }
+    .task-label { flex: 1; font-size: 13px; line-height: 1.4; }
+    .task-label.done { text-decoration: line-through; opacity: 0.4; }
+
+    /* Section: Avatars & Tags */
+    .avatar { width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 800; flex-shrink: 0; }
+    .tag { font-size: 10px; padding: 2px 8px; border-radius: 2px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; }
+    .tag-design { background: rgba(151,140,248,0.2); color: var(--purple); }
+    .tag-dev { background: rgba(177,212,24,0.2); color: #8aad0e; }
+    .tag-client { background: rgba(212,54,27,0.2); color: var(--red); }
+    .tag-admin { background: rgba(208,208,208,0.12); color: var(--text2); }
+
+    /* Section: Morning Brief */
+    .morning-brief { border-left: 3px solid var(--lime); background: var(--bg2); padding: 16px 24px; margin-bottom: 24px; border-radius: 0 4px 4px 0; display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+    .brief-greeting { font-size: 20px; font-weight: 900; letter-spacing: -0.02em; }
+    .brief-day { font-size: 12px; color: var(--text2); margin-top: 2px; }
+    .brief-stats { display: flex; gap: 32px; flex-wrap: wrap; }
+    .brief-stat { text-align: center; }
+    .brief-stat-val { font-size: 28px; font-weight: 900; color: var(--lime); line-height: 1; }
+    .brief-stat-lbl { font-size: 9px; color: var(--text2); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 2px; }
+
+    /* Section: Calendar */
+    .cal-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    .cal-grid { display: grid; grid-template-columns: 56px repeat(6, 1fr); border: 1px solid var(--border); border-radius: 4px; overflow: hidden; }
+    .cal-th { background: var(--bg2); padding: 8px 6px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; text-align: center; border-bottom: 1px solid var(--border); color: var(--text2); }
+    .cal-th.today { color: var(--lime); }
+    .cal-hour-cell { font-size: 10px; color: var(--text3); padding: 10px 6px; text-align: right; background: var(--bg2); border-bottom: 1px solid var(--border); border-right: 1px solid var(--border); }
+    .cal-cell { border-bottom: 1px solid var(--border); border-right: 1px solid var(--border); padding: 4px; min-height: 68px; background: var(--bg3); vertical-align: top; }
+    .cal-event { padding: 3px 7px; border-radius: 2px; font-size: 11px; font-weight: 600; margin-bottom: 3px; cursor: pointer; }
+    .ev-design { background: rgba(151,140,248,0.25); color: var(--purple); border-left: 2px solid var(--purple); }
+    .ev-client { background: rgba(212,54,27,0.2); color: #e85f45; border-left: 2px solid var(--red); }
+    .ev-dev { background: rgba(177,212,24,0.18); color: #8aad0e; border-left: 2px solid var(--lime); }
+    .ev-admin { background: rgba(208,208,208,0.08); color: var(--text2); border-left: 2px solid var(--border2); }
+
+    /* Section: Projects */
+    .project-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 4px; padding: 20px; cursor: pointer; transition: border-color 0.15s, transform 0.15s; }
+    .project-card:hover { border-color: var(--border2); transform: translateY(-1px); }
+    .project-name { font-size: 22px; font-weight: 900; text-transform: uppercase; letter-spacing: -0.02em; margin-bottom: 4px; }
+    .project-client { font-size: 11px; color: var(--text2); margin-bottom: 14px; font-variant-numeric: tabular-nums; }
+    .project-meta-row { display: flex; justify-content: space-between; margin-top: 14px; gap: 8px; flex-wrap: wrap; }
+    .project-meta-item { text-align: center; }
+    .project-meta-val { font-size: 14px; font-weight: 700; }
+    .project-meta-lbl { font-size: 9px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.06em; }
+
+    /* Section: Finance */
+    .finance-block { background: var(--bg2); border: 1px solid var(--border); border-radius: 4px; padding: 20px; margin-bottom: 16px; }
+    .urssaf-block { background: rgba(177,212,24,0.05); border: 1px solid rgba(177,212,24,0.18); border-radius: 4px; padding: 20px; margin-bottom: 16px; }
+    .savings-block { background: rgba(151,140,248,0.07); border: 1px solid rgba(151,140,248,0.2); border-radius: 4px; padding: 20px; }
+    .chart-container { display: flex; align-items: flex-end; gap: 6px; padding-bottom: 0; }
+    .chart-bar-wrap { display: flex; flex-direction: column; align-items: center; flex: 1; }
+    .chart-bar { width: 100%; border-radius: 3px 3px 0 0; min-height: 3px; }
+    .chart-bar.past { background: var(--lime); }
+    .chart-bar.proj { border: 1.5px dashed var(--border2); background: transparent; }
+    .chart-month { font-size: 9px; color: var(--text3); margin-top: 4px; text-align: center; }
+
+    /* Section: Table */
+    .data-table { width: 100%; border-collapse: collapse; }
+    .data-table th { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.08em; padding: 8px 14px; text-align: left; border-bottom: 1px solid var(--border); white-space: nowrap; }
+    .data-table td { padding: 12px 14px; border-bottom: 1px solid var(--border); font-size: 13px; vertical-align: middle; }
+    .data-table tr:hover td { background: var(--bg3); }
+    .data-table tr.row-alert td { background: rgba(212,54,27,0.05); }
+    .data-table tr.row-alert td:first-child { border-left: 3px solid var(--red); padding-left: 11px; }
+
+    /* Section: Kanban */
+    .kanban-board { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 16px; min-height: 400px; }
+    .kanban-col { flex: 0 0 230px; display: flex; flex-direction: column; }
+    .kanban-header { padding: 8px 12px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; border-radius: 3px 3px 0 0; display: flex; justify-content: space-between; align-items: center; }
+    .kanban-body { flex: 1; padding: 8px; background: var(--bg3); border: 1px solid var(--border); border-top: none; border-radius: 0 0 3px 3px; }
+    .kanban-footer { padding: 8px 12px; font-size: 10px; color: var(--text3); border: 1px solid var(--border); border-top: 1px dashed var(--border2); border-radius: 0; background: var(--bg2); }
+    .prospect-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 4px; padding: 12px; margin-bottom: 8px; transition: border-color 0.15s; }
+    .prospect-card:hover { border-color: var(--border2); }
+    .prospect-name { font-size: 13px; font-weight: 700; color: var(--text); }
+    .prospect-co { font-size: 11px; color: var(--text2); margin-bottom: 4px; }
+    .prospect-budget { font-size: 20px; font-weight: 900; color: var(--lime); line-height: 1; margin: 8px 0 4px; }
+    .urgency-bar { height: 3px; border-radius: 2px; margin: 8px 0 4px; }
+    .source-badge { font-size: 9px; padding: 2px 7px; border-radius: 2px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; background: var(--bg3); color: var(--text3); display: inline-block; }
+
+    /* Section: Gantt */
+    .gantt-overflow { overflow-x: auto; }
+    .gantt-grid { min-width: 700px; }
+    .gantt-header-row { display: grid; grid-template-columns: 160px repeat(12, 1fr); gap: 2px; margin-bottom: 6px; }
+    .gantt-month { font-size: 9px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.06em; text-align: center; padding: 4px; }
+    .gantt-row { display: grid; grid-template-columns: 160px repeat(12, 1fr); gap: 2px; margin-bottom: 8px; align-items: center; }
+    .gantt-project-label { font-size: 11px; font-weight: 600; color: var(--text2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 8px; }
+    .gantt-cell { height: 22px; background: var(--bg3); border-radius: 2px; }
+    .gantt-bar { height: 22px; border-radius: 3px; }
+
+    /* Section: Urgency & Misc */
+    .j-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; display: inline-block; }
+    .j-red { background: var(--red); }
+    .j-orange { background: #E8820C; }
+    .j-green { background: #4ade80; }
+    .j-text-red { color: var(--red); font-weight: 700; }
+    .j-text-orange { color: #E8820C; font-weight: 700; }
+    .j-text-green { color: #4ade80; font-weight: 600; }
+    .divider { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
+    .empty-state { text-align: center; padding: 40px; color: var(--text3); font-size: 13px; }
+
+    /* Section: Modal */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 100; display: flex; align-items: center; justify-content: center; padding: 20px; }
+    .modal-box { background: var(--bg2); border: 1px solid var(--border2); border-radius: 6px; width: 100%; max-width: 620px; max-height: 85vh; overflow-y: auto; padding: 28px; }
+    .modal-title { font-size: 18px; font-weight: 900; text-transform: uppercase; letter-spacing: -0.02em; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+    .modal-close { background: none; border: none; color: var(--text3); cursor: pointer; font-size: 20px; padding: 4px; line-height: 1; }
+    .modal-close:hover { color: var(--text); }
+    .form-group { margin-bottom: 16px; }
+    .form-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text2); margin-bottom: 6px; display: block; }
+    .form-input { background: var(--bg3); border: 1px solid var(--border); color: var(--text); padding: 9px 12px; font-size: 13px; border-radius: 3px; width: 100%; font-family: var(--font); }
+    .form-input:focus { outline: 2px solid var(--lime); border-color: transparent; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .form-select { background: var(--bg3); border: 1px solid var(--border); color: var(--text); padding: 9px 12px; font-size: 13px; border-radius: 3px; width: 100%; font-family: var(--font); cursor: pointer; }
+    .form-select:focus { outline: 2px solid var(--lime); }
+    .form-textarea { background: var(--bg3); border: 1px solid var(--border); color: var(--text); padding: 9px 12px; font-size: 13px; border-radius: 3px; width: 100%; font-family: var(--font); resize: vertical; min-height: 80px; }
+    .form-textarea:focus { outline: 2px solid var(--lime); }
+
+    /* Section: Toast */
+    .toast {
+      position: fixed; bottom: 24px; right: 24px;
+      background: var(--lime); color: #1A1A1A;
+      padding: 10px 22px 10px 24px;
+      font-size: 13px; font-weight: 700; z-index: 999;
+      clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 50%, calc(100% - 8px) 100%, 0 100%, 8px 50%);
+      opacity: 0; transform: translateY(8px); transition: opacity 0.2s ease, transform 0.2s ease;
+      pointer-events: none;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+
+    /* Section: Agenda Task Filters */
+    .filter-bar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+    .filter-chip {
+      padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 600;
+      border: 1px solid var(--border); background: transparent; color: var(--text2);
+      cursor: pointer; transition: all 0.15s; font-family: var(--font);
+    }
+    .filter-chip:hover { background: var(--bg3); color: var(--text); }
+    .filter-chip.active { background: var(--lime); color: #1A1A1A; border-color: var(--lime); }
+    .filter-chip.design.active { background: var(--purple); color: #fff; border-color: var(--purple); }
+    .filter-chip.dev.active { background: var(--lime); color: #1A1A1A; border-color: var(--lime); }
+    .filter-chip.client.active { background: var(--red); color: #fff; border-color: var(--red); }
+    .filter-chip.admin.active { background: var(--gray); color: #1A1A1A; border-color: var(--gray); }
+    .assignee-toggle { display: flex; border: 1px solid var(--border); border-radius: 3px; overflow: hidden; }
+    .assignee-btn {
+      padding: 4px 10px; font-size: 11px; font-weight: 600; border: none; background: transparent;
+      color: var(--text2); cursor: pointer; font-family: var(--font); transition: all 0.15s;
+    }
+    .assignee-btn.active { background: var(--bg3); color: var(--text); }
+
+    /* Section: Finance URSSAF */
+    .urssaf-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); }
+    .urssaf-row:last-child { border-bottom: none; }
+    .urssaf-label { font-size: 12px; color: var(--text2); }
+    .urssaf-value { font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; }
+    .urssaf-alert { color: var(--red); }
+    .urssaf-ok { color: var(--lime); }
+    .savings-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; }
+    .savings-label { font-size: 12px; color: var(--text2); }
+    .savings-val { font-size: 13px; font-weight: 700; color: var(--purple); font-variant-numeric: tabular-nums; }
+
+    /* Section: Responsive */
+    @media (max-width: 900px) {
+      .sidebar { width: 60px; }
+      .sidebar .nav-label { display: none; }
+      .sidebar .logo-text { display: none; }
+      .sidebar .member-info { display: none; }
+      .sidebar .team-title { display: none; }
+      .sidebar .nav-badge { display: none; }
+      .topbar { left: 60px; }
+      .main-wrapper { margin-left: 60px; }
+    }
+    @media (max-width: 768px) {
+      .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+      .grid-2 { grid-template-columns: 1fr; }
+      .main-content { padding: 16px; }
+      .brief-stats { gap: 16px; }
+    }
+
+    /* Section: Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .section-view { animation: fadeIn 0.18s ease; }
+    @keyframes barGrow {
+      from { width: 0; }
+      to { width: var(--target-w); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+    }
+
+  </style>
+  
+  <!-- Supabase Integration -->
+  <script>
+    // Configuration Supabase
+    const SUPABASE_URL = 'https://aybynlygfjlzjypswoly.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF5YnlubHlnZmpsemp5cHN3b2x5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQzNDk2NTQsImV4cCI6MjA4OTkyNTY1NH0.ztwFAxvzKvqbLYBiSGohsOck0FNSnJDaPYqscku1Yt8';
+
+    const supabaseHeaders = {
+      'apikey': SUPABASE_ANON_KEY,
+      'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+      'Content-Type': 'application/json',
+      'Prefer': 'return=representation'
+    };
+
+    async function supabaseGet(table) {
+      const response = await fetch(`${SUPABASE_URL}/rest/v1/${table}?select=*`, { headers: supabaseHeaders });
+      if (!response.ok) throw new Error(`Erreur GET ${table}`);
+      return await response.json();
+    }
+
+    async function supabaseUpdate(table, id, data) {
+      const response = await fetch(`${SUPABASE_URL}/rest/v1/${table}?id=eq.${id}`, {
+        method: 'PATCH',
+        headers: supabaseHeaders,
+        body: JSON.stringify(data)
+      });
+      if (!response.ok) throw new Error(`Erreur UPDATE ${table}`);
+      return await response.json();
+    }
+
+    window.Supabase = {
+      async loadAllData() {
+        try {
+          console.log('📥 Chargement Supabase...');
+          
+          const settings = await supabaseGet('settings');
+          if (settings.length > 0) {
+            appData.monthlyTarget = settings[0].monthly_target;
+            appData.yearTarget = settings[0].year_target;
+          }
+          
+          const members = await supabaseGet('members');
+          appData.members = members.map(m => ({
+            id: m.id, name: m.name, role: m.role, email: m.email, initials: m.initials
+          }));
+          
+          const projects = await supabaseGet('projects');
+          appData.projects = projects.map(p => ({
+            id: p.id, name: p.name, client: p.client, type: p.type,
+            budget: p.budget, billed: p.billed, progress: p.progress,
+            deadline: p.deadline, status: p.status, statusClass: p.status_class,
+            color: p.color, ganttStart: p.gantt_start, ganttEnd: p.gantt_end,
+            tasks: p.tasks || [], notes: p.notes
+          }));
+          
+          const invoices = await supabaseGet('invoices');
+          appData.invoices = invoices.map(i => ({
+            id: i.id, ref: i.ref, client: i.client, amount: i.amount,
+            type: i.type, status: i.status, statusClass: i.status_class
+          }));
+          
+          const tasks = await supabaseGet('tasks');
+          appData.tasks = tasks.map(t => ({
+            id: t.id, text: t.text, done: t.done, tag: t.tag, assignee: t.assignee
+          }));
+          
+          const events = await supabaseGet('events');
+          appData.events = events.map(e => ({
+            id: e.id, title: e.title, day: e.day, hour: e.hour, type: e.type, assignee: e.assignee
+          }));
+          
+          const prospects = await supabaseGet('prospects');
+          appData.prospects = prospects.map(p => ({
+            id: p.id, name: p.name, company: p.company, city: p.city,
+            sector: p.sector, budgetEst: p.budget_est, source: p.source,
+            stage: p.stage, daysSince: p.days_since, email: p.email,
+            linkedin: p.linkedin, notes: p.notes
+          }));
+          
+          const ca = await supabaseGet('monthly_ca');
+          appData.monthlyCA = ca.sort((a, b) => a.display_order - b.display_order)
+            .map(c => ({ month: c.month, amount: c.amount, projected: c.projected }));
+          
+          console.log('✅ Données Supabase chargées');
+          return true;
+        } catch (error) {
+          console.error('❌ Erreur Supabase:', error);
+          return false;
+        }
+      },
+      
+      async saveTaskToggle(taskId, done) {
+        try {
+          await supabaseUpdate('tasks', taskId, { done });
+          console.log(`✓ Tâche ${taskId} sauvegardée`);
+          return true;
+        } catch (error) {
+          console.error('Erreur sauvegarde tâche:', error);
+          return false;
+        }
+      },
+      
+      startRealtimeSync() {
+        setInterval(async () => {
+          await this.loadAllData();
+          renderActiveSection();
+        }, 5000);
+        console.log('🔄 Sync temps réel activée (5s)');
+      }
+    };
+  </script>
+</head>
+<body data-theme="dark">
+
+  <!-- Toast -->
+  <div class="toast" id="toast" role="alert" aria-live="assertive"></div>
+
+  <!-- Sidebar -->
+  <aside class="sidebar" role="navigation" aria-label="Navigation principale">
+    <div class="logo-area">
+      <!-- SVG Logo Placeholder: square with asterisk, NOT the real Phosphor logo -->
+      <svg class="logo-icon" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="1" y="1" width="30" height="30" stroke="#B1D418" stroke-width="2"/>
+        <text x="16" y="21" text-anchor="middle" fill="#B1D418" font-size="18" font-weight="900" font-family="sans-serif">✦</text>
+      </svg>
+      <span class="logo-text">Phosphor</span>
+    </div>
+
+    <nav class="nav-list" role="menubar">
+
+      <!-- Dashboard -->
+      <button class="nav-item active" data-section="dashboard" role="menuitem" aria-current="page">
+        <span class="nav-icon">
+          <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <rect x="3" y="3" width="7" height="7" rx="1" stroke-width="2"/>
+            <rect x="14" y="3" width="7" height="7" rx="1" stroke-width="2"/>
+            <rect x="3" y="14" width="7" height="7" rx="1" stroke-width="2"/>
+            <rect x="14" y="14" width="7" height="7" rx="1" stroke-width="2"/>
+          </svg>
+        </span>
+        <span class="nav-label">Dashboard</span>
+      </button>
+
+      <!-- Agenda -->
+      <button class="nav-item" data-section="agenda" role="menuitem">
+        <span class="nav-icon">
+          <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <rect x="3" y="4" width="18" height="18" rx="2" stroke-width="2"/>
+            <path d="M16 2v4M8 2v4M3 10h18" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </span>
+        <span class="nav-label">Agenda</span>
+        <span class="nav-badge" aria-label="3 tâches en attente">3</span>
+      </button>
+
+      <!-- Projets -->
+      <button class="nav-item" data-section="projects" role="menuitem">
+        <span class="nav-icon">
+          <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path d="M3 7l4-4h14v18H3V7z" stroke-width="2" stroke-linejoin="round"/>
+            <path d="M3 7h4V3" stroke-width="2" stroke-linejoin="round"/>
+          </svg>
+        </span>
+        <span class="nav-label">Projets</span>
+      </button>
+
+      <!-- Finances -->
+      <button class="nav-item" data-section="finances" role="menuitem">
+        <span class="nav-icon">
+          <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 100 7h5a3.5 3.5 0 110 7H6" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </span>
+        <span class="nav-label">Finances</span>
+        <span class="nav-badge" aria-label="1 facture en retard">1</span>
+      </button>
+
+      <!-- CRM -->
+      <button class="nav-item" data-section="crm" role="menuitem">
+        <span class="nav-icon">
+          <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <circle cx="12" cy="8" r="4" stroke-width="2"/>
+            <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke-width="2" stroke-linecap="round"/>
+            <path d="M18 14l2 2 4-4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+        <span class="nav-label">CRM</span>
+        <span class="nav-badge" aria-label="2 relances urgentes">2</span>
+      </button>
+
+    </nav>
+
+    <div class="team-section">
+      <div class="team-title">Équipe</div>
+
+      <!-- Enzo -->
+      <div class="member-row">
+        <div class="member-avatar av-enzo">
+          ED
+          <span class="presence-dot" title="En ligne"></span>
+        </div>
+        <div class="member-info">
+          <div class="member-name">Enzo Derny</div>
+          <div class="member-role">Creative Dir.</div>
+        </div>
+      </div>
+
+      <!-- Diego -->
+      <div class="member-row">
+        <div class="member-avatar av-diego">
+          DH
+          <span class="presence-dot" title="En ligne"></span>
+        </div>
+        <div class="member-info">
+          <div class="member-name">Diégo Humez</div>
+          <div class="member-role">Creative Dir.</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Wrapper -->
+  <div class="main-wrapper">
+    <header class="topbar" role="banner">
+      <h1 class="topbar-title" id="topbar-title">Dashboard</h1>
+      <span class="topbar-date" id="topbar-date"></span>
+      <div class="topbar-actions">
+        <button class="icon-btn" id="theme-toggle" aria-label="Basculer thème clair/sombre" title="Thème"></button>
+        <button class="btn btn-lime btn-sm" id="action-primary" onclick="handlePrimaryAction()">+ Ajouter</button>
+        <button class="btn btn-ghost btn-sm" id="action-secondary">Exporter</button>
+      </div>
+    </header>
+
+    <main class="main-content" role="main">
+      <div class="section-view" data-section-view="dashboard"></div>
+      <div class="section-view" data-section-view="agenda" style="display:none"></div>
+      <div class="section-view" data-section-view="projects" style="display:none"></div>
+      <div class="section-view" data-section-view="finances" style="display:none"></div>
+      <div class="section-view" data-section-view="crm" style="display:none"></div>
+    </main>
+  </div>
+
+  <script>
+    // === MOCK DATA ===
+    const appData = {
+      members: [
+        { id: 'enzo', name: 'Enzo Derny', role: 'Creative Director', email: 'enzo@phosphor.art', initials: 'ED' },
+        { id: 'diego', name: 'Diégo Humez', role: 'Creative Director', email: 'diego.humez@gmail.com', initials: 'DH' }
+      ],
+      projects: [
+        { id: 1, name: 'New Business', client: 'Communication agency', type: 'Branding', budget: 4800, billed: 2400, progress: 80, deadline: '28 mars', status: 'EN PROD', statusClass: 'badge-lime', color: '#B1D418', ganttStart: 0, ganttEnd: 2, tasks: [
+          { text: 'Finaliser identité visuelle', done: true },
+          { text: 'Décliner sur supports print', done: false },
+          { text: 'Livraison fichiers sources', done: false }
+        ], notes: 'Projet phare Q1. Client très réactif. Version finale attendue fin mars.' },
+        { id: 2, name: 'Manza', client: 'Manza SAS', type: 'Pastrami brand + Web', budget: 6200, billed: 0, progress: 55, deadline: '15 avr', status: 'EN REVIEW', statusClass: 'badge-blue', color: '#8CB7F8', ganttStart: 1, ganttEnd: 3, tasks: [
+          { text: 'Charte graphique v1', done: true },
+          { text: 'Maquettes web mobile-first', done: true },
+          { text: 'Intégration Framer', done: false },
+          { text: 'Contenu éditorial', done: false }
+        ], notes: 'Brand pastrami premium. Direction artistique validée. En attente copy client.' },
+        { id: 3, name: 'Whiti', client: 'MD Courtage', type: 'Branding', budget: 3500, billed: 1200, progress: 40, deadline: '30 avr', status: 'EN ATTENTE', statusClass: 'badge-gray', color: '#978CF8', ganttStart: 1, ganttEnd: 4, tasks: [
+          { text: 'Logo v1 validé', done: true },
+          { text: 'Charte couleurs', done: false },
+          { text: 'Déclinaisons papeterie', done: false }
+        ], notes: 'Courtage immobilier. Identité sobre et professionnelle. Attente retour client.' },
+        { id: 4, name: 'Livre interactif', client: 'TBD', type: 'Framer one-page', budget: 2800, billed: 0, progress: 20, deadline: 'TBD', status: 'EN ATTENTE', statusClass: 'badge-gray', color: '#D0D0D0', ganttStart: 2, ganttEnd: 5, tasks: [
+          { text: 'Wireframes', done: true },
+          { text: 'Prototype Framer', done: false },
+          { text: 'Animations micro', done: false },
+          { text: 'Tests cross-browser', done: false }
+        ], notes: 'One-pager expérimental. Animations scroll-driven. Client à confirmer.' }
+      ],
+      invoices: [
+        { id: 1, ref: 'FAC-024', client: 'Bakali Design', amount: 1200, type: 'Facture', status: 'EN RETARD', statusClass: 'badge-red' },
+        { id: 2, ref: 'FAC-025', client: 'New Business', amount: 2400, type: 'Facture', status: 'ENVOYÉE', statusClass: 'badge-orange' },
+        { id: 3, ref: 'DEV-012', client: 'Manza SAS', amount: 6200, type: 'Devis', status: 'BROUILLON', statusClass: 'badge-gray' },
+        { id: 4, ref: 'FAC-023', client: 'MD Courtage', amount: 1200, type: 'Facture', status: 'PAYÉE', statusClass: 'badge-lime' }
+      ],
+      tasks: [
+        { id: 1, text: 'Préparer brief client Manza', done: false, tag: 'client', assignee: 'enzo' },
+        { id: 2, text: 'Finaliser charte Whiti v2', done: false, tag: 'design', assignee: 'diego' },
+        { id: 3, text: 'Relancer Bakali Design (FAC-024)', done: false, tag: 'admin', assignee: 'enzo' },
+        { id: 4, text: 'Maquettes NB homepage', done: true, tag: 'design', assignee: 'diego' },
+        { id: 5, text: 'Devis Livre interactif', done: false, tag: 'admin', assignee: 'enzo' },
+        { id: 6, text: 'Review dev Framer', done: false, tag: 'dev', assignee: 'enzo' },
+        { id: 7, text: 'Icônes Manza finales', done: false, tag: 'design', assignee: 'diego' },
+        { id: 8, text: 'Update portfolio phosphor.art', done: false, tag: 'dev', assignee: 'enzo' },
+        { id: 9, text: 'Export assets NB v3', done: true, tag: 'design', assignee: 'enzo' },
+        { id: 10, text: 'Call Studio Lumière', done: false, tag: 'client', assignee: 'diego' }
+      ],
+      events: [
+        { id: 1, title: 'Call Manza', day: 'lun', hour: '9h', type: 'client', assignee: 'enzo' },
+        { id: 2, title: 'Design sprint Whiti', day: 'lun', hour: '14h', type: 'design', assignee: 'diego' },
+        { id: 3, title: 'Dev Framer', day: 'mar', hour: '9h', type: 'dev', assignee: 'enzo' },
+        { id: 4, title: 'Présentation NB', day: 'mer', hour: '11h', type: 'client', assignee: 'enzo' },
+        { id: 5, title: 'Compta / Factures', day: 'jeu', hour: '9h', type: 'admin', assignee: 'enzo' },
+        { id: 6, title: 'Design review Manza', day: 'jeu', hour: '14h', type: 'design', assignee: 'diego' },
+        { id: 7, title: 'Call prospection', day: 'ven', hour: '11h', type: 'client', assignee: 'enzo' },
+        { id: 8, title: 'Sprint interactif', day: 'sam', hour: '9h', type: 'dev', assignee: 'enzo' }
+      ],
+      prospects: [
+        { id: 1, name: 'Maison Léa', company: 'Maison Léa', city: 'Montpellier', sector: 'Déco', budgetEst: 2000, source: 'Réseau', stage: 'IDENTIFIÉ', daysSince: -2, email: '', linkedin: '', notes: '' },
+        { id: 2, name: 'Festival Sud', company: 'Festival Sud', city: 'Béziers', sector: 'Event', budgetEst: 4000, source: 'LinkedIn', stage: 'IDENTIFIÉ', daysSince: -5, email: '', linkedin: '', notes: '' },
+        { id: 3, name: 'CAM Méditerranée', company: 'CAM Méditerranée', city: 'Marseille', sector: 'Finance B2B', budgetEst: 5000, source: 'LinkedIn', stage: 'CONTACTÉ', daysSince: 7, email: '', linkedin: '', notes: 'Intéressé par branding complet.' },
+        { id: 4, name: 'Resto Le Sel', company: 'Le Sel', city: 'Sète', sector: 'Restauration', budgetEst: 1500, source: 'Entrant', stage: 'CONTACTÉ', daysSince: 3, email: '', linkedin: '', notes: 'Refonte menu + carte.' },
+        { id: 5, name: 'Studio Lumière', company: 'Studio Lumière', city: 'Paris', sector: 'Agence', budgetEst: 3500, source: 'Réseau', stage: 'EN DISCUSSION', daysSince: 12, email: '', linkedin: '', notes: 'Partenariat possible.' },
+        { id: 6, name: 'Manza Foods', company: 'Manza Foods', city: 'Rennes', sector: 'Agroalim', budgetEst: 6200, source: 'Entrant', stage: 'PROPOSITION', daysSince: 0, email: '', linkedin: '', notes: 'Devis envoyé.' },
+        { id: 7, name: 'New Business', company: 'New Business', city: 'Marseille', sector: 'Communication', budgetEst: 4800, source: 'Réseau', stage: 'SIGNÉ', daysSince: -30, email: '', linkedin: '', notes: 'Contrat signé.' }
+      ],
+      monthlyCA: [
+        { month: 'Jan', amount: 6800, projected: false },
+        { month: 'Fév', amount: 5200, projected: false },
+        { month: 'Mar', amount: 4800, projected: false },
+        { month: 'Avr', amount: 6500, projected: true },
+        { month: 'Mai', amount: 7200, projected: true },
+        { month: 'Jun', amount: 8000, projected: true },
+        { month: 'Jul', amount: 5000, projected: true },
+        { month: 'Aoû', amount: 4000, projected: true },
+        { month: 'Sep', amount: 8500, projected: true },
+        { month: 'Oct', amount: 9000, projected: true },
+        { month: 'Nov', amount: 8800, projected: true },
+        { month: 'Déc', amount: 10000, projected: true }
+      ],
+      monthlyTarget: 8000,
+      yearTarget: 120000
+    };
+
+    // === STATE ===
+    const state = {
+      activeSection: 'dashboard',
+      filterTag: 'all',
+      filterAssignee: 'all'
+    };
+
+    // === HELPERS ===
+
+    // Format number as French currency: 4800 → "4 800 €"
+    function formatEuro(n) {
+      return n.toLocaleString('fr-FR') + ' €';
+    }
+
+    // Show toast notification
+    function toast(message) {
+      const el = document.getElementById('toast');
+      el.textContent = message;
+      el.classList.add('show');
+      setTimeout(() => el.classList.remove('show'), 2000);
+    }
+
+    // Open a modal
+    function openModal(html) {
+      let overlay = document.getElementById('modal-overlay');
+      if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = 'modal-overlay';
+        overlay.className = 'modal-overlay';
+        document.body.appendChild(overlay);
+      }
+      overlay.innerHTML = html;
+      overlay.style.display = 'flex';
+      // Close on overlay click
+      overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(); });
+      // Trap focus
+      overlay.querySelector('.modal-box')?.focus();
+    }
+
+    // Close modal
+    function closeModal() {
+      const overlay = document.getElementById('modal-overlay');
+      if (overlay) overlay.style.display = 'none';
+    }
+
+    // Get urgency dot CSS class
+    function urgencyClass(daysSince) {
+      if (daysSince > 10) return 'j-red';
+      if (daysSince >= 5) return 'j-orange';
+      if (daysSince >= 0) return 'j-green';
+      return 'j-text-gray';
+    }
+
+    // Get urgency text CSS class
+    function urgencyTextClass(daysSince) {
+      if (daysSince > 10) return 'j-text-red';
+      if (daysSince >= 5) return 'j-text-orange';
+      if (daysSince >= 0) return 'j-text-green';
+      return 'j-text-gray';
+    }
+
+    // Get urgency bar background color
+    function urgencyBarColor(daysSince) {
+      if (daysSince > 10) return 'var(--red)';
+      if (daysSince >= 5) return 'var(--orange)';
+      if (daysSince >= 0) return 'rgba(74,222,128,0.5)';
+      return 'rgba(177,212,24,0.3)';
+    }
+
+    // Get urgency text label
+    function urgencyLabel(daysSince) {
+      if (daysSince < 0) return `Entrant J${daysSince}`;
+      if (daysSince === 0) return 'Auj.';
+      return `J+${daysSince}`;
+    }
+
+    // Animate progress bars
+    function updateProgressBars() {
+      requestAnimationFrame(() => {
+        document.querySelectorAll('.progress-fill[data-value]').forEach(el => {
+          el.style.width = el.dataset.value + '%';
+        });
+      });
+    }
+
+    // Update theme icon
+    function updateThemeIcon(theme) {
+      const btn = document.getElementById('theme-toggle');
+      if (!btn) return;
+      if (theme === 'dark') {
+        btn.innerHTML = `<svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707M18.364 17.657l-.707-.707M6.343 6.343l-.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z"/></svg>`;
+      } else {
+        btn.innerHTML = `<svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>`;
+      }
+    }
+
+    // === NAVIGATION ===
+    const sectionTitles = {
+      dashboard: 'Dashboard',
+      agenda: 'Agenda & Tâches',
+      projects: 'Projets',
+      finances: 'Finances & Facturation',
+      crm: 'Démarchage CRM'
+    };
+
+    const actionLabels = {
+      dashboard: '+ Ajouter',
+      agenda: '+ Tâche',
+      projects: '+ Projet',
+      finances: '+ Facture',
+      crm: '+ Prospect'
+    };
+
+    function navigate(section) {
+      state.activeSection = section;
+      document.querySelectorAll('.nav-item').forEach(el => {
+        el.classList.toggle('active', el.dataset.section === section);
+        el.setAttribute('aria-current', el.dataset.section === section ? 'page' : 'false');
+      });
+      const titleEl = document.getElementById('topbar-title');
+      if (titleEl) titleEl.textContent = sectionTitles[section];
+
+      // Update primary action button label
+      const primaryBtn = document.getElementById('action-primary');
+      if (primaryBtn) primaryBtn.textContent = actionLabels[section] || '+ Ajouter';
+
+      document.querySelectorAll('.section-view').forEach(el => {
+        el.style.display = el.dataset.sectionView === section ? 'block' : 'none';
+      });
+
+      const container = document.querySelector(`[data-section-view="${section}"]`);
+      if (container) {
+        const renderer = sectionRenderers[section];
+        if (renderer && renderer.render) {
+          container.innerHTML = renderer.render();
+          container.classList.add('section-view');
+          updateProgressBars();
+          if (renderer.init) renderer.init();
+        }
+      }
+    }
+
+
+    // ===== SECTION RENDERERS (merged) =====
+
+    // --- Dashboard ---
+function renderDashboard() {
+  const today = new Date();
+  const pendingTasks = appData.tasks.filter(t => !t.done).length;
+  const activeProjets = appData.projects.length;
+  const overdueInvoices = appData.invoices.filter(i => i.status === 'EN RETARD').length;
+  const totalBudget = appData.projects.reduce((s, p) => s + p.budget, 0);
+  const currentMonth = appData.monthlyCA[2];
+  const monthProgress = Math.round(currentMonth.amount / appData.monthlyTarget * 100);
+
+  const ytd = appData.monthlyCA
+    .filter(m => !m.projected)
+    .reduce((s, m) => s + m.amount, 0);
+  const ytdProgress = Math.round(ytd / appData.yearTarget * 100);
+
+  const billedSum = appData.projects.reduce((s, p) => s + p.billed, 0);
+
+  const first5Tasks = appData.tasks.slice(0, 5);
+
+  const tagClass = {
+    design: 'tag-design',
+    dev: 'tag-dev',
+    client: 'tag-client',
+    admin: 'tag-admin'
+  };
+
+  const tasksHTML = first5Tasks.map(task => `
+    <div class="task-item task-toggle" data-task-id="${task.id}" style="cursor:pointer;">
+      <span class="task-checkbox${task.done ? ' checked' : ''}"></span>
+      <span class="tag ${tagClass[task.tag] || ''}">${task.tag}</span>
+      <span class="task-label${task.done ? ' done' : ''}" style="flex:1;">${task.text}</span>
+      <span class="avatar av-${task.assignee}"></span>
+    </div>
+  `).join('');
+
+  return `
+<div id="section-dashboard">
+
+  <div class="morning-brief">
+    <div>
+      <div class="brief-greeting">Bonjour, <span>Studio Phosphor</span> ☀️</div>
+      <div style="font-size:11px;color:var(--text2);margin-top:4px;">Lundi 23 mars 2026 · Semaine 13</div>
+    </div>
+    <div class="brief-stats">
+      <div class="brief-stat">
+        <div class="brief-stat-val">${pendingTasks}</div>
+        <div class="brief-stat-lbl">Tâches en cours</div>
+      </div>
+      <div class="brief-stat">
+        <div class="brief-stat-val">${activeProjets}</div>
+        <div class="brief-stat-lbl">Projets actifs</div>
+      </div>
+      <div class="brief-stat">
+        <div class="brief-stat-val" style="color:var(--red)">${overdueInvoices}</div>
+        <div class="brief-stat-lbl">Facture en retard</div>
+      </div>
+      <div class="brief-stat">
+        <div class="brief-stat-val">${monthProgress}%</div>
+        <div class="brief-stat-lbl">Objectif mars</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="kpi-grid" style="margin-top:20px;">
+
+    <div class="kpi-card">
+      <div class="section-label">CA Mars</div>
+      <div class="kpi-value">${formatEuro(currentMonth.amount)}</div>
+      <div class="kpi-sub">Objectif mensuel : ${formatEuro(appData.monthlyTarget)}</div>
+      <div class="progress" style="margin:8px 0;">
+        <div class="progress-fill" data-value="${monthProgress}"></div>
+      </div>
+      <div class="kpi-trend down">−${formatEuro(appData.monthlyTarget - currentMonth.amount)} / objectif</div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="section-label">CA Annuel (YTD)</div>
+      <div class="kpi-value">${formatEuro(ytd)}</div>
+      <div class="kpi-sub">Objectif annuel : ${formatEuro(appData.yearTarget)}</div>
+      <div class="progress" style="margin:8px 0;">
+        <div class="progress-fill" data-value="${ytdProgress}"></div>
+      </div>
+      <div class="kpi-trend">${ytdProgress}% de l'objectif annuel</div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="section-label">Pipeline projets</div>
+      <div class="kpi-value">${formatEuro(totalBudget)}</div>
+      <div class="kpi-sub">${activeProjets} projets en cours</div>
+      <div class="kpi-trend up">${formatEuro(billedSum)} facturés</div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="section-label">Tâches</div>
+      <div class="kpi-value">${pendingTasks}</div>
+      <div class="kpi-sub">tâches restantes</div>
+      <div class="kpi-trend">2 terminées aujourd'hui</div>
+    </div>
+
+  </div>
+
+  <div class="grid-2" style="margin-top:20px;">
+
+    <div class="card">
+      <div class="section-label">Tâches du jour</div>
+      ${tasksHTML}
+      <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);">
+        <button id="btn-see-tasks" class="btn btn-ghost btn-sm" style="width:100%">
+          Voir toutes les tâches →
+        </button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-label">Relances urgentes</div>
+
+      <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);">
+        <span class="j-dot j-red"></span>
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:600;">Bakali Design — FAC-024</div>
+          <div style="font-size:11px;color:var(--text2);">Facture 1 200 € · EN RETARD</div>
+        </div>
+        <span class="badge badge-red">Urgent</span>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);">
+        <span class="j-dot j-orange"></span>
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:600;">CAM Méditerranée</div>
+          <div style="font-size:11px;color:var(--text2);">J+7 sans contact</div>
+        </div>
+        <span class="badge badge-orange">Relance</span>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);">
+        <span class="j-dot j-red"></span>
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:600;">Studio Lumière</div>
+          <div style="font-size:11px;color:var(--text2);">J+12 sans contact</div>
+        </div>
+        <span class="badge badge-red">Urgent</span>
+      </div>
+
+      <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);">
+        <button id="btn-see-crm" class="btn btn-ghost btn-sm" style="width:100%">
+          Voir le CRM →
+        </button>
+      </div>
+
+      <div class="divider" style="margin:16px 0 8px;"></div>
+      <div class="section-label">Activité récente</div>
+
+      <div style="display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);">
+        <div style="width:6px;height:6px;border-radius:50%;background:var(--lime);margin-top:5px;flex-shrink:0;"></div>
+        <div style="flex:1">
+          <div style="font-size:12px;color:var(--text);">Maquettes NB homepage terminées · Diego</div>
+          <div style="font-size:10px;color:var(--text3);margin-top:2px;">il y a 2h</div>
+        </div>
+      </div>
+
+      <div style="display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);">
+        <div style="width:6px;height:6px;border-radius:50%;background:var(--lime);margin-top:5px;flex-shrink:0;"></div>
+        <div style="flex:1">
+          <div style="font-size:12px;color:var(--text);">FAC-025 envoyée à New Business · 1 200 €</div>
+          <div style="font-size:10px;color:var(--text3);margin-top:2px;">il y a 4h</div>
+        </div>
+      </div>
+
+      <div style="display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);">
+        <div style="width:6px;height:6px;border-radius:50%;background:var(--lime);margin-top:5px;flex-shrink:0;"></div>
+        <div style="flex:1">
+          <div style="font-size:12px;color:var(--text);">Nouvelle tâche ajoutée : Devis Livre interactif · Enzo</div>
+          <div style="font-size:10px;color:var(--text3);margin-top:2px;">hier</div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+  `;
+}
+
+function initDashboard() {
+  // Task toggle avec sauvegarde Supabase
+  document.querySelectorAll('.task-toggle').forEach(el => {
+    el.addEventListener('click', async () => {
+      const id = parseInt(el.dataset.taskId);
+      const task = appData.tasks.find(t => t.id === id);
+      if (task) {
+        task.done = !task.done;
+        navigate('dashboard');
+        
+        // Sauvegarder dans Supabase
+        const saved = await Supabase.saveTaskToggle(id, task.done);
+        if (saved) {
+          toast(task.done ? '✓ Tâche terminée' : 'Tâche rouverte');
+        } else {
+          task.done = !task.done; // Annuler si erreur
+          navigate('dashboard');
+          toast('❌ Erreur de sauvegarde');
+        }
+      }
+    });
+  });
+
+  // Navigate to agenda
+  document.getElementById('btn-see-tasks')?.addEventListener('click', () => navigate('agenda'));
+
+  // Navigate to CRM
+  document.getElementById('btn-see-crm')?.addEventListener('click', () => navigate('crm'));
+}
+
+    // --- Agenda ---
+function renderAgenda() {
+  const hours = ['9h', '11h', '14h', '16h', '18h'];
+  const days = ['lun', 'mar', 'mer', 'jeu', 'ven', 'sam'];
+  const dayLabels = ['LUN 23', 'MAR 24', 'MER 25', 'JEU 26', 'VEN 27', 'SAM 28'];
+  const todayDay = 'lun'; // March 23, 2026 is a Monday
+
+  // Build calendar header row
+  let calHeader = `<div class="cal-th cal-hour-cell"></div>`;
+  days.forEach((day, i) => {
+    const isToday = day === todayDay;
+    calHeader += `<div class="cal-th${isToday ? ' today' : ''}">${dayLabels[i]}${isToday ? ' ★' : ''}</div>`;
+  });
+
+  // Build calendar body rows
+  let calRows = '';
+  hours.forEach(hour => {
+    let row = `<div class="cal-hour-cell">${hour}</div>`;
+    days.forEach(day => {
+      const events = appData.events.filter(e => e.day === day && e.hour === hour);
+      let cellContent = '';
+      events.forEach(ev => {
+        cellContent += `
+          <div class="cal-event ev-${ev.type}">
+            <span>${ev.title}</span>
+            <span class="avatar av-${ev.assignee}" title="${ev.assignee}"></span>
+          </div>`;
+      });
+      row += `<div class="cal-cell">${cellContent}</div>`;
+    });
+    calRows += `${row}`;
+  });
+
+  // Filter tasks
+  const filteredTasks = appData.tasks.filter(task => {
+    const tagMatch = state.filterTag === 'all' || task.tag === state.filterTag;
+    const assigneeMatch = state.filterAssignee === 'all' || task.assignee === state.filterAssignee;
+    return tagMatch && assigneeMatch;
+  });
+
+  // Build filter tag buttons
+  const tagFilters = [
+    { value: 'all', label: 'Tout' },
+    { value: 'design', label: 'Design' },
+    { value: 'dev', label: 'Dev' },
+    { value: 'client', label: 'Client' },
+    { value: 'admin', label: 'Admin' },
+  ];
+  const tagFilterBtns = tagFilters.map(f => {
+    const isActive = state.filterTag === f.value;
+    return `<button class="btn btn-sm filter-tag-btn${isActive ? ' btn-lime' : ' btn-ghost'}" data-tag="${f.value}">${f.label}</button>`;
+  }).join('');
+
+  // Build filter assignee buttons
+  const assigneeFilters = [
+    { value: 'all', label: 'Tous' },
+    { value: 'enzo', label: 'Enzo' },
+    { value: 'diego', label: 'Diego' },
+  ];
+  const assigneeFilterBtns = assigneeFilters.map(f => {
+    const isActive = state.filterAssignee === f.value;
+    return `<button class="btn btn-sm filter-assignee-btn${isActive ? ' btn-lime' : ' btn-ghost'}" data-assignee="${f.value}">${f.label}</button>`;
+  }).join('');
+
+  // Build task list
+  const taskItems = filteredTasks.map(task => {
+    return `
+      <div class="task-item task-toggle" data-task-id="${task.id}" style="cursor:pointer;">
+        <span class="task-checkbox${task.done ? ' checked' : ''}"></span>
+        <span class="task-label${task.done ? ' done' : ''}">${task.text}</span>
+        <span class="tag tag-${task.tag}">${task.tag}</span>
+        <span class="avatar av-${task.assignee}" title="${task.assignee}"></span>
+      </div>`;
+  }).join('');
+
+  const emptyState = filteredTasks.length === 0
+    ? `<div style="color:var(--text-muted,#888);padding:16px 0;text-align:center;">Aucune tâche pour ces filtres.</div>`
+    : '';
+
+  // Task distribution
+  const enzoTasks = appData.tasks.filter(t => t.assignee === 'enzo').length;
+  const diegoTasks = appData.tasks.filter(t => t.assignee === 'diego').length;
+  const total = enzoTasks + diegoTasks || 1;
+  const enzoPercent = Math.round(enzoTasks / total * 100);
+  const diegoPercent = 100 - enzoPercent;
+
+  return `
+    <!-- Zone 1: Week Calendar -->
+    <div class="card" style="margin-bottom:20px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <button class="btn btn-ghost btn-sm" id="cal-prev">&#8592;</button>
+          <span class="section-label" style="margin:0;">Semaine du 23 mars 2026</span>
+          <button class="btn btn-ghost btn-sm" id="cal-next">&#8594;</button>
+        </div>
+        <button class="btn btn-lime btn-sm" id="btn-add-event">+ Événement</button>
+      </div>
+      <div class="cal-grid" style="display:grid;grid-template-columns:60px repeat(6,1fr);gap:2px;">
+        ${calHeader}
+        ${calRows}
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Zone 2: Task List -->
+    <div class="card" style="margin-bottom:20px;">
+      <div class="section-label">Tâches</div>
+
+      <!-- Filter bar -->
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:16px;">
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          ${tagFilterBtns}
+        </div>
+        <div style="display:flex;gap:6px;">
+          ${assigneeFilterBtns}
+        </div>
+      </div>
+
+      <!-- Task list -->
+      <div style="display:flex;flex-direction:column;gap:4px;">
+        ${taskItems}
+        ${emptyState}
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Task distribution -->
+    <div class="card">
+      <div class="section-label">Répartition équipe</div>
+      <div style="display:flex;flex-direction:column;gap:14px;margin-top:8px;">
+        <div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span class="avatar av-enzo"></span>
+              <span>Enzo</span>
+            </div>
+            <span class="badge badge-gray">${enzoTasks} tâche${enzoTasks !== 1 ? 's' : ''} (${enzoPercent}%)</span>
+          </div>
+          <div style="height:8px;background:var(--border,#e5e7eb);border-radius:4px;overflow:hidden;">
+            <div style="height:100%;width:${enzoPercent}%;background:var(--lime,#a3e635);border-radius:4px;transition:width 0.4s;"></div>
+          </div>
+        </div>
+        <div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span class="avatar av-diego"></span>
+              <span>Diego</span>
+            </div>
+            <span class="badge badge-blue">${diegoTasks} tâche${diegoTasks !== 1 ? 's' : ''} (${diegoPercent}%)</span>
+          </div>
+          <div style="height:8px;background:var(--border,#e5e7eb);border-radius:4px;overflow:hidden;">
+            <div style="height:100%;width:${diegoPercent}%;background:var(--blue,#60a5fa);border-radius:4px;transition:width 0.4s;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function initAgenda() {
+  // Filter tag buttons
+  document.querySelectorAll('.filter-tag-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      state.filterTag = btn.dataset.tag;
+      navigate('agenda');
+    });
+  });
+
+  // Filter assignee buttons
+  document.querySelectorAll('.filter-assignee-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      state.filterAssignee = btn.dataset.assignee;
+      navigate('agenda');
+    });
+  });
+
+  // Task toggle
+  document.querySelectorAll('.task-toggle').forEach(el => {
+    el.addEventListener('click', () => {
+      const id = parseInt(el.dataset.taskId);
+      const task = appData.tasks.find(t => t.id === id);
+      if (task) {
+        task.done = !task.done;
+        toast(task.done ? '✓ Tâche terminée' : 'Tâche rouverte');
+        navigate('agenda');
+      }
+    });
+  });
+
+  // Calendar nav (cosmetic — no week offset logic needed for static week)
+  document.getElementById('cal-prev')?.addEventListener('click', () => {
+    toast('Semaine précédente');
+  });
+  document.getElementById('cal-next')?.addEventListener('click', () => {
+    toast('Semaine suivante');
+  });
+
+  // "+ Événement" button
+  document.getElementById('btn-add-event')?.addEventListener('click', () => {
+    openModal(`
+      <div class="modal-box">
+        <div class="modal-title">
+          Nouvel événement
+          <button class="modal-close" onclick="closeModal()">×</button>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Titre</label>
+          <input class="form-input" type="text" id="ev-title" placeholder="Ex: Call client Manza">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Jour</label>
+            <select class="form-select" id="ev-day">
+              <option value="lun" selected>Lundi</option>
+              <option value="mar">Mardi</option>
+              <option value="mer">Mercredi</option>
+              <option value="jeu">Jeudi</option>
+              <option value="ven">Vendredi</option>
+              <option value="sam">Samedi</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Heure</label>
+            <select class="form-select" id="ev-hour">
+              <option value="9h">9h</option>
+              <option value="11h">11h</option>
+              <option value="14h">14h</option>
+              <option value="16h">16h</option>
+              <option value="18h">18h</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Type</label>
+            <select class="form-select" id="ev-type">
+              <option value="design">Design</option>
+              <option value="client">Client</option>
+              <option value="dev">Dev</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Assigné à</label>
+            <select class="form-select" id="ev-assignee">
+              <option value="enzo">Enzo</option>
+              <option value="diego">Diego</option>
+            </select>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:20px;">
+          <button class="btn btn-lime" id="save-event-btn">Ajouter l'événement</button>
+          <button class="btn btn-ghost" onclick="closeModal()">Annuler</button>
+        </div>
+      </div>
+    `);
+
+    document.getElementById('save-event-btn')?.addEventListener('click', () => {
+      const title = document.getElementById('ev-title')?.value.trim();
+      if (!title) { toast('Titre requis'); return; }
+      appData.events.push({
+        id: Date.now(),
+        title,
+        day: document.getElementById('ev-day').value,
+        hour: document.getElementById('ev-hour').value,
+        type: document.getElementById('ev-type').value,
+        assignee: document.getElementById('ev-assignee').value
+      });
+      closeModal();
+      toast('Événement ajouté');
+      navigate('agenda');
+    });
+  });
+}
+
+    // --- Projets & Finances ---
+// ============================================================
+// Phosphor OS — Projects & Finances section renderers
+// ============================================================
+
+function renderProjects() {
+  const months = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'];
+
+  const totalBudget = appData.projects.reduce((s, p) => s + p.budget, 0);
+  const totalBilled = appData.projects.reduce((s, p) => s + p.billed, 0);
+
+  const projectCards = appData.projects.map(p => `
+    <div class="project-card card-clickable" data-project-id="${p.id}">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;">
+        <div class="project-name" style="color:${p.color}">${p.name}</div>
+        <span class="badge ${p.statusClass}">${p.status}</span>
+      </div>
+      <div class="project-type">${p.client} · ${p.type}</div>
+
+      <div class="progress" style="margin-top:8px;">
+        <div class="progress-fill" data-value="${p.progress}"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin-top:6px;">
+        <span style="font-size:11px;color:var(--text2);">${p.progress}% complet</span>
+        <span style="font-size:11px;color:var(--text3);">Deadline: ${p.deadline}</span>
+      </div>
+
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px;padding-top:12px;border-top:1px solid var(--border);">
+        <div>
+          <div style="font-size:18px;font-weight:900;color:var(--text);">${formatEuro(p.budget)}</div>
+          <div style="font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em;">Budget total</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:18px;font-weight:900;color:${p.billed > 0 ? 'var(--lime)' : 'var(--text3)'};">${formatEuro(p.billed)}</div>
+          <div style="font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em;">Facturé</div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+
+  const ganttHeader = months.map(m => `<div class="gantt-month">${m}</div>`).join('');
+
+  const ganttRows = appData.projects.map(p => {
+    const cells = Array.from({ length: 12 }, (_, i) =>
+      i >= p.ganttStart && i <= p.ganttEnd
+        ? `<div class="gantt-bar" style="background:${p.color};opacity:0.8;"></div>`
+        : `<div class="gantt-cell" style="background:var(--bg3);"></div>`
+    ).join('');
+    return `
+      <div class="gantt-row">
+        <div class="gantt-label">${p.name}</div>
+        ${cells}
+      </div>
+    `;
+  }).join('');
+
+  return `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+      <div>
+        <h2 style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--text3);">${appData.projects.length} projets actifs</h2>
+      </div>
+      <button class="btn btn-lime btn-sm" id="btn-add-project">+ Projet</button>
+    </div>
+
+    <div class="projects-grid">
+      ${projectCards}
+    </div>
+
+    <div class="card" style="margin-bottom:24px;">
+      <div style="display:flex;gap:40px;flex-wrap:wrap;">
+        <div>
+          <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:4px;">Budget total projets</div>
+          <div style="font-size:28px;font-weight:900;">${formatEuro(totalBudget)}</div>
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:4px;">Facturé</div>
+          <div style="font-size:28px;font-weight:900;color:var(--lime);">${formatEuro(totalBilled)}</div>
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:4px;">Restant à facturer</div>
+          <div style="font-size:28px;font-weight:900;color:var(--blue);">${formatEuro(totalBudget - totalBilled)}</div>
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:4px;">TJM moyen</div>
+          <div style="font-size:28px;font-weight:900;color:var(--purple);">450 €</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-label">Planning 2026</div>
+    <div class="card">
+      <div class="gantt-wrap">
+        <div class="gantt-row">
+          <div class="gantt-label" style="color:var(--text3);font-size:10px;font-weight:600;text-transform:uppercase;">Projet</div>
+          ${ganttHeader}
+        </div>
+        ${ganttRows}
+      </div>
+    </div>
+  `;
+}
+
+function initProjects() {
+  document.querySelectorAll('.project-card[data-project-id]').forEach(card => {
+    card.addEventListener('click', () => {
+      const id = parseInt(card.dataset.projectId);
+      const p = appData.projects.find(x => x.id === id);
+      if (!p) return;
+
+      const projectTasks = [
+        { text: 'Brief client validé', done: true },
+        { text: 'Moodboard & direction artistique', done: id <= 2 },
+        { text: 'Charte graphique v1', done: id === 1 },
+        { text: 'Révisions client', done: false },
+        { text: 'Livraison finale', done: false }
+      ];
+
+      const doneCount = projectTasks.filter(t => t.done).length;
+
+      openModal(`
+        <div class="modal-box">
+          <div class="modal-title">
+            <span style="color:${p.color}">${p.name}</span>
+            <button class="modal-close" onclick="closeModal()">×</button>
+          </div>
+
+          <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;">
+            <span class="badge ${p.statusClass}">${p.status}</span>
+            <span style="font-size:12px;color:var(--text2);">${p.client} · ${p.type}</span>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:20px;">
+            <div style="background:var(--bg3);padding:12px;border-radius:3px;">
+              <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;">Budget</div>
+              <div style="font-size:20px;font-weight:900;">${formatEuro(p.budget)}</div>
+            </div>
+            <div style="background:var(--bg3);padding:12px;border-radius:3px;">
+              <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;">Facturé</div>
+              <div style="font-size:20px;font-weight:900;color:var(--lime);">${formatEuro(p.billed)}</div>
+            </div>
+            <div style="background:var(--bg3);padding:12px;border-radius:3px;">
+              <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;">Avancement</div>
+              <div style="font-size:20px;font-weight:900;">${p.progress}%</div>
+            </div>
+          </div>
+
+          <div style="margin-bottom:16px;">
+            <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:8px;">Checklist (${doneCount}/${projectTasks.length})</div>
+            ${projectTasks.map(t => `
+              <div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border);">
+                <div style="width:16px;height:16px;border-radius:2px;border:1.5px solid ${t.done ? 'var(--lime)' : 'var(--border2)'};background:${t.done ? 'var(--lime)' : 'transparent'};display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:900;color:#1A1A1A;flex-shrink:0;">${t.done ? '✓' : ''}</div>
+                <span style="font-size:13px;${t.done ? 'text-decoration:line-through;opacity:0.4;' : ''}">${t.text}</span>
+              </div>
+            `).join('')}
+          </div>
+
+          <div style="display:flex;gap:8px;margin-top:20px;">
+            <button class="btn btn-lime btn-sm" onclick="closeModal();toast('Projet mis à jour');">Mettre à jour</button>
+            <button class="btn btn-ghost btn-sm" onclick="closeModal()">Fermer</button>
+          </div>
+        </div>
+      `);
+    });
+  });
+
+  document.getElementById('btn-add-project')?.addEventListener('click', () => {
+    openModal(`
+      <div class="modal-box">
+        <div class="modal-title">Nouveau projet <button class="modal-close" onclick="closeModal()">×</button></div>
+        <div class="form-group"><label class="form-label">Nom du projet *</label><input class="form-input" id="np-name" placeholder="Ex: Identité Studio X"></div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Client</label><input class="form-input" id="np-client" placeholder="Nom du client"></div>
+          <div class="form-group"><label class="form-label">Type</label><input class="form-input" id="np-type" placeholder="Ex: Branding, Web..."></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Budget (€)</label><input class="form-input" type="number" id="np-budget" placeholder="5000"></div>
+          <div class="form-group"><label class="form-label">Deadline</label><input class="form-input" type="text" id="np-deadline" placeholder="Ex: 30 avr"></div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:20px;">
+          <button class="btn btn-lime" id="save-project-btn">Créer le projet</button>
+          <button class="btn btn-ghost" onclick="closeModal()">Annuler</button>
+        </div>
+      </div>
+    `);
+    document.getElementById('save-project-btn')?.addEventListener('click', () => {
+      const name = document.getElementById('np-name')?.value.trim();
+      if (!name) { toast('Nom requis'); return; }
+      appData.projects.push({
+        id: Date.now(), name,
+        client: document.getElementById('np-client')?.value || '',
+        type: document.getElementById('np-type')?.value || '',
+        budget: parseInt(document.getElementById('np-budget')?.value) || 0,
+        billed: 0, progress: 0,
+        deadline: document.getElementById('np-deadline')?.value || 'TBD',
+        status: 'EN ATTENTE', statusClass: 'badge-gray',
+        color: '#D0D0D0', ganttStart: 3, ganttEnd: 6
+      });
+      closeModal();
+      toast('Projet créé !');
+      navigate('projects');
+    });
+  });
+}
+
+// ============================================================
+
+function renderFinances() {
+  const ytd = appData.monthlyCA.filter(m => !m.projected).reduce((s, m) => s + m.amount, 0);
+  const currentMonthCA = appData.monthlyCA[2].amount;
+  const monthProgress = Math.round(currentMonthCA / appData.monthlyTarget * 100);
+  const seuilTVA = 77700;
+  const distanceTVA = seuilTVA - ytd;
+  const annualProgress = Math.round(ytd / appData.yearTarget * 100);
+  const tvaProgress = Math.round(ytd / seuilTVA * 100);
+  const tvaColor = distanceTVA < 20000 ? 'var(--orange)' : 'var(--lime)';
+
+  // URSSAF — split YTD 50/50
+  const perPerson = Math.round(ytd / 2);
+  const urssaf = Math.round(perPerson * 0.22);
+  const netPerPerson = perPerson - urssaf;
+
+  // Savings nudge reference net monthly
+  const netMonthly = 6552;
+
+  const invoiceRows = appData.invoices.map(inv => `
+    <tr class="${inv.status === 'EN RETARD' ? 'row-alert' : ''}">
+      <td><span style="font-weight:700;font-family:monospace;">${inv.ref}</span></td>
+      <td>${inv.client}</td>
+      <td><span style="font-size:11px;color:var(--text2);">${inv.type}</span></td>
+      <td><strong>${formatEuro(inv.amount)}</strong></td>
+      <td><span class="badge ${inv.statusClass}">${inv.status}</span></td>
+      <td>
+        <button class="btn btn-ghost btn-sm invoice-action-btn" data-inv-id="${inv.id}" data-inv-ref="${inv.ref}">
+          ${inv.status === 'EN RETARD' ? '⚠ Relancer' : inv.status === 'ENVOYÉE' ? 'Marquer payée' : 'Voir'}
+        </button>
+      </td>
+    </tr>
+  `).join('');
+
+  const maxAmount = 12000;
+  const chartBars = appData.monthlyCA.map(m => {
+    const heightPct = Math.round(m.amount / maxAmount * 100);
+    return `
+      <div class="chart-bar-col">
+        <div class="chart-bar ${m.projected ? 'projected' : 'past'}"
+             style="height:${heightPct}%;min-height:3px;"
+             title="${m.month}: ${formatEuro(m.amount)}">
+        </div>
+        <div class="chart-bar-lbl">${m.month}</div>
+      </div>
+    `;
+  }).join('');
+
+  return `
+    <div class="kpi-grid" style="margin-bottom:24px;">
+
+      <div class="kpi-card">
+        <div class="kpi-value">${formatEuro(currentMonthCA)}</div>
+        <div class="kpi-sub">Objectif ${formatEuro(appData.monthlyTarget)}</div>
+        <div class="kpi-trend" style="color:var(--red);">↓ −${formatEuro(appData.monthlyTarget - currentMonthCA)} / objectif</div>
+        <div class="progress" style="margin-top:8px;">
+          <div class="progress-fill" data-value="${monthProgress}"></div>
+        </div>
+        <div style="font-size:10px;color:var(--text3);margin-top:4px;text-transform:uppercase;letter-spacing:0.05em;">CA Mars</div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-value">${formatEuro(ytd)}</div>
+        <div class="kpi-sub">CA cumulé 2026</div>
+        <div class="kpi-trend">${annualProgress}% de l'objectif annuel</div>
+        <div style="font-size:10px;color:var(--text3);margin-top:8px;text-transform:uppercase;letter-spacing:0.05em;">CA YTD (Jan–Mar)</div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-value" style="color:${tvaColor};">${formatEuro(distanceTVA)}</div>
+        <div class="kpi-sub">Avant seuil TVA ${formatEuro(seuilTVA)}</div>
+        <div class="kpi-trend" style="color:${tvaColor};">Seuil atteint à ${tvaProgress}%</div>
+        <div style="font-size:10px;color:var(--text3);margin-top:8px;text-transform:uppercase;letter-spacing:0.05em;">Franchise TVA</div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-value">450 €</div>
+        <div class="kpi-sub">Taux journalier moyen</div>
+        <div class="kpi-trend up">↑ +50€ vs. 2025</div>
+        <div style="font-size:10px;color:var(--text3);margin-top:8px;text-transform:uppercase;letter-spacing:0.05em;">TJM Moyen</div>
+      </div>
+
+    </div>
+
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+      <div class="section-label" style="margin:0;">Factures &amp; Devis</div>
+      <button class="btn btn-lime btn-sm" id="btn-add-invoice">+ Facture</button>
+    </div>
+
+    <div class="card" style="margin-bottom:24px;overflow-x:auto;">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Référence</th><th>Client</th><th>Type</th><th>Montant</th><th>Statut</th><th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${invoiceRows}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="grid-2" style="margin-bottom:24px;">
+
+      <div class="finance-block">
+        <div class="finance-title">Chiffre d'affaires 2026</div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+          <span style="font-size:11px;color:var(--text2);">Objectif mensuel</span>
+          <span style="font-size:11px;font-weight:700;color:var(--lime);">${formatEuro(appData.monthlyTarget)}</span>
+        </div>
+        <div class="chart-months">
+          ${chartBars}
+        </div>
+        <div style="margin-top:8px;font-size:10px;color:var(--text3);">
+          <span style="display:inline-block;width:12px;height:2px;background:var(--lime);margin-right:4px;vertical-align:middle;"></span>Réalisé
+          <span style="display:inline-block;width:12px;height:2px;border-top:1.5px dashed var(--border2);margin-right:4px;margin-left:12px;vertical-align:middle;"></span>Projeté
+        </div>
+      </div>
+
+      <div class="urssaf-block">
+        <div class="finance-title" style="color:var(--text2);">Calcul net URSSAF (22%)</div>
+
+        <div style="margin-bottom:16px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+            <div class="avatar av-enzo" style="width:22px;height:22px;font-size:8px;">ED</div>
+            <span style="font-size:12px;font-weight:700;">Enzo Derny</span>
+          </div>
+          <div style="font-size:12px;color:var(--text2);">CA attribué : <strong style="color:var(--text);">${formatEuro(perPerson)}</strong></div>
+          <div style="font-size:12px;color:var(--text2);">URSSAF (22%) : <strong style="color:var(--red);">−${formatEuro(urssaf)}</strong></div>
+          <div style="font-size:18px;font-weight:900;color:var(--lime);margin-top:4px;">${formatEuro(netPerPerson)} net</div>
+        </div>
+
+        <div style="height:1px;background:var(--border);margin-bottom:16px;"></div>
+
+        <div>
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+            <div class="avatar av-diego" style="width:22px;height:22px;font-size:8px;">DH</div>
+            <span style="font-size:12px;font-weight:700;">Diégo Humez</span>
+          </div>
+          <div style="font-size:12px;color:var(--text2);">CA attribué : <strong style="color:var(--text);">${formatEuro(perPerson)}</strong></div>
+          <div style="font-size:12px;color:var(--text2);">URSSAF (22%) : <strong style="color:var(--red);">−${formatEuro(urssaf)}</strong></div>
+          <div style="font-size:18px;font-weight:900;color:var(--lime);margin-top:4px;">${formatEuro(netPerPerson)} net</div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="savings-block">
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--purple);margin-bottom:12px;">
+        💜 Nudge épargne — basé sur le net mensuel (${formatEuro(netMonthly)})
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
+        <div style="background:rgba(151,140,248,0.1);border:1px solid rgba(151,140,248,0.2);border-radius:4px;padding:12px;text-align:center;">
+          <div style="font-size:22px;font-weight:900;color:var(--purple);">${formatEuro(Math.round(netMonthly * 0.03))}</div>
+          <div style="font-size:10px;color:var(--text2);text-transform:uppercase;margin-top:4px;">Effort 3%</div>
+        </div>
+        <div style="background:rgba(151,140,248,0.15);border:1px solid rgba(151,140,248,0.3);border-radius:4px;padding:12px;text-align:center;">
+          <div style="font-size:22px;font-weight:900;color:var(--purple);">${formatEuro(Math.round(netMonthly * 0.04))}</div>
+          <div style="font-size:10px;color:var(--text2);text-transform:uppercase;margin-top:4px;">Effort 4%</div>
+        </div>
+        <div style="background:rgba(151,140,248,0.2);border:1px solid rgba(151,140,248,0.4);border-radius:4px;padding:12px;text-align:center;">
+          <div style="font-size:22px;font-weight:900;color:var(--purple);">${formatEuro(Math.round(netMonthly * 0.05))}</div>
+          <div style="font-size:10px;color:var(--text2);text-transform:uppercase;margin-top:4px;">Effort 5%</div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--text3);margin-top:10px;">
+        Objectif annuel à 5% : <strong style="color:var(--purple);">${formatEuro(Math.round(netMonthly * 0.05 * 12))} / an</strong>
+      </div>
+    </div>
+  `;
+}
+
+function initFinances() {
+  document.querySelectorAll('.invoice-action-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = parseInt(btn.dataset.invId);
+      const ref = btn.dataset.invRef;
+      const inv = appData.invoices.find(i => i.id === id);
+      if (!inv) return;
+
+      if (inv.status === 'EN RETARD') {
+        toast(`Relance envoyée pour ${ref}`);
+        inv.status = 'ENVOYÉE';
+        inv.statusClass = 'badge-orange';
+        navigate('finances');
+      } else if (inv.status === 'ENVOYÉE') {
+        inv.status = 'PAYÉE';
+        inv.statusClass = 'badge-lime';
+        toast(`${ref} marquée comme payée ✓`);
+        navigate('finances');
+      } else {
+        toast(`${ref} · ${formatEuro(inv.amount)}`);
+      }
+    });
+  });
+
+  document.getElementById('btn-add-invoice')?.addEventListener('click', () => {
+    openModal(`
+      <div class="modal-box">
+        <div class="modal-title">Nouvelle facture <button class="modal-close" onclick="closeModal()">×</button></div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Référence</label><input class="form-input" id="ni-ref" placeholder="FAC-026"></div>
+          <div class="form-group"><label class="form-label">Client</label><input class="form-input" id="ni-client" placeholder="Nom client"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Montant (€)</label><input class="form-input" type="number" id="ni-amount" placeholder="2000"></div>
+          <div class="form-group"><label class="form-label">Type</label><select class="form-input" id="ni-type"><option value="Facture">Facture</option><option value="Devis">Devis</option><option value="Acompte">Acompte</option></select></div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:20px;">
+          <button class="btn btn-lime" id="save-invoice-btn">Créer</button>
+          <button class="btn btn-ghost" onclick="closeModal()">Annuler</button>
+        </div>
+      </div>
+    `);
+    document.getElementById('save-invoice-btn')?.addEventListener('click', () => {
+      const ref = document.getElementById('ni-ref')?.value.trim();
+      if (!ref) { toast('Référence requise'); return; }
+      appData.invoices.push({
+        id: Date.now(), ref,
+        client: document.getElementById('ni-client')?.value || '',
+        amount: parseInt(document.getElementById('ni-amount')?.value) || 0,
+        type: document.getElementById('ni-type')?.value || 'Facture',
+        status: 'BROUILLON', statusClass: 'badge-gray'
+      });
+      closeModal();
+      toast('Facture créée !');
+      navigate('finances');
+    });
+  });
+}
+
+    // --- CRM ---
+function renderCRM() {
+  const stages = ['IDENTIFIÉ', 'CONTACTÉ', 'EN DISCUSSION', 'PROPOSITION', 'SIGNÉ'];
+
+  // KPI computations
+  const active = appData.prospects.filter(p => p.stage !== 'SIGNÉ' && p.stage !== 'PERDU');
+  const pipeline = active.reduce((s, p) => s + p.budgetEst, 0);
+  const urgent = appData.prospects.filter(p => p.daysSince > 5 && p.stage !== 'SIGNÉ' && p.stage !== 'PERDU').length;
+  const signed = appData.prospects.filter(p => p.stage === 'SIGNÉ').length;
+  const total = appData.prospects.length;
+  const convRate = Math.round(signed / total * 100);
+
+  // Urgent relances list (for banner)
+  const urgentProspects = appData.prospects.filter(p => p.daysSince > 5 && p.stage !== 'SIGNÉ' && p.stage !== 'PERDU');
+
+  // Kanban columns
+  const stageColors = {
+    'IDENTIFIÉ':     { bg: 'rgba(208,208,208,0.12)', color: 'var(--text2)' },
+    'CONTACTÉ':      { bg: 'rgba(140,183,248,0.15)', color: 'var(--blue)' },
+    'EN DISCUSSION': { bg: 'rgba(151,140,248,0.15)', color: 'var(--purple)' },
+    'PROPOSITION':   { bg: 'rgba(232,130,12,0.15)',  color: 'var(--orange)' },
+    'SIGNÉ':         { bg: 'rgba(177,212,24,0.15)',  color: 'var(--lime)' }
+  };
+
+  return `
+    <div id="section-crm">
+
+      <!-- Header -->
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+        <div>
+          <h2 style="font-size:22px;font-weight:900;text-transform:uppercase;letter-spacing:-0.02em;color:var(--text);">Pipeline</h2>
+          <div style="font-size:11px;color:var(--text2);margin-top:2px;">Démarchage & Prospection</div>
+        </div>
+        <button class="btn btn-lime" id="add-prospect-btn">+ Prospect</button>
+      </div>
+
+      <!-- Urgent relances banner (only if urgent > 0) -->
+      ${urgentProspects.length > 0 ? `
+        <div class="relance-banner">
+          <div class="relance-banner-title">⚡ ${urgentProspects.length} relance${urgentProspects.length > 1 ? 's' : ''} urgente${urgentProspects.length > 1 ? 's' : ''}</div>
+          <div class="relance-chips">
+            ${urgentProspects.map(p => `
+              <div class="relance-chip banner-relance-btn" data-id="${p.id}">
+                <span class="j-dot ${urgencyClass(p.daysSince)}"></span>
+                ${p.name} — ${urgencyLabel(p.daysSince)}
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      ` : ''}
+
+      <!-- KPI Row -->
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-value">${active.length}</div>
+          <div class="kpi-sub">Prospects actifs</div>
+          <div class="kpi-trend" style="color:var(--text2);font-size:10px;margin-top:4px;">${total} au total</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-value" style="font-size:22px;">${formatEuro(pipeline)}</div>
+          <div class="kpi-sub">Pipeline estimé</div>
+          <div class="kpi-trend up">Hors signé</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-value" style="color:${urgent > 0 ? 'var(--red)' : 'var(--lime)'}">${urgent}</div>
+          <div class="kpi-sub">Relances urgentes</div>
+          <div class="kpi-trend ${urgent > 0 ? 'down' : ''}"> &gt; 5j sans contact</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-value">${convRate}%</div>
+          <div class="kpi-sub">Taux conversion</div>
+          <div class="kpi-trend up">${signed} signé${signed > 1 ? 's' : ''} / ${total}</div>
+        </div>
+      </div>
+
+      <!-- Kanban Pipeline -->
+      <div class="section-label">Pipeline de prospection</div>
+      <div class="kanban-board">
+        ${stages.map(stage => {
+          const col = stageColors[stage];
+          const cards = appData.prospects.filter(p => p.stage === stage);
+          const colPipeline = cards.reduce((s, p) => s + p.budgetEst, 0);
+          return `
+            <div class="kanban-col">
+              <div class="kanban-header" style="background:${col.bg};color:${col.color};">
+                <span>${stage}</span>
+                <span style="font-weight:400;opacity:0.7;">${cards.length}</span>
+              </div>
+              <div class="kanban-body">
+                ${cards.length === 0 ? `<div style="padding:16px;text-align:center;color:var(--text3);font-size:11px;">—</div>` : ''}
+                ${cards.map(p => {
+                  const urgencyColor = urgencyBarColor(p.daysSince);
+                  const textUrgClass = urgencyTextClass(p.daysSince);
+                  const isSigné = stage === 'SIGNÉ';
+                  return `
+                    <div class="prospect-card" data-prospect-id="${p.id}">
+                      <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+                        <div>
+                          <div class="prospect-name">${p.name}</div>
+                          <div class="prospect-co">${p.city} · ${p.sector}</div>
+                        </div>
+                        <span style="font-size:12px;font-weight:800;" class="${textUrgClass}">${urgencyLabel(p.daysSince)}</span>
+                      </div>
+                      <div class="prospect-budget">~${formatEuro(p.budgetEst)}</div>
+                      <div class="urgency-bar" style="background:${urgencyColor};"></div>
+                      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;">
+                        <span class="source-badge">${p.source}</span>
+                        ${isSigné
+                          ? `<span style="font-size:11px;font-weight:700;color:var(--lime);">✓ Signé</span>`
+                          : `<button class="btn btn-ghost btn-sm relancer-btn" data-prospect-id="${p.id}" data-name="${p.name}" style="font-size:10px;padding:4px 8px;">Relancer →</button>`
+                        }
+                      </div>
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+              <div class="kanban-footer">
+                ${stage === 'SIGNÉ' ? 'Fermé' : 'Pipeline'}: ${formatEuro(colPipeline)}
+              </div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+
+    </div>
+  `;
+}
+
+function initCRM() {
+  // Relancer buttons (on cards)
+  document.querySelectorAll('.relancer-btn').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const id = parseInt(btn.dataset.prospectId);
+      const p = appData.prospects.find(x => x.id === id);
+      if (!p) return;
+
+      openModal(`
+        <div class="modal-box">
+          <div class="modal-title">
+            Relancer — ${p.name}
+            <button class="modal-close" onclick="closeModal()">×</button>
+          </div>
+          <div style="background:var(--bg3);border-radius:4px;padding:12px;margin-bottom:16px;">
+            <div style="display:flex;gap:16px;flex-wrap:wrap;">
+              <div><span style="font-size:10px;color:var(--text3);text-transform:uppercase;">Dernier contact</span><br><strong class="${urgencyTextClass(p.daysSince)}">${urgencyLabel(p.daysSince)}</strong></div>
+              <div><span style="font-size:10px;color:var(--text3);text-transform:uppercase;">Budget estimé</span><br><strong style="color:var(--lime);">${formatEuro(p.budgetEst)}</strong></div>
+              <div><span style="font-size:10px;color:var(--text3);text-transform:uppercase;">Secteur</span><br><strong>${p.sector}</strong></div>
+              <div><span style="font-size:10px;color:var(--text3);text-transform:uppercase;">Source</span><br><strong>${p.source}</strong></div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Message de relance (copy-paste ready)</label>
+            <textarea class="form-textarea" id="relance-msg" style="min-height:180px;">Bonjour,
+
+Je me permets de revenir vers vous suite à notre dernier échange concernant votre projet de ${p.sector}.
+
+Chez Studio Phosphor, nous créons des identités visuelles percutantes qui distinguent les marques qui ont quelque chose à dire. Votre projet m'intéresse particulièrement.
+
+Seriez-vous disponible pour un échange de 20 minutes cette semaine ?
+
+Cordialement,
+Enzo Derny
+Studio Phosphor — phosphor.art
+enzo@phosphor.art</textarea>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:16px;flex-wrap:wrap;">
+            <button class="btn btn-lime" id="confirm-relance-btn" data-id="${p.id}">✓ Marquer comme relancé</button>
+            <button class="btn btn-ghost" onclick="
+              navigator.clipboard?.writeText(document.getElementById('relance-msg')?.value||'');
+              toast('Message copié !');
+            ">Copier le message</button>
+            <button class="btn btn-ghost" onclick="closeModal()">Annuler</button>
+          </div>
+        </div>
+      `);
+
+      document.getElementById('confirm-relance-btn')?.addEventListener('click', () => {
+        const prospect = appData.prospects.find(x => x.id === parseInt(document.getElementById('confirm-relance-btn').dataset.id));
+        if (prospect) prospect.daysSince = 0;
+        closeModal();
+        toast('Relance enregistrée · J+0 ✓');
+        navigate('crm');
+      });
+    });
+  });
+
+  // Banner relance chips
+  document.querySelectorAll('.banner-relance-btn').forEach(chip => {
+    chip.addEventListener('click', () => {
+      const id = parseInt(chip.dataset.id);
+      const p = appData.prospects.find(x => x.id === id);
+      if (!p) return;
+      // Find the corresponding relancer button and trigger click
+      const relBtn = document.querySelector(`.relancer-btn[data-prospect-id="${id}"]`);
+      if (relBtn) relBtn.click();
+    });
+  });
+
+  // "+ Prospect" button
+  document.getElementById('add-prospect-btn')?.addEventListener('click', () => {
+    openModal(`
+      <div class="modal-box">
+        <div class="modal-title">Nouveau prospect <button class="modal-close" onclick="closeModal()">×</button></div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Nom / Entreprise *</label><input class="form-input" id="new-name" placeholder="Atelier Lumière" required></div>
+          <div class="form-group"><label class="form-label">Ville</label><input class="form-input" id="new-city" placeholder="Montpellier"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Secteur</label><input class="form-input" id="new-sector" placeholder="Restauration, Mode..."></div>
+          <div class="form-group"><label class="form-label">Budget estimé (€)</label><input class="form-input" type="number" id="new-budget" placeholder="3000"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Email</label><input class="form-input" type="email" id="new-email" placeholder="contact@..."></div>
+          <div class="form-group"><label class="form-label">Source</label><select class="form-select" id="new-source"><option value="LinkedIn">LinkedIn</option><option value="Réseau">Réseau</option><option value="Entrant">Entrant</option><option value="Autre">Autre</option></select></div>
+        </div>
+        <div class="form-group"><label class="form-label">Notes</label><textarea class="form-textarea" id="new-notes" placeholder="Contexte du projet..."></textarea></div>
+        <div style="display:flex;gap:8px;margin-top:20px;">
+          <button class="btn btn-lime" id="save-prospect-btn">Ajouter le prospect</button>
+          <button class="btn btn-ghost" onclick="closeModal()">Annuler</button>
+        </div>
+      </div>
+    `);
+
+    document.getElementById('save-prospect-btn')?.addEventListener('click', () => {
+      const name = document.getElementById('new-name')?.value.trim();
+      if (!name) { toast('Nom requis'); return; }
+      appData.prospects.unshift({
+        id: Date.now(), name, company: name,
+        city: document.getElementById('new-city')?.value || '',
+        sector: document.getElementById('new-sector')?.value || '',
+        budgetEst: parseInt(document.getElementById('new-budget')?.value) || 0,
+        source: document.getElementById('new-source')?.value || 'Autre',
+        stage: 'IDENTIFIÉ', daysSince: 0,
+        email: document.getElementById('new-email')?.value || '',
+        linkedin: '', notes: document.getElementById('new-notes')?.value || ''
+      });
+      closeModal();
+      toast('Prospect ajouté !');
+      navigate('crm');
+    });
+  });
+}
+
+
+    // === SECTION RENDERERS MAP ===
+    const sectionRenderers = {
+      dashboard: { render: renderDashboard, init: initDashboard },
+      agenda: { render: renderAgenda, init: initAgenda },
+      projects: { render: renderProjects, init: initProjects },
+      finances: { render: renderFinances, init: initFinances },
+      crm: { render: renderCRM, init: initCRM }
+    };
+
+    // === CONTEXT-SENSITIVE ACTION BUTTON ===
+    function handlePrimaryAction() {
+      const actions = {
+        dashboard: () => document.querySelector('#btn-see-tasks') ? navigate('agenda') : toast('→ Agenda'),
+        agenda: () => document.getElementById('btn-add-event')?.click(),
+        projects: () => document.getElementById('btn-add-project')?.click(),
+        finances: () => document.getElementById('btn-add-invoice')?.click(),
+        crm: () => document.getElementById('add-prospect-btn')?.click()
+      };
+      const fn = actions[state.activeSection];
+      if (fn) fn();
+    }
+
+    // === EXPORT (CSV-like summary) ===
+    function handleExport() {
+      const section = state.activeSection;
+      let text = '';
+      if (section === 'finances') {
+        text = 'Ref;Client;Type;Montant;Statut\n' +
+          appData.invoices.map(i => `${i.ref};${i.client};${i.type};${i.amount};${i.status}`).join('\n');
+      } else if (section === 'projects') {
+        text = 'Projet;Client;Budget;Facturé;Avancement;Statut\n' +
+          appData.projects.map(p => `${p.name};${p.client};${p.budget};${p.billed};${p.progress}%;${p.status}`).join('\n');
+      } else if (section === 'crm') {
+        text = 'Nom;Ville;Secteur;Budget;Source;Étape\n' +
+          appData.prospects.map(p => `${p.name};${p.city};${p.sector};${p.budgetEst};${p.source};${p.stage}`).join('\n');
+      } else {
+        toast('Export disponible sur Projets, Finances & CRM');
+        return;
+      }
+      const blob = new Blob([text], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = `phosphor-${section}.csv`; a.click();
+      URL.revokeObjectURL(url);
+      toast('Export CSV téléchargé ✓');
+    }
+
+    // === INIT ===
+    function init() {
+      // Set current date in fr-FR
+      const now = new Date();
+      document.getElementById('topbar-date').textContent = now.toLocaleDateString('fr-FR', {
+        weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+      });
+
+      // Load theme from localStorage
+      const savedTheme = localStorage.getItem('phosphor-theme') || 'dark';
+      document.body.setAttribute('data-theme', savedTheme);
+      updateThemeIcon(savedTheme);
+
+      // Nav click handlers
+      document.querySelectorAll('.nav-item').forEach(el => {
+        el.addEventListener('click', (e) => {
+          e.preventDefault();
+          navigate(el.dataset.section);
+        });
+      });
+
+      // Theme toggle
+      document.getElementById('theme-toggle').addEventListener('click', () => {
+        const current = document.body.getAttribute('data-theme');
+        const next = current === 'dark' ? 'light' : 'dark';
+        document.body.setAttribute('data-theme', next);
+        localStorage.setItem('phosphor-theme', next);
+        updateThemeIcon(next);
+        toast(next === 'light' ? 'Mode clair activé' : 'Mode sombre activé');
+      });
+
+      // Exporter button
+      document.getElementById('action-secondary')?.addEventListener('click', handleExport);
+
+      // Keyboard shortcut: Escape = close modal
+      document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+      // Initial render
+      navigate('dashboard');
+    }
+
+    document.addEventListener('DOMContentLoaded', init);
+    
+    // Charger les données Supabase au démarrage
+    window.addEventListener('load', async () => {
+      const loaded = await Supabase.loadAllData();
+      if (loaded) {
+        navigate('dashboard');
+        Supabase.startRealtimeSync();
+        console.log('🚀 Phosphor OS chargé avec Supabase');
+      } else {
+        console.log('⚠️  Utilisation des données mockées');
+      }
+    });
+  </script>
+</body>
+</html>
