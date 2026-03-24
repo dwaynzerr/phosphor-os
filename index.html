@@ -430,7 +430,11 @@
             budget: p.budget, billed: p.billed, progress: p.progress,
             deadline: p.deadline, status: p.status, statusClass: p.status_class,
             color: p.color, ganttStart: p.gantt_start, ganttEnd: p.gantt_end,
-            tasks: p.tasks || [], notes: p.notes
+            tasks: p.tasks || [], notes: p.notes,
+            startDate: p.start_date || null,
+            endDate: p.end_date || null,
+            documents: p.documents || [],
+            projectTasks: p.project_tasks || []
           }));
           
           const invoices = await supabaseGet('invoices');
@@ -598,6 +602,10 @@
           if (updates.ganttEnd !== undefined) data.gantt_end = updates.ganttEnd;
           if (updates.tasks !== undefined) data.tasks = updates.tasks;
           if (updates.notes !== undefined) data.notes = updates.notes;
+          if (updates.startDate !== undefined) data.start_date = updates.startDate;
+          if (updates.endDate !== undefined) data.end_date = updates.endDate;
+          if (updates.documents !== undefined) data.documents = updates.documents;
+          if (updates.projectTasks !== undefined) data.project_tasks = updates.projectTasks;
           
           await supabaseUpdate('projects', projectId, data);
           console.log(`✓ Projet ${projectId} mis à jour`);
@@ -615,6 +623,103 @@
           return true;
         } catch (error) {
           console.error('Erreur suppression projet:', error);
+          return false;
+        }
+      },
+      
+      // PROJECT TASKS (tâches spécifiques au projet)
+      async addProjectTask(projectId, taskText) {
+        try {
+          const projects = await supabaseGet('projects');
+          const project = projects.find(p => p.id === projectId);
+          if (!project) return false;
+          
+          const tasks = project.project_tasks || [];
+          const newTask = {
+            id: Date.now(),
+            text: taskText,
+            done: false
+          };
+          tasks.push(newTask);
+          
+          await this.updateProject(projectId, { projectTasks: tasks });
+          return newTask;
+        } catch (error) {
+          console.error('Erreur ajout tâche projet:', error);
+          return null;
+        }
+      },
+      
+      async toggleProjectTask(projectId, taskId) {
+        try {
+          const projects = await supabaseGet('projects');
+          const project = projects.find(p => p.id === projectId);
+          if (!project) return false;
+          
+          const tasks = project.project_tasks || [];
+          const task = tasks.find(t => t.id === taskId);
+          if (!task) return false;
+          
+          task.done = !task.done;
+          await this.updateProject(projectId, { projectTasks: tasks });
+          return true;
+        } catch (error) {
+          console.error('Erreur toggle tâche projet:', error);
+          return false;
+        }
+      },
+      
+      async deleteProjectTask(projectId, taskId) {
+        try {
+          const projects = await supabaseGet('projects');
+          const project = projects.find(p => p.id === projectId);
+          if (!project) return false;
+          
+          const tasks = (project.project_tasks || []).filter(t => t.id !== taskId);
+          await this.updateProject(projectId, { projectTasks: tasks });
+          return true;
+        } catch (error) {
+          console.error('Erreur suppression tâche projet:', error);
+          return false;
+        }
+      },
+      
+      // PROJECT DOCUMENTS
+      async addProjectDocument(projectId, doc) {
+        try {
+          const projects = await supabaseGet('projects');
+          const project = projects.find(p => p.id === projectId);
+          if (!project) return false;
+          
+          const documents = project.documents || [];
+          const newDoc = {
+            id: Date.now(),
+            type: doc.type, // 'devis', 'facture', 'acompte'
+            ref: doc.ref,
+            amount: doc.amount,
+            date: doc.date
+          };
+          documents.push(newDoc);
+          
+          await this.updateProject(projectId, { documents });
+          return newDoc;
+        } catch (error) {
+          console.error('Erreur ajout document projet:', error);
+          return null;
+        }
+      },
+      
+      async deleteProjectDocument(projectId, docId) {
+        try {
+          const projects = await supabaseGet('projects');
+          const project = projects.find(p => p.id === projectId);
+          if (!project) return false;
+          
+          const documents = (project.documents || []).filter(d => d.id !== docId);
+          await this.updateProject(projectId, { documents });
+          return true;
+        } catch (error) {
+          console.error('Erreur suppression document projet:', error);
           return false;
         }
       },
@@ -1007,7 +1112,8 @@
         assignee: 'all',  // 'all', 'enzo', 'diego'
         status: 'all'     // 'all', 'todo', 'done'
       },
-      taskSort: 'date'  // 'date', 'priority', 'urgence'
+      taskSort: 'date',  // 'date', 'priority', 'urgence'
+      currentProjectId: null  // Pour page projet dédiée
     };
 
     // === HELPERS ===
@@ -1520,10 +1626,10 @@ function renderAgenda() {
 
   // Tri
   const sortBtns = ['date', 'priority', 'urgence'].map(s =>
-    `<button class="btn btn-sm task-sort-btn${state.taskSort === s ? ' btn-lime' : ' btn-ghost'}" data-sort="${s}">${s === 'date' ? '📅 Date' : s === 'priority' ? '⚡ Priorité' : '🔥 Urgence'}</button>`
+    `<button class="btn btn-sm task-sort-btn${state.taskSort === s ? ' btn-lime' : ' btn-ghost'}" data-sort="${s}">${s === 'date' ? 'Date' : s === 'priority' ? 'Priorité' : 'Urgence'}</button>`
   ).join('');
 
-  // Tasks list - NOUVELLE VERSION compacte
+  // Tasks list - VERSION corrigée
   const taskItems = filteredTasks.map(task => {
     const deadlineText = task.deadline ? formatDate(task.deadline) : '';
     const isOverdue = task.deadline && new Date(task.deadline) < new Date() && !task.done;
@@ -1538,14 +1644,14 @@ function renderAgenda() {
           </div>
           <div style="flex:1;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
             <span style="font-size:14px;font-weight:600;${task.done ? 'text-decoration:line-through;opacity:0.5;' : ''}">${task.text}</span>
-            <span style="font-size:11px;color:var(--text3);">${task.tag}</span>
-            <span class="avatar av-${task.assignee}" style="width:18px;height:18px;font-size:8px;"></span>
+            <span style="font-size:11px;padding:2px 6px;border:1px solid ${borderColor};border-radius:3px;color:${borderColor};">${task.tag}</span>
             ${deadlineText ? `<span style="font-size:11px;color:${isOverdue ? 'var(--red)' : 'var(--text2)'};">${deadlineText}</span>` : ''}
-            <span style="font-size:11px;padding:2px 6px;border:1px solid ${priorityColor};border-radius:3px;color:${priorityColor};">${task.priority || 'Moyenne'}</span>
+            <span style="font-size:11px;color:${priorityColor};">${task.priority || 'Moyenne'}</span>
           </div>
+          <span class="avatar av-${task.assignee}" style="width:18px;height:18px;font-size:8px;margin-left:auto;"></span>
           <div class="task-actions" style="display:flex;gap:8px;opacity:0;transition:opacity 0.2s;">
-            <button class="task-edit-btn" data-task-id="${task.id}" style="background:transparent;border:none;cursor:pointer;font-size:16px;padding:4px;" onclick="event.stopPropagation()">✏️</button>
-            <button class="task-delete-btn" data-task-id="${task.id}" style="background:transparent;border:none;cursor:pointer;font-size:16px;padding:4px;" onclick="event.stopPropagation()">🗑️</button>
+            <button class="task-edit-btn" data-task-id="${task.id}" style="background:transparent;border:none;cursor:pointer;font-size:11px;padding:4px 8px;color:var(--text2);" onclick="event.stopPropagation()">Éditer</button>
+            <button class="task-delete-btn" data-task-id="${task.id}" style="background:transparent;border:none;cursor:pointer;font-size:11px;padding:4px 8px;color:var(--red);" onclick="event.stopPropagation()">Supprimer</button>
           </div>
         </div>
       </div>`;
@@ -1581,15 +1687,24 @@ function renderAgenda() {
         <button class="btn btn-lime btn-sm" id="btn-add-task">+ Nouvelle tâche</button>
       </div>
 
-      <!-- Filtres + Tri sur UNE ligne -->
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap;">
-        <div style="display:flex;gap:4px;">${typeFilterBtns}</div>
-        <div style="width:1px;height:20px;background:var(--border);"></div>
-        <div style="display:flex;gap:4px;">${assigneeFilterBtns}</div>
-        <div style="width:1px;height:20px;background:var(--border);"></div>
-        <div style="display:flex;gap:4px;">${statusFilterBtns}</div>
-        <div style="width:1px;height:20px;background:var(--border);"></div>
-        <div style="display:flex;gap:4px;">${sortBtns}</div>
+      <!-- Filtres + Tri avec labels -->
+      <div style="display:flex;gap:24px;margin-bottom:16px;flex-wrap:wrap;">
+        <div>
+          <div style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--text3);margin-bottom:6px;">Type</div>
+          <div style="display:flex;gap:4px;">${typeFilterBtns}</div>
+        </div>
+        <div>
+          <div style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--text3);margin-bottom:6px;">Assigné</div>
+          <div style="display:flex;gap:4px;">${assigneeFilterBtns}</div>
+        </div>
+        <div>
+          <div style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--text3);margin-bottom:6px;">Statut</div>
+          <div style="display:flex;gap:4px;">${statusFilterBtns}</div>
+        </div>
+        <div>
+          <div style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--text3);margin-bottom:6px;">Tri</div>
+          <div style="display:flex;gap:4px;">${sortBtns}</div>
+        </div>
       </div>
 
       <div style="display:flex;flex-direction:column;gap:6px;">${taskItems}${emptyState}</div>
@@ -1916,6 +2031,175 @@ function initAgenda() {
 // Phosphor OS — Projects & Finances section renderers
 // ============================================================
 
+// PAGE PROJET DÉDIÉE - Plein écran
+// state.currentProjectId stocke l'ID du projet en cours de consultation
+
+function renderProjectPage() {
+  const projectId = state.currentProjectId;
+  const project = appData.projects.find(p => p.id === projectId);
+  
+  if (!project) {
+    return `<div style="padding:40px;text-align:center;">Projet introuvable</div>`;
+  }
+  
+  const projectTasks = project.projectTasks || [];
+  const doneTasks = projectTasks.filter(t => t.done).length;
+  const documents = project.documents || [];
+  
+  const devis = documents.filter(d => d.type === 'devis');
+  const factures = documents.filter(d => d.type === 'facture');
+  const acomptes = documents.filter(d => d.type === 'acompte');
+  
+  return `
+    <div style="padding:40px;max-width:1400px;margin:0 auto;">
+      <!-- Header -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:40px;">
+        <div>
+          <button class="btn btn-ghost btn-sm" onclick="navigate('projects')" style="margin-bottom:12px;">← Retour aux projets</button>
+          <h1 style="font-size:32px;font-weight:900;margin:0;color:${project.color};">${project.name}</h1>
+          <div style="font-size:14px;color:var(--text2);margin-top:8px;">${project.client} · ${project.type}</div>
+        </div>
+        <div style="display:flex;gap:12px;">
+          <button class="btn btn-lime" id="btn-edit-project">Éditer le projet</button>
+          <button class="btn btn-red" id="btn-delete-project">Supprimer</button>
+        </div>
+      </div>
+      
+      <!-- Grille 2 colonnes -->
+      <div style="display:grid;grid-template-columns:2fr 1fr;gap:40px;">
+        
+        <!-- Colonne gauche -->
+        <div style="display:flex;flex-direction:column;gap:32px;">
+          
+          <!-- Infos principales -->
+          <div class="card">
+            <div class="section-label" style="margin-bottom:20px;">Informations</div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;">
+              <div>
+                <div style="font-size:11px;color:var(--text3);text-transform:uppercase;margin-bottom:6px;">Budget</div>
+                <div style="font-size:24px;font-weight:900;">${formatEuro(project.budget)}</div>
+              </div>
+              <div>
+                <div style="font-size:11px;color:var(--text3);text-transform:uppercase;margin-bottom:6px;">Facturé</div>
+                <div style="font-size:24px;font-weight:900;color:var(--lime);">${formatEuro(project.billed)}</div>
+              </div>
+              <div>
+                <div style="font-size:11px;color:var(--text3);text-transform:uppercase;margin-bottom:6px;">Avancement</div>
+                <div style="font-size:24px;font-weight:900;">${project.progress}%</div>
+              </div>
+            </div>
+            <div style="margin-top:20px;">
+              <div style="font-size:11px;color:var(--text3);text-transform:uppercase;margin-bottom:8px;">Progression</div>
+              <div style="height:12px;background:var(--border);border-radius:6px;overflow:hidden;">
+                <div style="height:100%;width:${project.progress}%;background:${project.color};transition:width 0.4s;"></div>
+              </div>
+            </div>
+            ${project.startDate || project.endDate ? `
+              <div style="margin-top:20px;padding:16px;background:var(--bg3);border-radius:6px;">
+                <div style="font-size:11px;color:var(--text3);text-transform:uppercase;margin-bottom:8px;">Dates</div>
+                <div style="display:flex;gap:16px;">
+                  ${project.startDate ? `<div><span style="color:var(--text2);">Début:</span> ${new Date(project.startDate).toLocaleDateString('fr-FR')}</div>` : ''}
+                  ${project.endDate ? `<div><span style="color:var(--text2);">Fin:</span> ${new Date(project.endDate).toLocaleDateString('fr-FR')}</div>` : ''}
+                </div>
+              </div>
+            ` : ''}
+          </div>
+          
+          <!-- Tâches projet -->
+          <div class="card">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+              <div class="section-label">Tâches · ${doneTasks}/${projectTasks.length}</div>
+              <button class="btn btn-lime btn-sm" id="btn-add-project-task">+ Tâche</button>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+              ${projectTasks.length === 0 ? `
+                <div style="padding:32px;text-align:center;color:var(--text2);">
+                  <div style="font-size:32px;margin-bottom:8px;">📝</div>
+                  <div>Aucune tâche</div>
+                </div>
+              ` : projectTasks.map(task => `
+                <div style="display:flex;align-items:center;gap:12px;padding:12px;border:1px solid var(--border);border-radius:4px;">
+                  <div class="project-task-checkbox" data-task-id="${task.id}" style="cursor:pointer;">
+                    <span class="task-checkbox${task.done ? ' checked' : ''}" style="width:18px;height:18px;"></span>
+                  </div>
+                  <span style="flex:1;font-size:14px;${task.done ? 'text-decoration:line-through;opacity:0.5;' : ''}">${task.text}</span>
+                  <button class="project-task-delete" data-task-id="${task.id}" style="background:transparent;border:none;cursor:pointer;color:var(--red);font-size:12px;padding:4px 8px;">Supprimer</button>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+          
+        </div>
+        
+        <!-- Colonne droite - Documents -->
+        <div style="display:flex;flex-direction:column;gap:32px;">
+          
+          <!-- Devis -->
+          <div class="card">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+              <div class="section-label">Devis</div>
+              <button class="btn btn-ghost btn-sm" id="btn-add-devis">+</button>
+            </div>
+            ${devis.length === 0 ? `<div style="color:var(--text3);font-size:13px;">Aucun devis</div>` : devis.map(d => `
+              <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);">
+                <div>
+                  <div style="font-size:13px;font-weight:600;">${d.ref}</div>
+                  <div style="font-size:11px;color:var(--text2);">${new Date(d.date).toLocaleDateString('fr-FR')}</div>
+                </div>
+                <div style="text-align:right;">
+                  <div style="font-size:14px;font-weight:700;">${formatEuro(d.amount)}</div>
+                  <button class="doc-delete" data-doc-id="${d.id}" style="background:transparent;border:none;cursor:pointer;font-size:11px;color:var(--red);">×</button>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+          
+          <!-- Factures -->
+          <div class="card">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+              <div class="section-label">Factures</div>
+              <button class="btn btn-ghost btn-sm" id="btn-add-facture">+</button>
+            </div>
+            ${factures.length === 0 ? `<div style="color:var(--text3);font-size:13px;">Aucune facture</div>` : factures.map(d => `
+              <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);">
+                <div>
+                  <div style="font-size:13px;font-weight:600;">${d.ref}</div>
+                  <div style="font-size:11px;color:var(--text2);">${new Date(d.date).toLocaleDateString('fr-FR')}</div>
+                </div>
+                <div style="text-align:right;">
+                  <div style="font-size:14px;font-weight:700;color:var(--lime);">${formatEuro(d.amount)}</div>
+                  <button class="doc-delete" data-doc-id="${d.id}" style="background:transparent;border:none;cursor:pointer;font-size:11px;color:var(--red);">×</button>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+          
+          <!-- Acomptes -->
+          <div class="card">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+              <div class="section-label">Acomptes</div>
+              <button class="btn btn-ghost btn-sm" id="btn-add-acompte">+</button>
+            </div>
+            ${acomptes.length === 0 ? `<div style="color:var(--text3);font-size:13px;">Aucun acompte</div>` : acomptes.map(d => `
+              <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);">
+                <div>
+                  <div style="font-size:13px;font-weight:600;">${d.ref}</div>
+                  <div style="font-size:11px;color:var(--text2);">${new Date(d.date).toLocaleDateString('fr-FR')}</div>
+                </div>
+                <div style="text-align:right;">
+                  <div style="font-size:14px;font-weight:700;color:var(--blue);">${formatEuro(d.amount)}</div>
+                  <button class="doc-delete" data-doc-id="${d.id}" style="background:transparent;border:none;cursor:pointer;font-size:11px;color:var(--red);">×</button>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+          
+        </div>
+      </div>
+    </div>
+  `;
+}
+
 function renderProjects() {
   const months = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'];
 
@@ -1954,14 +2238,26 @@ function renderProjects() {
   const ganttHeader = months.map(m => `<div class="gantt-month">${m}</div>`).join('');
 
   const ganttRows = appData.projects.map(p => {
+    // Calculer position depuis dates réelles si présentes
+    let startMonth = p.ganttStart || 0;
+    let endMonth = p.ganttEnd || 1;
+    
+    if (p.startDate && p.endDate) {
+      const start = new Date(p.startDate);
+      const end = new Date(p.endDate);
+      startMonth = start.getMonth();
+      endMonth = end.getMonth();
+    }
+    
     const cells = Array.from({ length: 12 }, (_, i) =>
-      i >= p.ganttStart && i <= p.ganttEnd
+      i >= startMonth && i <= endMonth
         ? `<div class="gantt-bar" style="background:${p.color};opacity:0.8;"></div>`
         : `<div class="gantt-cell" style="background:var(--bg3);"></div>`
     ).join('');
+    
     return `
       <div class="gantt-row">
-        <div class="gantt-label">${p.name}</div>
+        <div class="gantt-label" style="color:${p.color};">${p.name}</div>
         ${cells}
       </div>
     `;
@@ -2128,6 +2424,199 @@ function initProjects() {
     });
   });
 }
+
+function initProjectPage() {
+  const projectId = state.currentProjectId;
+  
+  // Éditer projet
+  document.getElementById('btn-edit-project')?.addEventListener('click', () => {
+    const project = appData.projects.find(p => p.id === projectId);
+    if (!project) return;
+    
+    openModal(`
+      <div class="modal-box">
+        <div class="modal-title">Éditer le projet<button class="modal-close" onclick="closeModal()">×</button></div>
+        <div class="form-group"><label class="form-label">Nom *</label><input class="form-input" id="edit-p-name" value="${project.name}"></div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Client</label><input class="form-input" id="edit-p-client" value="${project.client}"></div>
+          <div class="form-group"><label class="form-label">Type</label><input class="form-input" id="edit-p-type" value="${project.type}"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Budget (€)</label><input class="form-input" type="number" id="edit-p-budget" value="${project.budget}"></div>
+          <div class="form-group"><label class="form-label">Facturé (€)</label><input class="form-input" type="number" id="edit-p-billed" value="${project.billed}"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Avancement (%)</label><input class="form-input" type="number" id="edit-p-progress" value="${project.progress}" min="0" max="100"></div>
+          <div class="form-group"><label class="form-label">Couleur</label><input class="form-input" type="color" id="edit-p-color" value="${project.color}"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Date début</label><input class="form-input" type="date" id="edit-p-start" value="${project.startDate || ''}"></div>
+          <div class="form-group"><label class="form-label">Date fin</label><input class="form-input" type="date" id="edit-p-end" value="${project.endDate || ''}"></div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:20px;">
+          <button class="btn btn-lime" id="save-edit-project">Sauvegarder</button>
+          <button class="btn btn-ghost" onclick="closeModal()">Annuler</button>
+        </div>
+      </div>
+    `);
+    
+    document.getElementById('save-edit-project')?.addEventListener('click', async () => {
+      const updates = {
+        name: document.getElementById('edit-p-name').value.trim(),
+        client: document.getElementById('edit-p-client').value.trim(),
+        type: document.getElementById('edit-p-type').value.trim(),
+        budget: parseInt(document.getElementById('edit-p-budget').value) || 0,
+        billed: parseInt(document.getElementById('edit-p-billed').value) || 0,
+        progress: parseInt(document.getElementById('edit-p-progress').value) || 0,
+        color: document.getElementById('edit-p-color').value,
+        startDate: document.getElementById('edit-p-start').value || null,
+        endDate: document.getElementById('edit-p-end').value || null
+      };
+      
+      const saved = await Supabase.updateProject(projectId, updates);
+      if (saved) {
+        await Supabase.loadAllData();
+        closeModal();
+        toast('✓ Projet mis à jour');
+        navigate('project');
+      } else {
+        toast('❌ Erreur');
+      }
+    });
+  });
+  
+  // Supprimer projet
+  document.getElementById('btn-delete-project')?.addEventListener('click', async () => {
+    const project = appData.projects.find(p => p.id === projectId);
+    if (!project) return;
+    
+    if (confirm(`Supprimer le projet "${project.name}" ?`)) {
+      const deleted = await Supabase.deleteProject(projectId);
+      if (deleted) {
+        await Supabase.loadAllData();
+        toast('✓ Projet supprimé');
+        navigate('projects');
+      } else {
+        toast('❌ Erreur');
+      }
+    }
+  });
+  
+  // Ajouter tâche projet
+  document.getElementById('btn-add-project-task')?.addEventListener('click', () => {
+    openModal(`
+      <div class="modal-box">
+        <div class="modal-title">Nouvelle tâche<button class="modal-close" onclick="closeModal()">×</button></div>
+        <div class="form-group"><label class="form-label">Texte *</label><input class="form-input" id="new-ptask-text" placeholder="Ex: Maquettes homepage"></div>
+        <div style="display:flex;gap:8px;margin-top:20px;">
+          <button class="btn btn-lime" id="save-ptask">Ajouter</button>
+          <button class="btn btn-ghost" onclick="closeModal()">Annuler</button>
+        </div>
+      </div>
+    `);
+    
+    document.getElementById('save-ptask')?.addEventListener('click', async () => {
+      const text = document.getElementById('new-ptask-text').value.trim();
+      if (!text) { toast('Texte requis'); return; }
+      
+      const added = await Supabase.addProjectTask(projectId, text);
+      if (added) {
+        await Supabase.loadAllData();
+        closeModal();
+        toast('✓ Tâche ajoutée');
+        navigate('project');
+      } else {
+        toast('❌ Erreur');
+      }
+    });
+  });
+  
+  // Toggle tâches projet
+  document.querySelectorAll('.project-task-checkbox').forEach(el => {
+    el.addEventListener('click', async () => {
+      const taskId = parseInt(el.dataset.taskId);
+      const toggled = await Supabase.toggleProjectTask(projectId, taskId);
+      if (toggled) {
+        await Supabase.loadAllData();
+        navigate('project');
+      }
+    });
+  });
+  
+  // Supprimer tâche projet
+  document.querySelectorAll('.project-task-delete').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const taskId = parseInt(btn.dataset.taskId);
+      if (confirm('Supprimer cette tâche ?')) {
+        const deleted = await Supabase.deleteProjectTask(projectId, taskId);
+        if (deleted) {
+          await Supabase.loadAllData();
+          toast('✓ Supprimée');
+          navigate('project');
+        }
+      }
+    });
+  });
+  
+  // Ajouter document (devis/facture/acompte)
+  const addDocHandler = (type) => {
+    openModal(`
+      <div class="modal-box">
+        <div class="modal-title">Nouveau ${type}<button class="modal-close" onclick="closeModal()">×</button></div>
+        <div class="form-group"><label class="form-label">Référence</label><input class="form-input" id="new-doc-ref" placeholder="FAC-001"></div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Montant (€)</label><input class="form-input" type="number" id="new-doc-amount" placeholder="5000"></div>
+          <div class="form-group"><label class="form-label">Date</label><input class="form-input" type="date" id="new-doc-date" value="${new Date().toISOString().split('T')[0]}"></div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:20px;">
+          <button class="btn btn-lime" id="save-doc">Ajouter</button>
+          <button class="btn btn-ghost" onclick="closeModal()">Annuler</button>
+        </div>
+      </div>
+    `);
+    
+    document.getElementById('save-doc')?.addEventListener('click', async () => {
+      const doc = {
+        type: type,
+        ref: document.getElementById('new-doc-ref').value.trim(),
+        amount: parseInt(document.getElementById('new-doc-amount').value) || 0,
+        date: document.getElementById('new-doc-date').value
+      };
+      
+      if (!doc.ref) { toast('Référence requise'); return; }
+      
+      const added = await Supabase.addProjectDocument(projectId, doc);
+      if (added) {
+        await Supabase.loadAllData();
+        closeModal();
+        toast('✓ Document ajouté');
+        navigate('project');
+      } else {
+        toast('❌ Erreur');
+      }
+    });
+  };
+  
+  document.getElementById('btn-add-devis')?.addEventListener('click', () => addDocHandler('devis'));
+  document.getElementById('btn-add-facture')?.addEventListener('click', () => addDocHandler('facture'));
+  document.getElementById('btn-add-acompte')?.addEventListener('click', () => addDocHandler('acompte'));
+  
+  // Supprimer document
+  document.querySelectorAll('.doc-delete').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const docId = parseInt(btn.dataset.docId);
+      if (confirm('Supprimer ce document ?')) {
+        const deleted = await Supabase.deleteProjectDocument(projectId, docId);
+        if (deleted) {
+          await Supabase.loadAllData();
+          toast('✓ Supprimé');
+          navigate('project');
+        }
+      }
+    });
+  });
+}
+
 
 // ============================================================
 
@@ -2643,6 +3132,7 @@ enzo@phosphor.art</textarea>
       dashboard: { render: renderDashboard, init: initDashboard },
       agenda: { render: renderAgenda, init: initAgenda },
       projects: { render: renderProjects, init: initProjects },
+      project: { render: renderProjectPage, init: initProjectPage },
       finances: { render: renderFinances, init: initFinances },
       crm: { render: renderCRM, init: initCRM }
     };
