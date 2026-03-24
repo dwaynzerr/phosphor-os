@@ -441,7 +441,14 @@
           
           const tasks = await supabaseGet('tasks');
           appData.tasks = tasks.map(t => ({
-            id: t.id, text: t.text, done: t.done, tag: t.tag, assignee: t.assignee
+            id: t.id,
+            text: t.text,
+            done: t.done,
+            tag: t.tag,
+            assignee: t.assignee,
+            deadline: t.deadline || null,
+            priority: t.priority || 'Moyenne',
+            notes: t.notes || ''
           }));
           
           const events = await supabaseGet('events');
@@ -483,7 +490,15 @@
       // TASKS
       async addTask(task) {
         try {
-          const data = { text: task.text, done: false, tag: task.tag, assignee: task.assignee };
+          const data = {
+            text: task.text,
+            done: false,
+            tag: task.tag,
+            assignee: task.assignee,
+            deadline: task.deadline || null,
+            priority: task.priority || 'Moyenne',
+            notes: task.notes || ''
+          };
           const result = await supabaseInsert('tasks', data);
           console.log('✓ Tâche ajoutée');
           return result[0];
@@ -495,7 +510,20 @@
       
       async updateTask(taskId, updates) {
         try {
-          await supabaseUpdate('tasks', taskId, updates);
+          const data = {};
+          
+          // Champs existants
+          if (updates.text !== undefined) data.text = updates.text;
+          if (updates.tag !== undefined) data.tag = updates.tag;
+          if (updates.assignee !== undefined) data.assignee = updates.assignee;
+          if (updates.done !== undefined) data.done = updates.done;
+          
+          // NOUVEAUX champs
+          if (updates.deadline !== undefined) data.deadline = updates.deadline;
+          if (updates.priority !== undefined) data.priority = updates.priority;
+          if (updates.notes !== undefined) data.notes = updates.notes;
+          
+          await supabaseUpdate('tasks', taskId, data);
           console.log(`✓ Tâche ${taskId} mise à jour`);
           return true;
         } catch (error) {
@@ -511,6 +539,16 @@
           return true;
         } catch (error) {
           console.error('Erreur suppression tâche:', error);
+          return false;
+        }
+      },
+      
+      async saveTaskToggle(taskId, done) {
+        try {
+          await supabaseUpdate('tasks', taskId, { done });
+          return true;
+        } catch (error) {
+          console.error('Erreur toggle tâche:', error);
           return false;
         }
       },
@@ -687,6 +725,47 @@
           return true;
         } catch (error) {
           console.error('Erreur suppression prospect:', error);
+          return false;
+        }
+      },
+      
+      // EVENTS
+      async addEvent(event) {
+        try {
+          const data = {
+            title: event.title,
+            day: event.day,
+            hour: event.hour,
+            type: event.type,
+            assignee: event.assignee
+          };
+          const result = await supabaseInsert('events', data);
+          console.log('✓ Événement ajouté');
+          return result[0];
+        } catch (error) {
+          console.error('Erreur ajout événement:', error);
+          return null;
+        }
+      },
+      
+      async updateEvent(eventId, updates) {
+        try {
+          await supabaseUpdate('events', eventId, updates);
+          console.log(`✓ Événement ${eventId} mis à jour`);
+          return true;
+        } catch (error) {
+          console.error('Erreur update événement:', error);
+          return false;
+        }
+      },
+      
+      async deleteEvent(eventId) {
+        try {
+          await supabaseDelete('events', eventId);
+          console.log(`✓ Événement ${eventId} supprimé`);
+          return true;
+        } catch (error) {
+          console.error('Erreur suppression événement:', error);
           return false;
         }
       },
@@ -921,7 +1000,13 @@
     const state = {
       activeSection: 'dashboard',
       filterTag: 'all',
-      filterAssignee: 'all'
+      filterAssignee: 'all',
+      // Filtres pour les tâches
+      taskFilters: {
+        type: 'all',      // 'all', 'design', 'dev', 'client', 'admin'
+        assignee: 'all',  // 'all', 'enzo', 'diego'
+        status: 'all'     // 'all', 'todo', 'done'
+      }
     };
 
     // === HELPERS ===
@@ -929,6 +1014,66 @@
     // Format number as French currency: 4800 → "4 800 €"
     function formatEuro(n) {
       return n.toLocaleString('fr-FR') + ' €';
+    }
+
+    // Filter tasks based on current filters
+    function filterTasks(tasks) {
+      return tasks.filter(task => {
+        // Filtre type
+        if (state.taskFilters.type !== 'all' && task.tag !== state.taskFilters.type) {
+          return false;
+        }
+        
+        // Filtre assigné
+        if (state.taskFilters.assignee !== 'all' && task.assignee !== state.taskFilters.assignee) {
+          return false;
+        }
+        
+        // Filtre statut
+        if (state.taskFilters.status === 'todo' && task.done) {
+          return false;
+        }
+        if (state.taskFilters.status === 'done' && !task.done) {
+          return false;
+        }
+        
+        return true;
+      });
+    }
+
+    // Format date for display
+    function formatDate(dateString) {
+      if (!dateString) return null;
+      const date = new Date(dateString);
+      const today = new Date();
+      const diffDays = Math.ceil((date - today) / (1000 * 60 * 60 * 24));
+      
+      if (diffDays < 0) return '⚠️ En retard';
+      if (diffDays === 0) return '📅 Aujourd\'hui';
+      if (diffDays === 1) return '📅 Demain';
+      if (diffDays <= 7) return `📅 Dans ${diffDays}j`;
+      
+      return `📅 ${date.getDate()}/${date.getMonth() + 1}`;
+    }
+
+    // Get priority badge color
+    function getPriorityClass(priority) {
+      const priorities = {
+        'Haute': 'badge-red',
+        'Moyenne': 'badge-orange',
+        'Basse': 'badge-gray'
+      };
+      return priorities[priority] || 'badge-gray';
+    }
+
+    // Get priority emoji
+    function getPriorityEmoji(priority) {
+      const emojis = {
+        'Haute': '🔴',
+        'Moyenne': '🟡',
+        'Basse': '⚪'
+      };
+      return emojis[priority] || '⚪';
     }
 
     // Show toast notification
@@ -1269,10 +1414,8 @@ function initDashboard() {
     });
   });
 
-  // Navigate to agenda
+  // Navigate buttons
   document.getElementById('btn-see-tasks')?.addEventListener('click', () => navigate('agenda'));
-
-  // Navigate to CRM
   document.getElementById('btn-see-crm')?.addEventListener('click', () => navigate('crm'));
 }
 
@@ -1281,16 +1424,15 @@ function renderAgenda() {
   const hours = ['9h', '11h', '14h', '16h', '18h'];
   const days = ['lun', 'mar', 'mer', 'jeu', 'ven', 'sam'];
   const dayLabels = ['LUN 23', 'MAR 24', 'MER 25', 'JEU 26', 'VEN 27', 'SAM 28'];
-  const todayDay = 'lun'; // March 23, 2026 is a Monday
+  const todayDay = 'lun';
 
-  // Build calendar header row
+  // Calendar
   let calHeader = `<div class="cal-th cal-hour-cell"></div>`;
   days.forEach((day, i) => {
     const isToday = day === todayDay;
     calHeader += `<div class="cal-th${isToday ? ' today' : ''}">${dayLabels[i]}${isToday ? ' ★' : ''}</div>`;
   });
 
-  // Build calendar body rows
   let calRows = '';
   hours.forEach(hour => {
     let row = `<div class="cal-hour-cell">${hour}</div>`;
@@ -1298,64 +1440,75 @@ function renderAgenda() {
       const events = appData.events.filter(e => e.day === day && e.hour === hour);
       let cellContent = '';
       events.forEach(ev => {
-        cellContent += `
-          <div class="cal-event ev-${ev.type}">
-            <span>${ev.title}</span>
-            <span class="avatar av-${ev.assignee}" title="${ev.assignee}"></span>
-          </div>`;
+        cellContent += `<div class="cal-event ev-${ev.type}"><span>${ev.title}</span><span class="avatar av-${ev.assignee}"></span></div>`;
       });
       row += `<div class="cal-cell">${cellContent}</div>`;
     });
-    calRows += `${row}`;
+    calRows += row;
   });
 
-  // Filter tasks
-  const filteredTasks = appData.tasks.filter(task => {
-    const tagMatch = state.filterTag === 'all' || task.tag === state.filterTag;
-    const assigneeMatch = state.filterAssignee === 'all' || task.assignee === state.filterAssignee;
-    return tagMatch && assigneeMatch;
-  });
+  // Filtres
+  const filteredTasks = filterTasks(appData.tasks);
+  const doneTasks = filteredTasks.filter(t => t.done).length;
 
-  // Build filter tag buttons
-  const tagFilters = [
-    { value: 'all', label: 'Tout' },
+  const typeFilters = [
+    { value: 'all', label: 'Tous' },
     { value: 'design', label: 'Design' },
     { value: 'dev', label: 'Dev' },
     { value: 'client', label: 'Client' },
-    { value: 'admin', label: 'Admin' },
+    { value: 'admin', label: 'Admin' }
   ];
-  const tagFilterBtns = tagFilters.map(f => {
-    const isActive = state.filterTag === f.value;
-    return `<button class="btn btn-sm filter-tag-btn${isActive ? ' btn-lime' : ' btn-ghost'}" data-tag="${f.value}">${f.label}</button>`;
-  }).join('');
+  const typeFilterBtns = typeFilters.map(f => 
+    `<button class="btn btn-sm task-filter-type${state.taskFilters.type === f.value ? ' btn-lime' : ' btn-ghost'}" data-value="${f.value}">${f.label}</button>`
+  ).join('');
 
-  // Build filter assignee buttons
   const assigneeFilters = [
     { value: 'all', label: 'Tous' },
     { value: 'enzo', label: 'Enzo' },
-    { value: 'diego', label: 'Diego' },
+    { value: 'diego', label: 'Diego' }
   ];
-  const assigneeFilterBtns = assigneeFilters.map(f => {
-    const isActive = state.filterAssignee === f.value;
-    return `<button class="btn btn-sm filter-assignee-btn${isActive ? ' btn-lime' : ' btn-ghost'}" data-assignee="${f.value}">${f.label}</button>`;
-  }).join('');
+  const assigneeFilterBtns = assigneeFilters.map(f =>
+    `<button class="btn btn-sm task-filter-assignee${state.taskFilters.assignee === f.value ? ' btn-lime' : ' btn-ghost'}" data-value="${f.value}">${f.label}</button>`
+  ).join('');
 
-  // Build task list
+  const statusFilters = [
+    { value: 'all', label: 'Tous' },
+    { value: 'todo', label: 'À faire' },
+    { value: 'done', label: 'Terminées' }
+  ];
+  const statusFilterBtns = statusFilters.map(f =>
+    `<button class="btn btn-sm task-filter-status${state.taskFilters.status === f.value ? ' btn-lime' : ' btn-ghost'}" data-value="${f.value}">${f.label}</button>`
+  ).join('');
+
+  // Tasks list
   const taskItems = filteredTasks.map(task => {
+    const deadlineText = task.deadline ? formatDate(task.deadline) : '';
+    const priorityEmoji = getPriorityEmoji(task.priority);
+    const isOverdue = task.deadline && new Date(task.deadline) < new Date() && !task.done;
+    
     return `
-      <div class="task-item task-toggle" data-task-id="${task.id}" style="cursor:pointer;">
-        <span class="task-checkbox${task.done ? ' checked' : ''}"></span>
-        <span class="task-label${task.done ? ' done' : ''}">${task.text}</span>
-        <span class="tag tag-${task.tag}">${task.tag}</span>
-        <span class="avatar av-${task.assignee}" title="${task.assignee}"></span>
+      <div class="task-item-new" data-task-id="${task.id}" style="padding:12px;border:1px solid ${isOverdue ? 'var(--red)' : 'var(--border)'};border-radius:6px;cursor:pointer;transition:background 0.2s;" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='transparent'">
+        <div style="display:flex;gap:12px;">
+          <div class="task-checkbox-click" data-task-id="${task.id}" style="cursor:pointer;padding-top:2px;" onclick="event.stopPropagation()">
+            <span class="task-checkbox${task.done ? ' checked' : ''}" style="width:20px;height:20px;"></span>
+          </div>
+          <div style="flex:1;">
+            <div style="font-size:14px;font-weight:600;margin-bottom:6px;" class="${task.done ? 'done' : ''}">${task.text}</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+              <span class="tag tag-${task.tag}" style="font-size:11px;">${task.tag}</span>
+              <span class="avatar av-${task.assignee}" style="width:20px;height:20px;font-size:9px;"></span>
+              ${task.priority !== 'Moyenne' ? `<span style="font-size:11px;">${priorityEmoji} ${task.priority}</span>` : ''}
+              ${deadlineText ? `<span style="font-size:11px;color:${isOverdue ? 'var(--red)' : 'var(--text2)'};">${deadlineText}</span>` : ''}
+            </div>
+            ${task.notes ? `<div style="font-size:12px;color:var(--text2);margin-top:6px;font-style:italic;">"${task.notes}"</div>` : ''}
+          </div>
+        </div>
       </div>`;
   }).join('');
 
-  const emptyState = filteredTasks.length === 0
-    ? `<div style="color:var(--text-muted,#888);padding:16px 0;text-align:center;">Aucune tâche pour ces filtres.</div>`
-    : '';
+  const emptyState = filteredTasks.length === 0 ? `<div style="color:var(--text2);padding:32px;text-align:center;"><div style="font-size:48px;margin-bottom:12px;">📋</div><div>Aucune tâche</div></div>` : '';
 
-  // Task distribution
+  // Distribution
   const enzoTasks = appData.tasks.filter(t => t.assignee === 'enzo').length;
   const diegoTasks = appData.tasks.filter(t => t.assignee === 'diego').length;
   const total = enzoTasks + diegoTasks || 1;
@@ -1363,7 +1516,6 @@ function renderAgenda() {
   const diegoPercent = 100 - enzoPercent;
 
   return `
-    <!-- Zone 1: Week Calendar -->
     <div class="card" style="margin-bottom:20px;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
         <div style="display:flex;align-items:center;gap:12px;">
@@ -1373,63 +1525,56 @@ function renderAgenda() {
         </div>
         <button class="btn btn-lime btn-sm" id="btn-add-event">+ Événement</button>
       </div>
-      <div class="cal-grid" style="display:grid;grid-template-columns:60px repeat(6,1fr);gap:2px;">
-        ${calHeader}
-        ${calRows}
-      </div>
+      <div class="cal-grid" style="display:grid;grid-template-columns:60px repeat(6,1fr);gap:2px;">${calHeader}${calRows}</div>
     </div>
 
     <div class="divider"></div>
 
-    <!-- Zone 2: Task List -->
     <div class="card" style="margin-bottom:20px;">
-      <div class="section-label">Tâches</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+        <div class="section-label">Tâches · ${filteredTasks.length} · ${doneTasks} ✓</div>
+        <button class="btn btn-lime btn-sm" id="btn-add-task">+ Nouvelle tâche</button>
+      </div>
 
-      <!-- Filter bar -->
-      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:16px;">
-        <div style="display:flex;gap:6px;flex-wrap:wrap;">
-          ${tagFilterBtns}
+      <div style="margin-bottom:20px;">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;">
+          <span style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text3);min-width:60px;">Type</span>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">${typeFilterBtns}</div>
         </div>
-        <div style="display:flex;gap:6px;">
-          ${assigneeFilterBtns}
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;">
+          <span style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text3);min-width:60px;">Assigné</span>
+          <div style="display:flex;gap:6px;">${assigneeFilterBtns}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;">
+          <span style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text3);min-width:60px;">Statut</span>
+          <div style="display:flex;gap:6px;">${statusFilterBtns}</div>
         </div>
       </div>
 
-      <!-- Task list -->
-      <div style="display:flex;flex-direction:column;gap:4px;">
-        ${taskItems}
-        ${emptyState}
-      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;">${taskItems}${emptyState}</div>
     </div>
 
     <div class="divider"></div>
 
-    <!-- Task distribution -->
     <div class="card">
       <div class="section-label">Répartition équipe</div>
       <div style="display:flex;flex-direction:column;gap:14px;margin-top:8px;">
         <div>
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
-            <div style="display:flex;align-items:center;gap:8px;">
-              <span class="avatar av-enzo"></span>
-              <span>Enzo</span>
-            </div>
+            <div style="display:flex;align-items:center;gap:8px;"><span class="avatar av-enzo"></span><span>Enzo</span></div>
             <span class="badge badge-gray">${enzoTasks} tâche${enzoTasks !== 1 ? 's' : ''} (${enzoPercent}%)</span>
           </div>
-          <div style="height:8px;background:var(--border,#e5e7eb);border-radius:4px;overflow:hidden;">
-            <div style="height:100%;width:${enzoPercent}%;background:var(--lime,#a3e635);border-radius:4px;transition:width 0.4s;"></div>
+          <div style="height:8px;background:var(--border);border-radius:4px;overflow:hidden;">
+            <div style="height:100%;width:${enzoPercent}%;background:var(--lime);border-radius:4px;transition:width 0.4s;"></div>
           </div>
         </div>
         <div>
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
-            <div style="display:flex;align-items:center;gap:8px;">
-              <span class="avatar av-diego"></span>
-              <span>Diego</span>
-            </div>
+            <div style="display:flex;align-items:center;gap:8px;"><span class="avatar av-diego"></span><span>Diego</span></div>
             <span class="badge badge-blue">${diegoTasks} tâche${diegoTasks !== 1 ? 's' : ''} (${diegoPercent}%)</span>
           </div>
-          <div style="height:8px;background:var(--border,#e5e7eb);border-radius:4px;overflow:hidden;">
-            <div style="height:100%;width:${diegoPercent}%;background:var(--blue,#60a5fa);border-radius:4px;transition:width 0.4s;"></div>
+          <div style="height:8px;background:var(--border);border-radius:4px;overflow:hidden;">
+            <div style="height:100%;width:${diegoPercent}%;background:var(--blue);border-radius:4px;transition:width 0.4s;"></div>
           </div>
         </div>
       </div>
@@ -1438,60 +1583,226 @@ function renderAgenda() {
 }
 
 function initAgenda() {
-  // Filter tag buttons
-  document.querySelectorAll('.filter-tag-btn').forEach(btn => {
+  // Filtres type
+  document.querySelectorAll('.task-filter-type').forEach(btn => {
     btn.addEventListener('click', () => {
-      state.filterTag = btn.dataset.tag;
+      state.taskFilters.type = btn.dataset.value;
       navigate('agenda');
     });
   });
 
-  // Filter assignee buttons
-  document.querySelectorAll('.filter-assignee-btn').forEach(btn => {
+  // Filtres assigné
+  document.querySelectorAll('.task-filter-assignee').forEach(btn => {
     btn.addEventListener('click', () => {
-      state.filterAssignee = btn.dataset.assignee;
+      state.taskFilters.assignee = btn.dataset.value;
       navigate('agenda');
     });
   });
 
-  // Task toggle
-  document.querySelectorAll('.task-toggle').forEach(el => {
-    el.addEventListener('click', () => {
+  // Filtres statut
+  document.querySelectorAll('.task-filter-status').forEach(btn => {
+    btn.addEventListener('click', () => {
+      state.taskFilters.status = btn.dataset.value;
+      navigate('agenda');
+    });
+  });
+
+  // Toggle tâche (checkbox)
+  document.querySelectorAll('.task-checkbox-click').forEach(el => {
+    el.addEventListener('click', async (e) => {
+      e.stopPropagation();
       const id = parseInt(el.dataset.taskId);
       const task = appData.tasks.find(t => t.id === id);
       if (task) {
         task.done = !task.done;
-        toast(task.done ? '✓ Tâche terminée' : 'Tâche rouverte');
         navigate('agenda');
+        const saved = await Supabase.saveTaskToggle(id, task.done);
+        if (saved) {
+          toast(task.done ? '✓ Tâche terminée' : 'Tâche rouverte');
+        } else {
+          task.done = !task.done;
+          navigate('agenda');
+          toast('❌ Erreur');
+        }
       }
     });
   });
 
-  // Calendar nav (cosmetic — no week offset logic needed for static week)
-  document.getElementById('cal-prev')?.addEventListener('click', () => {
-    toast('Semaine précédente');
-  });
-  document.getElementById('cal-next')?.addEventListener('click', () => {
-    toast('Semaine suivante');
+  // Clic tâche → Modal édition
+  document.querySelectorAll('.task-item-new').forEach(el => {
+    el.addEventListener('click', () => {
+      const id = parseInt(el.dataset.taskId);
+      const task = appData.tasks.find(t => t.id === id);
+      if (!task) return;
+
+      openModal(`
+        <div class="modal-box">
+          <div class="modal-title">Éditer la tâche<button class="modal-close" onclick="closeModal()">×</button></div>
+          <div class="form-group"><label class="form-label">Texte *</label><input class="form-input" id="edit-text" value="${task.text}"></div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Type</label>
+              <select class="form-select" id="edit-tag">
+                <option value="design" ${task.tag === 'design' ? 'selected' : ''}>Design</option>
+                <option value="dev" ${task.tag === 'dev' ? 'selected' : ''}>Dev</option>
+                <option value="client" ${task.tag === 'client' ? 'selected' : ''}>Client</option>
+                <option value="admin" ${task.tag === 'admin' ? 'selected' : ''}>Admin</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Assigné</label>
+              <select class="form-select" id="edit-assignee">
+                <option value="enzo" ${task.assignee === 'enzo' ? 'selected' : ''}>Enzo</option>
+                <option value="diego" ${task.assignee === 'diego' ? 'selected' : ''}>Diego</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Deadline</label><input class="form-input" type="date" id="edit-deadline" value="${task.deadline || ''}"></div>
+            <div class="form-group">
+              <label class="form-label">Priorité</label>
+              <select class="form-select" id="edit-priority">
+                <option value="Haute" ${task.priority === 'Haute' ? 'selected' : ''}>🔴 Haute</option>
+                <option value="Moyenne" ${task.priority === 'Moyenne' ? 'selected' : ''}>🟡 Moyenne</option>
+                <option value="Basse" ${task.priority === 'Basse' ? 'selected' : ''}>⚪ Basse</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group"><label class="form-label">Notes</label><textarea class="form-input" id="edit-notes" rows="3" placeholder="Notes optionnelles...">${task.notes || ''}</textarea></div>
+          <div class="form-group"><label style="display:flex;align-items:center;gap:8px;cursor:pointer;"><input type="checkbox" id="edit-done" ${task.done ? 'checked' : ''}> Tâche terminée</label></div>
+          <div style="display:flex;gap:8px;margin-top:20px;">
+            <button class="btn btn-lime" id="save-task-edit">Sauvegarder</button>
+            <button class="btn btn-red" id="delete-task-btn">Supprimer</button>
+            <button class="btn btn-ghost" onclick="closeModal()">Annuler</button>
+          </div>
+        </div>
+      `);
+
+      // Save edit
+      document.getElementById('save-task-edit')?.addEventListener('click', async () => {
+        const text = document.getElementById('edit-text')?.value.trim();
+        if (!text) { toast('Texte requis'); return; }
+
+        const updates = {
+          text,
+          tag: document.getElementById('edit-tag').value,
+          assignee: document.getElementById('edit-assignee').value,
+          deadline: document.getElementById('edit-deadline').value || null,
+          priority: document.getElementById('edit-priority').value,
+          notes: document.getElementById('edit-notes').value.trim(),
+          done: document.getElementById('edit-done').checked
+        };
+
+        const updated = await Supabase.updateTask(id, updates);
+        if (updated) {
+          await Supabase.loadAllData();
+          closeModal();
+          toast('✓ Tâche mise à jour');
+          navigate('agenda');
+        } else {
+          toast('❌ Erreur');
+        }
+      });
+
+      // Delete
+      document.getElementById('delete-task-btn')?.addEventListener('click', async () => {
+        if (confirm(`Supprimer la tâche "${task.text}" ?`)) {
+          const deleted = await Supabase.deleteTask(id);
+          if (deleted) {
+            await Supabase.loadAllData();
+            closeModal();
+            toast('✓ Tâche supprimée');
+            navigate('agenda');
+          } else {
+            toast('❌ Erreur');
+          }
+        }
+      });
+    });
   });
 
-  // "+ Événement" button
+  // Bouton + Nouvelle tâche
+  document.getElementById('btn-add-task')?.addEventListener('click', () => {
+    openModal(`
+      <div class="modal-box">
+        <div class="modal-title">Nouvelle tâche<button class="modal-close" onclick="closeModal()">×</button></div>
+        <div class="form-group"><label class="form-label">Texte *</label><input class="form-input" id="new-task-text" placeholder="Ex: Finaliser maquettes"></div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Type</label>
+            <select class="form-select" id="new-task-tag">
+              <option value="design">Design</option>
+              <option value="dev">Dev</option>
+              <option value="client">Client</option>
+              <option value="admin" selected>Admin</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Assigné</label>
+            <select class="form-select" id="new-task-assignee">
+              <option value="enzo">Enzo</option>
+              <option value="diego">Diego</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Deadline (optionnel)</label><input class="form-input" type="date" id="new-task-deadline"></div>
+          <div class="form-group">
+            <label class="form-label">Priorité</label>
+            <select class="form-select" id="new-task-priority">
+              <option value="Haute">🔴 Haute</option>
+              <option value="Moyenne" selected>🟡 Moyenne</option>
+              <option value="Basse">⚪ Basse</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group"><label class="form-label">Notes (optionnel)</label><textarea class="form-input" id="new-task-notes" rows="3" placeholder="Notes..."></textarea></div>
+        <div style="display:flex;gap:8px;margin-top:20px;">
+          <button class="btn btn-lime" id="save-new-task">Créer la tâche</button>
+          <button class="btn btn-ghost" onclick="closeModal()">Annuler</button>
+        </div>
+      </div>
+    `);
+
+    document.getElementById('save-new-task')?.addEventListener('click', async () => {
+      const text = document.getElementById('new-task-text')?.value.trim();
+      if (!text) { toast('Texte requis'); return; }
+
+      const newTask = await Supabase.addTask({
+        text,
+        tag: document.getElementById('new-task-tag').value,
+        assignee: document.getElementById('new-task-assignee').value,
+        deadline: document.getElementById('new-task-deadline').value || null,
+        priority: document.getElementById('new-task-priority').value,
+        notes: document.getElementById('new-task-notes').value.trim()
+      });
+
+      if (newTask) {
+        await Supabase.loadAllData();
+        closeModal();
+        toast('✓ Tâche créée');
+        navigate('agenda');
+      } else {
+        toast('❌ Erreur');
+      }
+    });
+  });
+
+  // Calendar nav
+  document.getElementById('cal-prev')?.addEventListener('click', () => toast('Semaine précédente'));
+  document.getElementById('cal-next')?.addEventListener('click', () => toast('Semaine suivante'));
+
+  // Bouton événement (existant)
   document.getElementById('btn-add-event')?.addEventListener('click', () => {
     openModal(`
       <div class="modal-box">
-        <div class="modal-title">
-          Nouvel événement
-          <button class="modal-close" onclick="closeModal()">×</button>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Titre</label>
-          <input class="form-input" type="text" id="ev-title" placeholder="Ex: Call client Manza">
-        </div>
+        <div class="modal-title">Nouvel événement<button class="modal-close" onclick="closeModal()">×</button></div>
+        <div class="form-group"><label class="form-label">Titre</label><input class="form-input" type="text" id="ev-title" placeholder="Call client"></div>
         <div class="form-row">
           <div class="form-group">
             <label class="form-label">Jour</label>
             <select class="form-select" id="ev-day">
-              <option value="lun" selected>Lundi</option>
+              <option value="lun">Lundi</option>
               <option value="mar">Mardi</option>
               <option value="mer">Mercredi</option>
               <option value="jeu">Jeudi</option>
@@ -1529,26 +1840,42 @@ function initAgenda() {
           </div>
         </div>
         <div style="display:flex;gap:8px;margin-top:20px;">
-          <button class="btn btn-lime" id="save-event-btn">Ajouter l'événement</button>
+          <button class="btn btn-lime" id="save-event-btn">Ajouter</button>
           <button class="btn btn-ghost" onclick="closeModal()">Annuler</button>
         </div>
       </div>
     `);
 
-    document.getElementById('save-event-btn')?.addEventListener('click', () => {
+    document.getElementById('save-event-btn')?.addEventListener('click', async () => {
       const title = document.getElementById('ev-title')?.value.trim();
       if (!title) { toast('Titre requis'); return; }
-      appData.events.push({
-        id: Date.now(),
+
+      const newEvent = await Supabase.addEvent({
         title,
         day: document.getElementById('ev-day').value,
         hour: document.getElementById('ev-hour').value,
         type: document.getElementById('ev-type').value,
         assignee: document.getElementById('ev-assignee').value
       });
-      closeModal();
-      toast('Événement ajouté');
-      navigate('agenda');
+
+      if (newEvent) {
+        await Supabase.loadAllData();
+        closeModal();
+        toast('✓ Événement ajouté');
+        navigate('agenda');
+      } else {
+        toast('❌ Erreur');
+      }
+    });
+  });
+}
+        await Supabase.loadAllData();
+        closeModal();
+        toast('✓ Événement ajouté');
+        navigate('agenda');
+      } else {
+        toast('❌ Erreur de sauvegarde');
+      }
     });
   });
 }
@@ -1737,22 +2064,36 @@ function initProjects() {
         </div>
       </div>
     `);
-    document.getElementById('save-project-btn')?.addEventListener('click', () => {
+    document.getElementById('save-project-btn')?.addEventListener('click', async () => {
       const name = document.getElementById('np-name')?.value.trim();
       if (!name) { toast('Nom requis'); return; }
-      appData.projects.push({
-        id: Date.now(), name,
+      
+      // Sauvegarder dans Supabase
+      const newProject = await Supabase.addProject({
+        name,
         client: document.getElementById('np-client')?.value || '',
         type: document.getElementById('np-type')?.value || '',
         budget: parseInt(document.getElementById('np-budget')?.value) || 0,
-        billed: 0, progress: 0,
+        billed: 0,
+        progress: 0,
         deadline: document.getElementById('np-deadline')?.value || 'TBD',
-        status: 'EN ATTENTE', statusClass: 'badge-gray',
-        color: '#D0D0D0', ganttStart: 3, ganttEnd: 6
+        status: 'EN ATTENTE',
+        statusClass: 'badge-gray',
+        color: '#D0D0D0',
+        ganttStart: 3,
+        ganttEnd: 6,
+        tasks: [],
+        notes: ''
       });
-      closeModal();
-      toast('Projet créé !');
-      navigate('projects');
+      
+      if (newProject) {
+        await Supabase.loadAllData();
+        closeModal();
+        toast('✓ Projet créé !');
+        navigate('projects');
+      } else {
+        toast('❌ Erreur de sauvegarde');
+      }
     });
   });
 }
@@ -1932,22 +2273,34 @@ function renderFinances() {
 
 function initFinances() {
   document.querySelectorAll('.invoice-action-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', async () => {
       const id = parseInt(btn.dataset.invId);
       const ref = btn.dataset.invRef;
       const inv = appData.invoices.find(i => i.id === id);
       if (!inv) return;
 
       if (inv.status === 'EN RETARD') {
-        toast(`Relance envoyée pour ${ref}`);
-        inv.status = 'ENVOYÉE';
-        inv.statusClass = 'badge-orange';
-        navigate('finances');
+        // Sauvegarder le changement de statut dans Supabase
+        const updated = await Supabase.updateInvoice(id, {
+          status: 'ENVOYÉE',
+          statusClass: 'badge-orange'
+        });
+        if (updated) {
+          toast(`Relance envoyée pour ${ref}`);
+          await Supabase.loadAllData();
+          navigate('finances');
+        }
       } else if (inv.status === 'ENVOYÉE') {
-        inv.status = 'PAYÉE';
-        inv.statusClass = 'badge-lime';
-        toast(`${ref} marquée comme payée ✓`);
-        navigate('finances');
+        // Marquer comme payée
+        const updated = await Supabase.updateInvoice(id, {
+          status: 'PAYÉE',
+          statusClass: 'badge-lime'
+        });
+        if (updated) {
+          toast(`${ref} marquée comme payée ✓`);
+          await Supabase.loadAllData();
+          navigate('finances');
+        }
       } else {
         toast(`${ref} · ${formatEuro(inv.amount)}`);
       }
@@ -1972,19 +2325,28 @@ function initFinances() {
         </div>
       </div>
     `);
-    document.getElementById('save-invoice-btn')?.addEventListener('click', () => {
+    document.getElementById('save-invoice-btn')?.addEventListener('click', async () => {
       const ref = document.getElementById('ni-ref')?.value.trim();
       if (!ref) { toast('Référence requise'); return; }
-      appData.invoices.push({
-        id: Date.now(), ref,
+      
+      // Sauvegarder dans Supabase
+      const newInvoice = await Supabase.addInvoice({
+        ref,
         client: document.getElementById('ni-client')?.value || '',
         amount: parseInt(document.getElementById('ni-amount')?.value) || 0,
         type: document.getElementById('ni-type')?.value || 'Facture',
-        status: 'BROUILLON', statusClass: 'badge-gray'
+        status: 'BROUILLON',
+        statusClass: 'badge-gray'
       });
-      closeModal();
-      toast('Facture créée !');
-      navigate('finances');
+      
+      if (newInvoice) {
+        await Supabase.loadAllData();
+        closeModal();
+        toast('✓ Facture créée !');
+        navigate('finances');
+      } else {
+        toast('❌ Erreur de sauvegarde');
+      }
     });
   });
 }
@@ -2213,22 +2575,33 @@ enzo@phosphor.art</textarea>
       </div>
     `);
 
-    document.getElementById('save-prospect-btn')?.addEventListener('click', () => {
+    document.getElementById('save-prospect-btn')?.addEventListener('click', async () => {
       const name = document.getElementById('new-name')?.value.trim();
       if (!name) { toast('Nom requis'); return; }
-      appData.prospects.unshift({
-        id: Date.now(), name, company: name,
+      
+      // Sauvegarder dans Supabase
+      const newProspect = await Supabase.addProspect({
+        name,
+        company: name,
         city: document.getElementById('new-city')?.value || '',
         sector: document.getElementById('new-sector')?.value || '',
         budgetEst: parseInt(document.getElementById('new-budget')?.value) || 0,
         source: document.getElementById('new-source')?.value || 'Autre',
-        stage: 'IDENTIFIÉ', daysSince: 0,
+        stage: 'IDENTIFIÉ',
+        daysSince: 0,
         email: document.getElementById('new-email')?.value || '',
-        linkedin: '', notes: document.getElementById('new-notes')?.value || ''
+        linkedin: '',
+        notes: document.getElementById('new-notes')?.value || ''
       });
-      closeModal();
-      toast('Prospect ajouté !');
-      navigate('crm');
+      
+      if (newProspect) {
+        await Supabase.loadAllData();
+        closeModal();
+        toast('✓ Prospect ajouté !');
+        navigate('crm');
+      } else {
+        toast('❌ Erreur de sauvegarde');
+      }
     });
   });
 }
