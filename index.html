@@ -3136,13 +3136,26 @@ function initProjectPage() {
       
       if (!doc.ref) { toast('Référence requise'); return; }
       
+      // Désactiver bouton pendant traitement
+      const btn = document.getElementById('save-doc');
+      btn.disabled = true;
+      btn.textContent = '⏳ Ajout...';
+      
       const added = await Supabase.addProjectDocument(projectId, doc);
       if (added) {
-        appData.projects = await supabaseGet('projects');
+        // Mise à jour LOCALE au lieu de recharger depuis BDD
+        const project = appData.projects.find(p => p.id === projectId);
+        if (project) {
+          project.documents = project.documents || [];
+          project.documents.push(added);
+        }
+        
         closeModal();
         toast('✓ Document ajouté');
         navigate('project');
       } else {
+        btn.disabled = false;
+        btn.textContent = 'Ajouter';
         toast('❌ Erreur');
       }
     });
@@ -3174,8 +3187,12 @@ function initProjectPage() {
       if (confirm('Supprimer ce document ?')) {
         const deleted = await Supabase.deleteProjectDocument(projectId, docId);
         if (deleted) {
-          // Recharger uniquement projets au lieu de tout
-          appData.projects = await supabaseGet('projects');
+          // Mise à jour LOCALE au lieu de recharger depuis BDD
+          const project = appData.projects.find(p => p.id === projectId);
+          if (project) {
+            project.documents = (project.documents || []).filter(d => d.id !== docId);
+          }
+          
           toast('✓ Supprimé');
           navigate('project');
         }
@@ -3505,8 +3522,19 @@ function initFinances() {
             await Supabase.syncProjectBilled(projectId);
           }
           
-          // Recharger uniquement projets au lieu de tout
-          appData.projects = await supabaseGet('projects');
+          // Mise à jour LOCALE au lieu de recharger depuis BDD
+          const proj = appData.projects.find(p => p.id === projectId);
+          if (proj) {
+            proj.documents = documents;
+            // Recalculer billed localement si payée
+            if (newStatus === 'payee') {
+              const totalBilled = documents
+                .filter(d => d.paid && (d.type === 'facture' || d.type === 'acompte'))
+                .reduce((s, d) => s + (d.amount || 0), 0);
+              proj.billed = totalBilled;
+            }
+          }
+          
           closeModal();
           toast('✓ Statut mis à jour');
           navigate('finances');
