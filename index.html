@@ -1023,7 +1023,10 @@
       startRealtimeSync() {
         setInterval(async () => {
           await this.loadAllData();
-          renderActiveSection();
+          // Rafraîchir section active
+          if (typeof navigate !== 'undefined' && state.activeSection) {
+            navigate(state.activeSection);
+          }
         }, 5000);
         console.log('🔄 Sync temps réel activée (5s)');
       }
