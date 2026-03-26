@@ -3240,6 +3240,26 @@ function renderFinances() {
   // Combiner avec anciennes factures (si elles existent encore)
   const allInvoices = [...projectDocuments];
   
+  // Calculer CA réel par mois depuis les factures payées
+  const currentYear = new Date().getFullYear();
+  const months = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'];
+  const monthlyCAReal = months.map((month, index) => {
+    const monthCA = allInvoices
+      .filter(inv => {
+        if (!inv.paid && inv.status !== 'payee') return false; // Seulement payées
+        const invDate = new Date(inv.date);
+        return invDate.getFullYear() === currentYear && invDate.getMonth() === index;
+      })
+      .reduce((sum, inv) => sum + (inv.amount || 0), 0);
+    
+    const currentMonth = new Date().getMonth();
+    return {
+      month,
+      amount: monthCA,
+      projected: index > currentMonth // Futur = projeté
+    };
+  });
+  
   // Calculer CA payé et CA en attente
   const caPaye = allInvoices
     .filter(i => i.status === 'payee' || i.paid === true)
@@ -3249,12 +3269,16 @@ function renderFinances() {
     .filter(i => i.status !== 'payee' && i.paid !== true && i.type !== 'devis')
     .reduce((s, i) => s + (i.amount || 0), 0);
   
+  // CA total cible = CA actuel + CA en attente (objectif réaliste)
+  const yearTarget = caPaye + caEnAttente;
+  const monthlyTarget = Math.round(yearTarget / 12);
+  
   const ytd = caPaye; // CA réel = CA payé
-  const currentMonthCA = appData.monthlyCA[2].amount;
-  const monthProgress = Math.round(currentMonthCA / appData.monthlyTarget * 100);
+  const currentMonthCA = monthlyCAReal[new Date().getMonth()].amount;
+  const monthProgress = monthlyTarget > 0 ? Math.round(currentMonthCA / monthlyTarget * 100) : 0;
   const seuilTVA = 77700;
   const distanceTVA = seuilTVA - ytd;
-  const annualProgress = Math.round(ytd / appData.yearTarget * 100);
+  const annualProgress = yearTarget > 0 ? Math.round(ytd / yearTarget * 100) : 0;
   const tvaProgress = Math.round(ytd / seuilTVA * 100);
   const tvaColor = distanceTVA < 20000 ? 'var(--orange)' : 'var(--lime)';
 
@@ -3311,8 +3335,8 @@ function renderFinances() {
   `;
   }).join('');
 
-  const maxAmount = 12000;
-  const chartBars = appData.monthlyCA.map(m => {
+  const maxAmount = Math.max(...monthlyCAReal.map(m => m.amount), 1000); // Min 1000 pour éviter division par 0
+  const chartBars = monthlyCAReal.map(m => {
     const heightPct = Math.round(m.amount / maxAmount * 100);
     return `
       <div class="chart-bar-col">
@@ -3330,15 +3354,15 @@ function renderFinances() {
 
       <div class="kpi-card">
         <div class="kpi-value" style="color:var(--lime);">${formatEuro(caPaye)}</div>
-        <div class="kpi-sub">CA payé (facturé et encaissé)</div>
-        <div class="kpi-trend">${annualProgress}% de l'objectif annuel</div>
-        <div style="font-size:10px;color:var(--text3);margin-top:8px;text-transform:uppercase;letter-spacing:0.05em;">CA Réel 2026</div>
+        <div class="kpi-sub">Factures payées (encaissées)</div>
+        <div class="kpi-trend">${annualProgress}% de l'objectif (${formatEuro(yearTarget)})</div>
+        <div style="font-size:10px;color:var(--text3);margin-top:8px;text-transform:uppercase;letter-spacing:0.05em;">CA Validé ${currentYear}</div>
       </div>
 
       <div class="kpi-card">
         <div class="kpi-value" style="color:var(--orange);">${formatEuro(caEnAttente)}</div>
-        <div class="kpi-sub">CA en attente (facturé non encaissé)</div>
-        <div class="kpi-trend">${allInvoices.filter(i => i.status !== 'payee' && !i.paid && i.type !== 'devis').length} facture(s)</div>
+        <div class="kpi-sub">Factures en attente de paiement</div>
+        <div class="kpi-trend">${allInvoices.filter(i => i.status !== 'payee' && !i.paid && i.type !== 'devis').length} facture(s) non payée(s)</div>
         <div style="font-size:10px;color:var(--text3);margin-top:8px;text-transform:uppercase;letter-spacing:0.05em;">À encaisser</div>
       </div>
 
@@ -3389,9 +3413,15 @@ function renderFinances() {
 
       <div class="finance-block">
         <div class="finance-title">Chiffre d'affaires 2026</div>
-        <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
-          <span style="font-size:11px;color:var(--text2);">Objectif mensuel</span>
-          <span style="font-size:11px;font-weight:700;color:var(--lime);">${formatEuro(appData.monthlyTarget)}</span>
+        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px;">
+          <div>
+            <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;">CA mois en cours</div>
+            <div style="font-size:32px;font-weight:900;color:var(--lime);">${formatEuro(currentMonthCA)}</div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:10px;color:var(--text3);">Objectif mensuel</div>
+            <div style="font-size:14px;font-weight:600;color:var(--text2);">${formatEuro(monthlyTarget)}</div>
+          </div>
         </div>
         <div class="chart-months">
           ${chartBars}
