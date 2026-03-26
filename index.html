@@ -2357,11 +2357,11 @@ function renderProjectPage() {
             <div class="section-label" style="margin-bottom:20px;">Informations</div>
             <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;">
               <div>
-                <div style="font-size:11px;color:var(--text3);text-transform:uppercase;margin-bottom:6px;">Budget</div>
+                <div style="font-size:11px;color:var(--text3);text-transform:uppercase;margin-bottom:6px;">${project.type === 'maintenance' ? 'Budget annuel' : 'Budget'}</div>
                 <div style="font-size:24px;font-weight:900;">${formatEuro(project.budget)}</div>
               </div>
               <div>
-                <div style="font-size:11px;color:var(--text3);text-transform:uppercase;margin-bottom:6px;">Facturé</div>
+                <div style="font-size:11px;color:var(--text3);text-transform:uppercase;margin-bottom:6px;">Facturé ${project.type === 'maintenance' ? 'YTD' : ''}</div>
                 <div style="font-size:24px;font-weight:900;color:var(--lime);">${formatEuro(project.billed)}</div>
               </div>
               ${project.type !== 'maintenance' ? `
@@ -2419,12 +2419,44 @@ function renderProjectPage() {
         <!-- Colonne droite - Documents -->
         <div style="display:flex;flex-direction:column;gap:32px;">
           
-          <!-- Devis -->
-          <div class="card">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
-              <div class="section-label">Devis</div>
-              <button class="btn btn-ghost btn-sm" id="btn-add-devis">+</button>
+          ${project.type === 'maintenance' ? `
+            <!-- Factures maintenance uniquement -->
+            <div class="card">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+                <div class="section-label">Factures maintenance</div>
+                <button class="btn btn-ghost btn-sm" id="btn-add-facture-maint">+</button>
+              </div>
+              ${documents.length === 0 ? `<div style="color:var(--text3);font-size:13px;">Aucune facture</div>` : documents.map(d => {
+                const status = getStatusBadge(d);
+                return `
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border);">
+                  <div style="flex:1;">
+                    <div style="display:flex;align-items:center;gap:8px;">
+                      <div style="font-size:13px;font-weight:600;">${d.ref}</div>
+                      ${d.factureNetUrl ? `<span style="font-size:11px;color:var(--text3);">🔗 Facture.net</span>` : ''}
+                    </div>
+                    <div style="display:flex;align-items:center;gap:8px;margin-top:4px;">
+                      <div style="font-size:11px;color:var(--text2);">${new Date(d.date).toLocaleDateString('fr-FR')}</div>
+                      <span class="badge ${status.class}" style="font-size:9px;padding:2px 6px;">${status.label}</span>
+                    </div>
+                    ${d.factureNetUrl ? `<a href="${d.factureNetUrl}" target="_blank" style="font-size:10px;color:var(--blue);text-decoration:underline;">Voir sur Facture.net →</a>` : ''}
+                  </div>
+                  <div style="text-align:right;display:flex;align-items:center;gap:12px;">
+                    <div>
+                      <div style="font-size:14px;font-weight:700;color:${status.class === 'badge-lime' ? 'var(--lime)' : 'var(--text)'};">${formatEuro(d.amount)}</div>
+                    </div>
+                    <button class="doc-delete" data-doc-id="${d.id}" style="background:transparent;border:none;cursor:pointer;font-size:11px;color:var(--red);padding:4px;">×</button>
+                  </div>
+                </div>
+              `;}).join('')}
             </div>
+          ` : `
+            <!-- Devis / Factures / Acomptes pour projets normaux -->
+            <div class="card">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+                <div class="section-label">Devis</div>
+                <button class="btn btn-ghost btn-sm" id="btn-add-devis">+</button>
+              </div>
             ${devis.length === 0 ? `<div style="color:var(--text3);font-size:13px;">Aucun devis</div>` : devis.map(d => {
               const status = getStatusBadge(d);
               return `
@@ -2511,6 +2543,7 @@ function renderProjectPage() {
               </div>
             `;}).join('')}
           </div>
+          `}
           
         </div>
       </div>
@@ -2711,11 +2744,11 @@ function renderMaintenance() {
       <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px;padding-top:12px;border-top:1px solid var(--border);">
         <div>
           <div style="font-size:18px;font-weight:900;color:var(--text);">${formatEuro(p.budget)}</div>
-          <div style="font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em;">Montant</div>
+          <div style="font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em;">Annuel</div>
         </div>
         <div style="text-align:right;">
           <div style="font-size:18px;font-weight:900;color:${p.billed > 0 ? 'var(--lime)' : 'var(--text3)'};">${formatEuro(p.billed)}</div>
-          <div style="font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em;">Facturé</div>
+          <div style="font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em;">Facturé YTD</div>
         </div>
       </div>
     </div>
@@ -2772,8 +2805,9 @@ function initMaintenance() {
         <div class="form-group"><label class="form-label">Client *</label><input class="form-input" id="nm-client" placeholder="Nom du client"></div>
         <div class="form-row">
           <div class="form-group">
-            <label class="form-label">Montant mensuel (€) *</label>
-            <input class="form-input" type="number" id="nm-budget" placeholder="570">
+            <label class="form-label">Montant annuel (€) *</label>
+            <input class="form-input" type="number" id="nm-budget" placeholder="6840">
+            <div style="font-size:11px;color:var(--text3);margin-top:4px;">Budget total pour l'année</div>
           </div>
           <div class="form-group">
             <label class="form-label">Date début *</label>
@@ -3148,6 +3182,7 @@ function initProjectPage() {
   document.getElementById('btn-add-devis')?.addEventListener('click', () => addDocHandler('devis'));
   document.getElementById('btn-add-facture')?.addEventListener('click', () => addDocHandler('facture'));
   document.getElementById('btn-add-acompte')?.addEventListener('click', () => addDocHandler('acompte'));
+  document.getElementById('btn-add-facture-maint')?.addEventListener('click', () => addDocHandler('facture'));
   
   // Marquer document payé
   document.querySelectorAll('.doc-mark-paid').forEach(btn => {
