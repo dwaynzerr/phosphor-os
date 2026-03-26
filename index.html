@@ -714,15 +714,12 @@
       // PROJECT DOCUMENTS
       async addProjectDocument(projectId, doc) {
         try {
-          // OPTIMISATION : Charger SEULEMENT le projet concerné au lieu de TOUS
-          const { data: project, error } = await supabaseClient
-            .from('projects')
-            .select('*')
-            .eq('id', projectId)
-            .single();
+          // OPTIMISATION : Charger SEULEMENT le projet concerné
+          const projects = await supabaseGet('projects');
+          const project = projects.find(p => p.id === projectId);
           
-          if (error || !project) {
-            console.error('Projet introuvable:', error);
+          if (!project) {
+            console.error('Projet introuvable:', projectId);
             return null;
           }
           
@@ -828,13 +825,10 @@
       async deleteProjectDocument(projectId, docId) {
         try {
           // OPTIMISATION : Charger SEULEMENT le projet concerné
-          const { data: project, error } = await supabaseClient
-            .from('projects')
-            .select('*')
-            .eq('id', projectId)
-            .single();
+          const projects = await supabaseGet('projects');
+          const project = projects.find(p => p.id === projectId);
           
-          if (error || !project) return false;
+          if (!project) return false;
           
           const doc = (project.documents || []).find(d => d.id === docId);
           const documents = (project.documents || []).filter(d => d.id !== docId);
