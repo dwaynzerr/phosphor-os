@@ -1057,7 +1057,6 @@
           </svg>
         </span>
         <span class="nav-label">Agenda</span>
-        <span class="nav-badge" aria-label="3 tâches en attente">3</span>
       </button>
 
       <!-- Projets -->
@@ -1089,7 +1088,6 @@
           </svg>
         </span>
         <span class="nav-label">Finances</span>
-        <span class="nav-badge" aria-label="1 facture en retard">1</span>
       </button>
 
       <!-- CRM -->
@@ -1102,7 +1100,6 @@
           </svg>
         </span>
         <span class="nav-label">CRM</span>
-        <span class="nav-badge" aria-label="2 relances urgentes">2</span>
       </button>
 
     </nav>
@@ -2579,9 +2576,15 @@ function renderProjects() {
   // Filtre année
   if (state.projectFilters.year !== 'all') {
     filteredProjects = filteredProjects.filter(p => {
-      if (!p.startDate && !p.endDate) return false;
+      // Si pas de dates, considérer comme année courante
+      if (!p.startDate && !p.endDate) {
+        return state.projectFilters.year === new Date().getFullYear();
+      }
+      
       const startYear = p.startDate ? new Date(p.startDate).getFullYear() : null;
       const endYear = p.endDate ? new Date(p.endDate).getFullYear() : null;
+      
+      // Projet appartient à l'année si start OU end correspond
       return startYear === state.projectFilters.year || endYear === state.projectFilters.year;
     });
   }
@@ -2614,7 +2617,12 @@ function renderProjects() {
       </div>
       <div style="display:flex;justify-content:space-between;margin-top:6px;">
         <span style="font-size:11px;color:var(--text2);">${p.progress}% complet</span>
-        <span style="font-size:11px;color:var(--text3);">Deadline: ${p.deadline}</span>
+        <span style="font-size:11px;color:var(--text3);">
+          ${p.startDate || p.endDate 
+            ? (p.startDate ? new Date(p.startDate).toLocaleDateString('fr-FR', {month: 'short', year: 'numeric'}) : '') + 
+              (p.endDate ? ' → ' + new Date(p.endDate).toLocaleDateString('fr-FR', {month: 'short', year: 'numeric'}) : '')
+            : p.deadline ? 'Deadline: ' + p.deadline : ''}
+        </span>
       </div>
 
       <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px;padding-top:12px;border-top:1px solid var(--border);">
@@ -2687,7 +2695,7 @@ function renderProjects() {
       <button class="btn btn-lime btn-sm" id="btn-add-project">+ Projet</button>
     </div>
 
-    <div class="projects-grid" style="gap:24px;">
+    <div style="display:flex;flex-direction:column;gap:24px;">
       ${projectCards}
     </div>
 
@@ -2738,7 +2746,7 @@ function renderMaintenance() {
   });
   
   const totalMaintenance = maintenanceProjects.reduce((s, p) => s + p.budget, 0);
-  const totalBilled = maintenanceProjects.reduce((s, p) => s + p.billed, 0);
+  const totalMonthly = maintenanceProjects.reduce((s, p) => s + Math.round(p.budget / 12), 0);
   
   const projectCards = maintenanceProjects.map(p => {
     const monthlyBudget = Math.round(p.budget / 12);
@@ -2771,23 +2779,19 @@ function renderMaintenance() {
       <button class="btn btn-purple btn-sm" id="btn-add-maintenance">+ Maintenance</button>
     </div>
 
-    <div class="projects-grid" style="gap:24px;">
+    <div style="display:flex;flex-direction:column;gap:24px;">
       ${projectCards.length > 0 ? projectCards : '<div style="padding:40px;text-align:center;color:var(--text2);">Aucun contrat maintenance</div>'}
     </div>
 
     <div class="card" style="margin-top:32px;">
-      <div style="display:flex;gap:40px;flex-wrap:wrap;">
+      <div style="display:flex;gap:60px;flex-wrap:wrap;">
         <div>
-          <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:4px;">Total maintenance</div>
-          <div style="font-size:28px;font-weight:900;color:var(--purple);">${formatEuro(totalMaintenance)}</div>
+          <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:4px;">Budget annuel total</div>
+          <div style="font-size:36px;font-weight:900;color:var(--purple);">${formatEuro(totalMaintenance)}</div>
         </div>
         <div>
-          <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:4px;">Facturé</div>
-          <div style="font-size:28px;font-weight:900;color:var(--lime);">${formatEuro(totalBilled)}</div>
-        </div>
-        <div>
-          <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:4px;">Restant</div>
-          <div style="font-size:28px;font-weight:900;color:var(--blue);">${formatEuro(totalMaintenance - totalBilled)}</div>
+          <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:4px;">Budget mensuel total</div>
+          <div style="font-size:36px;font-weight:900;color:var(--text);">${formatEuro(totalMonthly)}</div>
         </div>
       </div>
     </div>
@@ -2907,17 +2911,22 @@ function initProjects() {
   });
 
   document.getElementById('btn-add-project')?.addEventListener('click', () => {
+    const today = new Date().toISOString().split('T')[0];
     openModal(`
       <div class="modal-box">
         <div class="modal-title">Nouveau projet <button class="modal-close" onclick="closeModal()">×</button></div>
         <div class="form-group"><label class="form-label">Nom du projet *</label><input class="form-input" id="np-name" placeholder="Ex: Identité Studio X"></div>
         <div class="form-row">
-          <div class="form-group"><label class="form-label">Client</label><input class="form-input" id="np-client" placeholder="Nom du client"></div>
+          <div class="form-group"><label class="form-label">Client *</label><input class="form-input" id="np-client" placeholder="Nom du client"></div>
           <div class="form-group"><label class="form-label">Type</label><input class="form-input" id="np-type" placeholder="Ex: Branding, Web..."></div>
         </div>
         <div class="form-row">
           <div class="form-group"><label class="form-label">Budget (€)</label><input class="form-input" type="number" id="np-budget" placeholder="5000"></div>
-          <div class="form-group"><label class="form-label">Deadline</label><input class="form-input" type="text" id="np-deadline" placeholder="Ex: 30 avr"></div>
+          <div class="form-group"><label class="form-label">Couleur</label><input class="form-input" type="color" id="np-color" value="#D0D0D0"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Date début *</label><input class="form-input" type="date" id="np-start" value="${today}"></div>
+          <div class="form-group"><label class="form-label">Date fin estimée</label><input class="form-input" type="date" id="np-end"></div>
         </div>
         <div style="display:flex;gap:8px;margin-top:20px;">
           <button class="btn btn-lime" id="save-project-btn">Créer le projet</button>
@@ -2927,24 +2936,33 @@ function initProjects() {
     `);
     document.getElementById('save-project-btn')?.addEventListener('click', async () => {
       const name = document.getElementById('np-name')?.value.trim();
+      const client = document.getElementById('np-client')?.value.trim();
+      const startDate = document.getElementById('np-start')?.value;
+      
       if (!name) { toast('Nom requis'); return; }
+      if (!client) { toast('Client requis'); return; }
+      if (!startDate) { toast('Date début requise'); return; }
       
       // Sauvegarder dans Supabase
       const newProject = await Supabase.addProject({
         name,
-        client: document.getElementById('np-client')?.value || '',
+        client,
         type: document.getElementById('np-type')?.value || '',
         budget: parseInt(document.getElementById('np-budget')?.value) || 0,
         billed: 0,
         progress: 0,
-        deadline: document.getElementById('np-deadline')?.value || 'TBD',
+        deadline: '', // Deprecated - on utilise endDate maintenant
         status: 'EN ATTENTE',
         statusClass: 'badge-gray',
-        color: '#D0D0D0',
+        color: document.getElementById('np-color')?.value || '#D0D0D0',
+        startDate: startDate,
+        endDate: document.getElementById('np-end')?.value || null,
         ganttStart: 3,
         ganttEnd: 6,
         tasks: [],
-        notes: ''
+        notes: '',
+        documents: [],
+        projectTasks: []
       });
       
       if (newProject) {
@@ -2983,6 +3001,17 @@ function initProjectPage() {
           <div class="form-group"><label class="form-label">Date début</label><input class="form-input" type="date" id="edit-p-start" value="${project.startDate || ''}"></div>
           <div class="form-group"><label class="form-label">Date fin</label><input class="form-input" type="date" id="edit-p-end" value="${project.endDate || ''}"></div>
         </div>
+        <div class="form-group">
+          <label class="form-label">Statut</label>
+          <select class="form-input" id="edit-p-status">
+            <option value="EN ATTENTE" ${project.status === 'EN ATTENTE' ? 'selected' : ''}>En attente</option>
+            <option value="EN COURS" ${project.status === 'EN COURS' ? 'selected' : ''}>En cours</option>
+            <option value="EN VALIDATION" ${project.status === 'EN VALIDATION' ? 'selected' : ''}>En validation</option>
+            <option value="TERMINÉ" ${project.status === 'TERMINÉ' ? 'selected' : ''}>Terminé</option>
+            <option value="ARCHIVÉ" ${project.status === 'ARCHIVÉ' ? 'selected' : ''}>Archivé</option>
+            <option value="ANNULÉ" ${project.status === 'ANNULÉ' ? 'selected' : ''}>Annulé</option>
+          </select>
+        </div>
         <div style="font-size:11px;color:var(--text3);margin-top:12px;padding:8px;background:var(--bg3);border-radius:4px;">
           ℹ️ L'avancement se calcule automatiquement selon les tâches complétées
         </div>
@@ -2994,6 +3023,18 @@ function initProjectPage() {
     `);
     
     document.getElementById('save-edit-project')?.addEventListener('click', async () => {
+      const status = document.getElementById('edit-p-status').value;
+      
+      // Mapping statut → classe badge
+      const statusClassMap = {
+        'EN ATTENTE': 'badge-gray',
+        'EN COURS': 'badge-blue',
+        'EN VALIDATION': 'badge-orange',
+        'TERMINÉ': 'badge-lime',
+        'ARCHIVÉ': 'badge-gray',
+        'ANNULÉ': 'badge-red'
+      };
+      
       const updates = {
         name: document.getElementById('edit-p-name').value.trim(),
         client: document.getElementById('edit-p-client').value.trim(),
@@ -3001,7 +3042,9 @@ function initProjectPage() {
         budget: parseInt(document.getElementById('edit-p-budget').value) || 0,
         color: document.getElementById('edit-p-color').value,
         startDate: document.getElementById('edit-p-start').value || null,
-        endDate: document.getElementById('edit-p-end').value || null
+        endDate: document.getElementById('edit-p-end').value || null,
+        status: status,
+        statusClass: statusClassMap[status] || 'badge-gray'
       };
       
       const saved = await Supabase.updateProject(projectId, updates);
@@ -3249,10 +3292,17 @@ function renderFinances() {
   // Combiner avec anciennes factures (si elles existent encore)
   const allInvoices = [...projectDocuments];
   
-  // Calculer CA réel par mois depuis les factures payées
+  // Calculer maintenance mensuelle totale
+  const maintenanceProjects = appData.projects.filter(p => p.type === 'maintenance');
+  const totalMaintenanceMonthly = maintenanceProjects.reduce((sum, p) => {
+    return sum + Math.round(p.budget / 12);
+  }, 0);
+  
+  // Calculer CA réel par mois depuis les factures payées + maintenance estimée
   const currentYear = new Date().getFullYear();
   const months = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'];
   const monthlyCAReal = months.map((month, index) => {
+    // CA facturé ce mois
     const monthCA = allInvoices
       .filter(inv => {
         if (!inv.paid && inv.status !== 'payee') return false; // Seulement payées
@@ -3262,9 +3312,15 @@ function renderFinances() {
       .reduce((sum, inv) => sum + (inv.amount || 0), 0);
     
     const currentMonth = new Date().getMonth();
+    
+    // Ajouter maintenance mensuelle estimée aux mois futurs
+    const withMaintenance = index >= currentMonth 
+      ? monthCA + totalMaintenanceMonthly 
+      : monthCA;
+    
     return {
       month,
-      amount: monthCA,
+      amount: withMaintenance,
       projected: index > currentMonth // Futur = projeté
     };
   });
@@ -3278,8 +3334,11 @@ function renderFinances() {
     .filter(i => i.status !== 'payee' && i.paid !== true && i.type !== 'devis')
     .reduce((s, i) => s + (i.amount || 0), 0);
   
-  // CA total cible = CA actuel + CA en attente (objectif réaliste)
-  const yearTarget = caPaye + caEnAttente;
+  // CA total annuel maintenance
+  const totalMaintenanceAnnual = maintenanceProjects.reduce((sum, p) => sum + p.budget, 0);
+  
+  // CA total cible = CA actuel + CA en attente + Maintenance annuelle
+  const yearTarget = caPaye + caEnAttente + totalMaintenanceAnnual;
   const monthlyTarget = Math.round(yearTarget / 12);
   
   const ytd = caPaye; // CA réel = CA payé
