@@ -726,9 +726,9 @@
             amount: doc.amount,
             date: doc.date,
             paid: doc.paid || false,
-            status: doc.status || (doc.type === 'devis' ? 'a_envoyer' : 'en_attente'), // Statut détaillé
-            fileUrl: doc.fileUrl || null,
-            fileName: doc.fileName || null
+            status: doc.status || (doc.type === 'devis' ? 'a_envoyer' : 'en_attente'),
+            factureNetUrl: doc.factureNetUrl || null, // Lien Facture.net
+            factureNetRef: doc.factureNetRef || null  // Référence Facture.net
           };
           documents.push(newDoc);
           
@@ -2445,13 +2445,13 @@ function renderProjectPage() {
                 <div style="flex:1;">
                   <div style="display:flex;align-items:center;gap:8px;">
                     <div style="font-size:13px;font-weight:600;">${d.ref}</div>
-                    ${d.fileName ? `<span style="font-size:11px;color:var(--text3);">📎 ${d.fileName}</span>` : ''}
+                    ${d.factureNetUrl ? `<span style="font-size:11px;color:var(--text3);">🔗 Facture.net</span>` : ''}
                   </div>
                   <div style="display:flex;align-items:center;gap:8px;margin-top:4px;">
                     <div style="font-size:11px;color:var(--text2);">${new Date(d.date).toLocaleDateString('fr-FR')}</div>
                     <span class="badge ${status.class}" style="font-size:9px;padding:2px 6px;">${status.label}</span>
                   </div>
-                  ${d.fileUrl ? `<a href="${d.fileUrl}" download="${d.fileName || 'document.pdf'}" style="font-size:10px;color:var(--blue);text-decoration:underline;">Télécharger</a>` : ''}
+                  ${d.factureNetUrl ? `<a href="${d.factureNetUrl}" target="_blank" style="font-size:10px;color:var(--blue);text-decoration:underline;">Voir sur Facture.net →</a>` : ''}
                 </div>
                 <div style="text-align:right;display:flex;align-items:center;gap:12px;">
                   <div>
@@ -2476,13 +2476,13 @@ function renderProjectPage() {
                 <div style="flex:1;">
                   <div style="display:flex;align-items:center;gap:8px;">
                     <div style="font-size:13px;font-weight:600;">${d.ref}</div>
-                    ${d.fileName ? `<span style="font-size:11px;color:var(--text3);">📎 ${d.fileName}</span>` : ''}
+                    ${d.factureNetUrl ? `<span style="font-size:11px;color:var(--text3);">🔗 Facture.net</span>` : ''}
                   </div>
                   <div style="display:flex;align-items:center;gap:8px;margin-top:4px;">
                     <div style="font-size:11px;color:var(--text2);">${new Date(d.date).toLocaleDateString('fr-FR')}</div>
                     <span class="badge ${status.class}" style="font-size:9px;padding:2px 6px;">${status.label}</span>
                   </div>
-                  ${d.fileUrl ? `<a href="${d.fileUrl}" download="${d.fileName || 'document.pdf'}" style="font-size:10px;color:var(--blue);text-decoration:underline;">Télécharger PDF</a>` : ''}
+                  ${d.factureNetUrl ? `<a href="${d.factureNetUrl}" target="_blank" style="font-size:10px;color:var(--blue);text-decoration:underline;">Voir sur Facture.net →</a>` : ''}
                 </div>
                 <div style="text-align:right;display:flex;align-items:center;gap:12px;">
                   <div>
@@ -2507,13 +2507,13 @@ function renderProjectPage() {
                 <div style="flex:1;">
                   <div style="display:flex;align-items:center;gap:8px;">
                     <div style="font-size:13px;font-weight:600;">${d.ref}</div>
-                    ${d.fileName ? `<span style="font-size:11px;color:var(--text3);">📎 ${d.fileName}</span>` : ''}
+                    ${d.factureNetUrl ? `<span style="font-size:11px;color:var(--text3);">🔗 Facture.net</span>` : ''}
                   </div>
                   <div style="display:flex;align-items:center;gap:8px;margin-top:4px;">
                     <div style="font-size:11px;color:var(--text2);">${new Date(d.date).toLocaleDateString('fr-FR')}</div>
                     <span class="badge ${status.class}" style="font-size:9px;padding:2px 6px;">${status.label}</span>
                   </div>
-                  ${d.fileUrl ? `<a href="${d.fileUrl}" download="${d.fileName || 'document.pdf'}" style="font-size:10px;color:var(--blue);text-decoration:underline;">Télécharger PDF</a>` : ''}
+                  ${d.factureNetUrl ? `<a href="${d.factureNetUrl}" target="_blank" style="font-size:10px;color:var(--blue);text-decoration:underline;">Voir sur Facture.net →</a>` : ''}
                 </div>
                 <div style="text-align:right;display:flex;align-items:center;gap:12px;">
                   <div>
@@ -2782,8 +2782,25 @@ function initMaintenance() {
       <div class="modal-box">
         <div class="modal-title">Nouveau contrat maintenance<button class="modal-close" onclick="closeModal()">×</button></div>
         <div class="form-group"><label class="form-label">Nom *</label><input class="form-input" id="nm-name" placeholder="Ex: Maintenance Heroiks"></div>
-        <div class="form-group"><label class="form-label">Client</label><input class="form-input" id="nm-client" placeholder="Nom du client"></div>
-        <div class="form-group"><label class="form-label">Montant mensuel (€)</label><input class="form-input" type="number" id="nm-budget" placeholder="570"></div>
+        <div class="form-group"><label class="form-label">Client *</label><input class="form-input" id="nm-client" placeholder="Nom du client"></div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Montant mensuel (€) *</label>
+            <input class="form-input" type="number" id="nm-budget" placeholder="570">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Date début *</label>
+            <input class="form-input" type="date" id="nm-start" value="${new Date().toISOString().split('T')[0]}">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Fréquence facturation</label>
+          <select class="form-input" id="nm-frequency">
+            <option value="monthly">Mensuelle</option>
+            <option value="quarterly">Trimestrielle</option>
+            <option value="yearly">Annuelle</option>
+          </select>
+        </div>
         <div style="display:flex;gap:8px;margin-top:20px;">
           <button class="btn btn-purple" id="save-maintenance">Créer</button>
           <button class="btn btn-ghost" onclick="closeModal()">Annuler</button>
@@ -2795,8 +2812,12 @@ function initMaintenance() {
       const name = document.getElementById('nm-name').value.trim();
       const client = document.getElementById('nm-client').value.trim();
       const budget = parseInt(document.getElementById('nm-budget').value) || 0;
+      const startDate = document.getElementById('nm-start').value;
+      const frequency = document.getElementById('nm-frequency').value;
       
       if (!name) { toast('Nom requis'); return; }
+      if (!client) { toast('Client requis'); return; }
+      if (!budget) { toast('Montant requis'); return; }
       
       const projet = {
         name,
@@ -2813,8 +2834,9 @@ function initMaintenance() {
         ganttEnd: 11,
         tasks: [],
         notes: '',
-        startDate: new Date().toISOString().split('T')[0],
+        startDate: startDate,
         endDate: null,
+        frequency: frequency || 'monthly',
         documents: [],
         projectTasks: []
       };
@@ -3083,9 +3105,13 @@ function initProjectPage() {
         </div>
         ${statusOptions}
         <div class="form-group">
-          <label class="form-label">Fichier PDF (optionnel)</label>
-          <input type="file" id="new-doc-file" accept=".pdf" class="form-input" style="padding:8px;">
-          <div style="font-size:11px;color:var(--text3);margin-top:4px;">Max 5 MB</div>
+          <label class="form-label">Lien Facture.net (optionnel)</label>
+          <input type="url" id="new-doc-facturenet-url" class="form-input" placeholder="https://app.facture.net/documents/...">
+          <div style="font-size:11px;color:var(--text3);margin-top:4px;">Lien vers le document sur Facture.net</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Réf. Facture.net (optionnel)</label>
+          <input type="text" id="new-doc-facturenet-ref" class="form-input" placeholder="FAC-2026-001">
         </div>
         <div style="display:flex;gap:8px;margin-top:20px;">
           <button class="btn btn-lime" id="save-doc">Ajouter</button>
@@ -3103,50 +3129,21 @@ function initProjectPage() {
         amount: parseInt(document.getElementById('new-doc-amount').value) || 0,
         date: document.getElementById('new-doc-date').value,
         status: status,
-        paid: status === 'payee' // Si statut = payée, marquer paid=true
+        paid: status === 'payee',
+        factureNetUrl: document.getElementById('new-doc-facturenet-url').value.trim() || null,
+        factureNetRef: document.getElementById('new-doc-facturenet-ref').value.trim() || null
       };
       
       if (!doc.ref) { toast('Référence requise'); return; }
       
-      // Upload fichier si présent
-      const fileInput = document.getElementById('new-doc-file');
-      if (fileInput && fileInput.files && fileInput.files[0]) {
-        const file = fileInput.files[0];
-        
-        // Vérifier taille (5 MB max)
-        if (file.size > 5 * 1024 * 1024) {
-          toast('❌ Fichier trop volumineux (max 5 MB)');
-          return;
-        }
-        
-        // Convertir en base64
-        const reader = new FileReader();
-        reader.onload = async (e) => {
-          doc.fileUrl = e.target.result;
-          doc.fileName = file.name;
-          
-          const added = await Supabase.addProjectDocument(projectId, doc);
-          if (added) {
-            await Supabase.loadAllData();
-            closeModal();
-            toast('✓ Document ajouté');
-            navigate('project');
-          } else {
-            toast('❌ Erreur');
-          }
-        };
-        reader.readAsDataURL(file);
+      const added = await Supabase.addProjectDocument(projectId, doc);
+      if (added) {
+        appData.projects = await supabaseGet('projects');
+        closeModal();
+        toast('✓ Document ajouté');
+        navigate('project');
       } else {
-        // Pas de fichier
-        const added = await Supabase.addProjectDocument(projectId, doc);
-        if (added) {
-          await Supabase.loadAllData();
-          closeModal();
-          toast('✓ Document ajouté');
-          navigate('project');
-        } else {
-          toast('❌ Erreur');
-        }
+        toast('❌ Erreur');
       }
     });
   };
@@ -3177,7 +3174,8 @@ function initProjectPage() {
       if (confirm('Supprimer ce document ?')) {
         const deleted = await Supabase.deleteProjectDocument(projectId, docId);
         if (deleted) {
-          await Supabase.loadAllData();
+          // Recharger uniquement projets au lieu de tout
+          appData.projects = await supabaseGet('projects');
           toast('✓ Supprimé');
           navigate('project');
         }
@@ -3470,11 +3468,11 @@ function initFinances() {
             </select>
           </div>
           
-          ${doc.fileName ? `
+          ${doc.factureNetUrl ? `
             <div style="margin-top:12px;padding:12px;background:var(--bg2);border-radius:6px;">
-              <div style="font-size:11px;color:var(--text3);margin-bottom:4px;">Fichier attaché</div>
-              <div style="font-size:13px;">📎 ${doc.fileName}</div>
-              <a href="${doc.fileUrl}" download="${doc.fileName}" style="font-size:11px;color:var(--blue);text-decoration:underline;">Télécharger</a>
+              <div style="font-size:11px;color:var(--text3);margin-bottom:4px;">Lien Facture.net</div>
+              <div style="font-size:13px;">🔗 ${doc.factureNetRef || 'Document Facture.net'}</div>
+              <a href="${doc.factureNetUrl}" target="_blank" style="font-size:11px;color:var(--blue);text-decoration:underline;">Voir sur Facture.net →</a>
             </div>
           ` : ''}
           
@@ -3507,7 +3505,8 @@ function initFinances() {
             await Supabase.syncProjectBilled(projectId);
           }
           
-          await Supabase.loadAllData();
+          // Recharger uniquement projets au lieu de tout
+          appData.projects = await supabaseGet('projects');
           closeModal();
           toast('✓ Statut mis à jour');
           navigate('finances');
