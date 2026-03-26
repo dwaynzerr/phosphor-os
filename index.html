@@ -2360,10 +2360,17 @@ function renderProjectPage() {
                 <div style="font-size:11px;color:var(--text3);text-transform:uppercase;margin-bottom:6px;">${project.type === 'maintenance' ? 'Budget annuel' : 'Budget'}</div>
                 <div style="font-size:24px;font-weight:900;">${formatEuro(project.budget)}</div>
               </div>
-              <div>
-                <div style="font-size:11px;color:var(--text3);text-transform:uppercase;margin-bottom:6px;">Facturé ${project.type === 'maintenance' ? 'YTD' : ''}</div>
-                <div style="font-size:24px;font-weight:900;color:var(--lime);">${formatEuro(project.billed)}</div>
-              </div>
+              ${project.type === 'maintenance' ? `
+                <div>
+                  <div style="font-size:11px;color:var(--text3);text-transform:uppercase;margin-bottom:6px;">Budget mensuel</div>
+                  <div style="font-size:24px;font-weight:900;color:var(--purple);">${formatEuro(Math.round(project.budget / 12))}</div>
+                </div>
+              ` : `
+                <div>
+                  <div style="font-size:11px;color:var(--text3);text-transform:uppercase;margin-bottom:6px;">Facturé</div>
+                  <div style="font-size:24px;font-weight:900;color:var(--lime);">${formatEuro(project.billed)}</div>
+                </div>
+              `}
               ${project.type !== 'maintenance' ? `
                 <div>
                   <div style="font-size:11px;color:var(--text3);text-transform:uppercase;margin-bottom:6px;">Avancement</div>
@@ -2733,7 +2740,9 @@ function renderMaintenance() {
   const totalMaintenance = maintenanceProjects.reduce((s, p) => s + p.budget, 0);
   const totalBilled = maintenanceProjects.reduce((s, p) => s + p.billed, 0);
   
-  const projectCards = maintenanceProjects.map(p => `
+  const projectCards = maintenanceProjects.map(p => {
+    const monthlyBudget = Math.round(p.budget / 12);
+    return `
     <div class="project-card card-clickable" data-project-id="${p.id}">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;">
         <div class="project-name" style="color:var(--purple)">${p.name}</div>
@@ -2747,12 +2756,12 @@ function renderMaintenance() {
           <div style="font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em;">Annuel</div>
         </div>
         <div style="text-align:right;">
-          <div style="font-size:18px;font-weight:900;color:${p.billed > 0 ? 'var(--lime)' : 'var(--text3)'};">${formatEuro(p.billed)}</div>
-          <div style="font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em;">Facturé YTD</div>
+          <div style="font-size:18px;font-weight:900;color:var(--purple);">${formatEuro(monthlyBudget)}</div>
+          <div style="font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em;">Mensuel</div>
         </div>
       </div>
     </div>
-  `).join('');
+  `;}).join('');
 
   return `
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
