@@ -2364,17 +2364,21 @@ function renderProjectPage() {
                 <div style="font-size:11px;color:var(--text3);text-transform:uppercase;margin-bottom:6px;">Facturé</div>
                 <div style="font-size:24px;font-weight:900;color:var(--lime);">${formatEuro(project.billed)}</div>
               </div>
-              <div>
-                <div style="font-size:11px;color:var(--text3);text-transform:uppercase;margin-bottom:6px;">Avancement</div>
-                <div style="font-size:24px;font-weight:900;">${autoProgress}%</div>
-              </div>
+              ${project.type !== 'maintenance' ? `
+                <div>
+                  <div style="font-size:11px;color:var(--text3);text-transform:uppercase;margin-bottom:6px;">Avancement</div>
+                  <div style="font-size:24px;font-weight:900;">${autoProgress}%</div>
+                </div>
+              ` : ''}
             </div>
-            <div style="margin-top:20px;">
-              <div style="font-size:11px;color:var(--text3);text-transform:uppercase;margin-bottom:8px;">Progression (${doneTasks}/${projectTasks.length} tâches)</div>
-              <div style="height:12px;background:var(--border);border-radius:6px;overflow:hidden;">
-                <div style="height:100%;width:${autoProgress}%;background:${project.color};transition:width 0.4s;"></div>
+            ${project.type !== 'maintenance' ? `
+              <div style="margin-top:20px;">
+                <div style="font-size:11px;color:var(--text3);text-transform:uppercase;margin-bottom:8px;">Progression (${doneTasks}/${projectTasks.length} tâches)</div>
+                <div style="height:12px;background:var(--border);border-radius:6px;overflow:hidden;">
+                  <div style="height:100%;width:${autoProgress}%;background:${project.color};transition:width 0.4s;"></div>
+                </div>
               </div>
-            </div>
+            ` : ''}
             ${project.startDate || project.endDate ? `
               <div style="margin-top:20px;padding:16px;background:var(--bg3);border-radius:6px;">
                 <div style="font-size:11px;color:var(--text3);text-transform:uppercase;margin-bottom:8px;">Dates</div>
@@ -2930,15 +2934,14 @@ function initProjectPage() {
         </div>
         <div class="form-row">
           <div class="form-group"><label class="form-label">Budget (€)</label><input class="form-input" type="number" id="edit-p-budget" value="${project.budget}"></div>
-          <div class="form-group"><label class="form-label">Facturé (€)</label><input class="form-input" type="number" id="edit-p-billed" value="${project.billed}"></div>
-        </div>
-        <div class="form-row">
-          <div class="form-group"><label class="form-label">Avancement (%)</label><input class="form-input" type="number" id="edit-p-progress" value="${project.progress}" min="0" max="100"></div>
           <div class="form-group"><label class="form-label">Couleur</label><input class="form-input" type="color" id="edit-p-color" value="${project.color}"></div>
         </div>
         <div class="form-row">
           <div class="form-group"><label class="form-label">Date début</label><input class="form-input" type="date" id="edit-p-start" value="${project.startDate || ''}"></div>
           <div class="form-group"><label class="form-label">Date fin</label><input class="form-input" type="date" id="edit-p-end" value="${project.endDate || ''}"></div>
+        </div>
+        <div style="font-size:11px;color:var(--text3);margin-top:12px;padding:8px;background:var(--bg3);border-radius:4px;">
+          ℹ️ L'avancement se calcule automatiquement selon les tâches complétées
         </div>
         <div style="display:flex;gap:8px;margin-top:20px;">
           <button class="btn btn-lime" id="save-edit-project">Sauvegarder</button>
@@ -2953,8 +2956,6 @@ function initProjectPage() {
         client: document.getElementById('edit-p-client').value.trim(),
         type: document.getElementById('edit-p-type').value.trim(),
         budget: parseInt(document.getElementById('edit-p-budget').value) || 0,
-        billed: parseInt(document.getElementById('edit-p-billed').value) || 0,
-        progress: parseInt(document.getElementById('edit-p-progress').value) || 0,
         color: document.getElementById('edit-p-color').value,
         startDate: document.getElementById('edit-p-start').value || null,
         endDate: document.getElementById('edit-p-end').value || null
