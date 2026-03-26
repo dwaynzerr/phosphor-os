@@ -714,47 +714,33 @@
       // PROJECT DOCUMENTS
       async addProjectDocument(projectId, doc) {
         try {
-          const projects = await supabaseGet('projects');
-          const project = projects.find(p => p.id === projectId);
-          if (!project) return false;
+          // OPTIMISATION : Charger SEULEMENT le projet concerné au lieu de TOUS
+          const { data: project, error } = await supabaseClient
+            .from('projects')
+            .select('*')
+            .eq('id', projectId)
+            .single();
+          
+          if (error || !project) {
+            console.error('Projet introuvable:', error);
+            return null;
+          }
           
           const documents = project.documents || [];
           const newDoc = {
             id: Date.now(),
-            type: doc.type, // 'devis', 'facture', 'acompte'
+            type: doc.type,
             ref: doc.ref,
             amount: doc.amount,
             date: doc.date,
             paid: doc.paid || false,
             status: doc.status || (doc.type === 'devis' ? 'a_envoyer' : 'en_attente'),
-            factureNetUrl: doc.factureNetUrl || null, // Lien Facture.net
-            factureNetRef: doc.factureNetRef || null  // Référence Facture.net
+            factureNetUrl: doc.factureNetUrl || null,
+            factureNetRef: doc.factureNetRef || null
           };
           documents.push(newDoc);
           
-          // Synchroniser avec table invoices (optionnel si migration pas faite)
-          try {
-            const invoice = {
-              ref: doc.ref,
-              client: project.client,
-              amount: doc.amount,
-              type: doc.type,
-              status: doc.paid ? 'PAYÉ' : 'EN ATTENTE',
-              statusClass: doc.paid ? 'badge-lime' : 'badge-gray',
-              project_id: projectId,
-              date: doc.date,
-              paid: doc.paid || false,
-              file_url: doc.fileUrl || null,
-              file_name: doc.fileName || null
-            };
-            
-            await supabaseInsert('invoices', invoice);
-            console.log('✓ Document synchronisé avec finances');
-          } catch (syncError) {
-            console.warn('⚠️ Sync finances ignorée (migration SQL pas encore exécutée):', syncError.message);
-          }
-          
-          // Si devis, mettre à jour budget
+          // Mise à jour DIRECTE sans sync invoices (trop lent et pas nécessaire)
           if (doc.type === 'devis') {
             await this.updateProject(projectId, { 
               documents,
@@ -764,9 +750,12 @@
             await this.updateProject(projectId, { documents });
           }
           
-          // Si document payé, mettre à jour billed
+          // Recalcul billed seulement si payé
           if (doc.paid && (doc.type === 'facture' || doc.type === 'acompte')) {
-            await this.syncProjectBilled(projectId);
+            const totalBilled = documents
+              .filter(d => d.paid && (d.type === 'facture' || d.type === 'acompte'))
+              .reduce((s, d) => s + (d.amount || 0), 0);
+            await this.updateProject(projectId, { billed: totalBilled });
           }
           
           return newDoc;
@@ -838,30 +827,24 @@
       
       async deleteProjectDocument(projectId, docId) {
         try {
-          const projects = await supabaseGet('projects');
-          const project = projects.find(p => p.id === projectId);
-          if (!project) return false;
+          // OPTIMISATION : Charger SEULEMENT le projet concerné
+          const { data: project, error } = await supabaseClient
+            .from('projects')
+            .select('*')
+            .eq('id', projectId)
+            .single();
+          
+          if (error || !project) return false;
           
           const doc = (project.documents || []).find(d => d.id === docId);
           const documents = (project.documents || []).filter(d => d.id !== docId);
-          await this.updateProject(projectId, { documents });
           
-          // Supprimer de invoices aussi (optionnel)
-          if (doc) {
-            try {
-              const invoices = await supabaseGet('invoices');
-              const invoice = invoices.find(i => i.ref === doc.ref && i.project_id === projectId);
-              if (invoice) {
-                await supabaseDelete('invoices', invoice.id);
-                console.log('✓ Document supprimé de finances');
-              }
-            } catch (syncError) {
-              console.warn('⚠️ Sync suppression ignorée:', syncError.message);
-            }
-          }
+          // Recalcul billed direct sans fonction supplémentaire
+          const totalBilled = documents
+            .filter(d => d.paid && (d.type === 'facture' || d.type === 'acompte'))
+            .reduce((s, d) => s + (d.amount || 0), 0);
           
-          // Recalculer billed
-          await this.syncProjectBilled(projectId);
+          await this.updateProject(projectId, { documents, billed: totalBilled });
           
           return true;
         } catch (error) {
