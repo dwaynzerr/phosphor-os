@@ -1420,6 +1420,43 @@
     function formatEuro(n) {
       return n.toLocaleString('fr-FR') + ' €';
     }
+    
+    // Calculer CA mensuel réel depuis factures payées (synchronisé avec Finance)
+    function calculateMonthlyCA() {
+      const projectDocuments = [];
+      appData.projects.forEach(project => {
+        (project.documents || []).forEach(doc => {
+          projectDocuments.push(doc);
+        });
+      });
+      
+      const maintenanceProjects = appData.projects.filter(p => p.type === 'maintenance');
+      const totalMaintenanceMonthly = maintenanceProjects.reduce((sum, p) => {
+        return sum + Math.round(p.budget / 12);
+      }, 0);
+      
+      const currentYear = new Date().getFullYear();
+      const months = ['Jan', 'Fév', 'Mars', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc'];
+      
+      return months.map((month, index) => {
+        const monthCA = projectDocuments
+          .filter(inv => {
+            if (!inv.paid && inv.status !== 'payee') return false;
+            const invDate = new Date(inv.date);
+            return invDate.getFullYear() === currentYear && invDate.getMonth() === index;
+          })
+          .reduce((sum, inv) => sum + (inv.amount || 0), 0);
+        
+        const currentMonth = new Date().getMonth();
+        const withMaintenance = index >= currentMonth ? monthCA + totalMaintenanceMonthly : monthCA;
+        
+        return {
+          month,
+          amount: withMaintenance,
+          projected: index > currentMonth
+        };
+      });
+    }
 
     // Filter tasks based on current filters
     function filterTasks(tasks) {
@@ -1634,10 +1671,18 @@ function renderDashboard() {
   }).length;
   
   const totalBudget = appData.projects.reduce((s, p) => s + p.budget, 0);
-  const currentMonth = appData.monthlyCA[2];
+  
+  // Calculer CA mois actuel dynamiquement (synchronisé avec Finance)
+  const monthlyCA = calculateMonthlyCA();
+  const currentMonthIndex = today.getMonth(); // 0=Jan, 1=Fev, 2=Mars...
+  const currentMonth = monthlyCA[currentMonthIndex] || { month: 'N/A', amount: 0, projected: false };
   const monthProgress = Math.round(currentMonth.amount / appData.monthlyTarget * 100);
+  
+  // Nom du mois actuel
+  const monthNames = ['Jan', 'Fév', 'Mars', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc'];
+  const currentMonthName = monthNames[currentMonthIndex];
 
-  const ytd = appData.monthlyCA
+  const ytd = monthlyCA
     .filter(m => !m.projected)
     .reduce((s, m) => s + m.amount, 0);
   const ytdProgress = Math.round(ytd / appData.yearTarget * 100);
@@ -1693,7 +1738,7 @@ function renderDashboard() {
       </div>
       <div class="brief-stat">
         <div class="brief-stat-val">${monthProgress}%</div>
-        <div class="brief-stat-lbl">Objectif mars</div>
+        <div class="brief-stat-lbl">Objectif ${currentMonthName.toLowerCase()}</div>
       </div>
     </div>
   </div>
@@ -1701,7 +1746,7 @@ function renderDashboard() {
   <div class="kpi-grid" style="margin-top:20px;">
 
     <div class="kpi-card">
-      <div class="section-label">CA Mars</div>
+      <div class="section-label">CA ${currentMonthName}</div>
       <div class="kpi-value">${formatEuro(currentMonth.amount)}</div>
       <div class="kpi-sub">Objectif mensuel : ${formatEuro(appData.monthlyTarget)}</div>
       <div class="progress" style="margin:8px 0;">
@@ -1806,49 +1851,44 @@ function renderDashboard() {
         const upcoming = (appData.socialPosts || [])
           .filter(p => p.status === 'scheduled')
           .sort((a, b) => new Date(a.scheduledDate + ' ' + a.scheduledTime) - new Date(b.scheduledDate + ' ' + b.scheduledTime))
-          .slice(0, 3);
+          .slice(0, 5);
         
         if (upcoming.length === 0) {
           return '<div style="padding:16px;text-align:center;color:var(--text3);font-size:12px;">Aucune publication programmée</div>';
         }
         
         const platformIcons = {
-          instagram: '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4" fill="#000"/><circle cx="18" cy="6" r="1.5" fill="#000"/></svg>',
-          linkedin: '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M20 3H4a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1zM8.5 18H6V9.5h2.5V18zM7.3 8.4c-.8 0-1.4-.6-1.4-1.4 0-.8.6-1.4 1.4-1.4.8 0 1.4.6 1.4 1.4 0 .8-.6 1.4-1.4 1.4zM18 18h-2.5v-4.3c0-1-.4-1.7-1.3-1.7-.7 0-1.1.5-1.3 1-.1.2-.1.4-.1.7V18H10V9.5h2.5v1.1c.3-.5 1-1.3 2.4-1.3 1.7 0 3 1.1 3 3.6V18z"/></svg>',
-          twitter: '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>',
-          facebook: '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>'
+          instagram: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="18" cy="6" r="1.5"/></svg>',
+          linkedin: '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20 3H4a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1zM8.5 18H6V9.5h2.5V18zM7.3 8.4c-.8 0-1.4-.6-1.4-1.4 0-.8.6-1.4 1.4-1.4.8 0 1.4.6 1.4 1.4 0 .8-.6 1.4-1.4 1.4zM18 18h-2.5v-4.3c0-1-.4-1.7-1.3-1.7-.7 0-1.1.5-1.3 1-.1.2-.1.4-.1.7V18H10V9.5h2.5v1.1c.3-.5 1-1.3 2.4-1.3 1.7 0 3 1.1 3 3.6V18z"/></svg>',
+          twitter: '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>',
+          facebook: '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>'
         };
         
-        const platformColors = {
-          instagram: '#E4405F',
-          linkedin: '#0A66C2',
-          twitter: '#1DA1F2',
-          facebook: '#1877F2'
+        const statusBadges = {
+          draft: { class: 'badge-gray', label: 'Brouillon' },
+          scheduled: { class: 'badge-blue', label: 'Programmé' },
+          published: { class: 'badge-lime', label: 'Publié' }
         };
         
-        return `<div style="display:flex;flex-direction:column;gap:12px;">` + upcoming.map(post => {
+        return upcoming.map(post => {
           const platforms = post.platforms || [post.platform];
           const date = new Date(post.scheduledDate);
-          const dateStr = date.toLocaleDateString('fr-FR', {weekday: 'short', day: '2-digit', month: 'short'});
+          const dateStr = date.toLocaleDateString('fr-FR', {day: '2-digit', month: 'short'});
+          const statusBadge = statusBadges[post.status] || statusBadges.draft;
           
           return `
-          <div style="background:var(--bg3);border-radius:8px;padding:12px;border-left:3px solid ${platformColors[platforms[0]]};transition:all 0.2s;cursor:pointer;" onmouseover="this.style.background='var(--bg2)'" onmouseout="this.style.background='var(--bg3)'">
-            <div style="display:flex;align-items:start;gap:12px;">
-              <div style="display:flex;gap:4px;flex-shrink:0;">
-                ${platforms.map(p => `<span style="display:inline-flex;align-items:center;color:var(--text3);" title="${p}">${platformIcons[p] || platformIcons.facebook}</span>`).join('')}
-              </div>
-              <div style="flex:1;min-width:0;">
-                <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:6px;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;line-height:1.4;">${post.content}</div>
-                <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-                  <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.03em;">${dateStr}</div>
-                  <div style="font-size:10px;font-weight:700;color:${platformColors[platforms[0]]}">${post.scheduledTime}</div>
-                  ${post.hashtags ? `<div style="font-size:9px;color:var(--blue);">${post.hashtags.split(' ').slice(0,2).join(' ')}</div>` : ''}
-                </div>
-              </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);">
+            <div style="display:flex;gap:4px;flex-shrink:0;">
+              ${platforms.map(p => `<span style="display:inline-flex;color:var(--text3);" title="${p}">${platformIcons[p] || platformIcons.facebook}</span>`).join('')}
             </div>
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:12px;color:var(--text);margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${post.content}</div>
+              <div style="font-size:10px;color:var(--text3);">${dateStr} · ${post.scheduledTime}</div>
+            </div>
+            <span class="badge ${statusBadge.class}" style="font-size:9px;">${statusBadge.label}</span>
           </div>
           `;
-        }).join('') + '</div>';
+        }).join('');
       })()}
       
       <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);">
@@ -4622,7 +4662,7 @@ function renderSocial() {
               <td style="padding:12px;">
                 <div style="display:flex;gap:4px;">
                   <button class="btn btn-ghost btn-sm edit-post-btn" data-post-id="${post.id}">Éditer</button>
-                  <button class="btn btn-ghost btn-sm delete-post-btn" data-post-id="${post.id}" style="color:var(--red);">×</button>
+                  <button class="btn btn-ghost btn-sm" onclick="deleteSocialPost(${post.id}); return false;" style="color:var(--red);">×</button>
                 </div>
               </td>
             </tr>
@@ -4986,28 +5026,21 @@ function initSocial() {
     });
   });
   
-  // Supprimer publication
-  document.querySelectorAll('.delete-post-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      e.stopImmediatePropagation();
-      
-      if (!confirm('Supprimer cette publication ?')) {
-        return false;
-      }
-      
-      const postId = parseInt(btn.dataset.postId);
-      const index = appData.socialPosts.findIndex(p => p.id === postId);
-      if (index !== -1) {
-        appData.socialPosts.splice(index, 1);
-        // TODO: Supprimer dans Supabase
-        toast('✓ Publication supprimée');
-        navigate('social');
-      }
+  // Fonction globale pour suppression (appelée par onclick)
+  window.deleteSocialPost = function(postId) {
+    if (!confirm('Supprimer cette publication ?')) {
       return false;
-    });
-  });
+    }
+    
+    const index = appData.socialPosts.findIndex(p => p.id === postId);
+    if (index !== -1) {
+      appData.socialPosts.splice(index, 1);
+      // TODO: Supprimer dans Supabase
+      toast('✓ Publication supprimée');
+      navigate('social');
+    }
+    return false;
+  };
   
   // Clic sur carte calendrier
   document.querySelectorAll('.social-post-card').forEach(card => {
