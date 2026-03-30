@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Phosphor OS — Studio Management</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 237 140'><path d='M78.75 26.25V0H122.5L157.5 26.25V0H201.251L236.251 26.25V140H188.125L157.5 113.75V140H109.375L78.75 113.75V140H35L0 118.125V0H43.75L78.75 26.25ZM39.0889 47.251C29.4476 47.2511 22.4746 51.6777 22.4746 60.2275C22.4747 69.2625 29.5695 71.3245 37.3311 73.083C43.9403 74.5989 48.0635 75.4478 48.0635 79.6924C48.0633 83.6943 44.1219 85.2705 39.6348 85.2705C33.4498 85.2705 30.4784 83.2089 29.8721 77.9941H21.2617C21.5649 87.1504 28.2353 92.3652 39.999 92.3652C49.7615 92.3651 56.8564 87.4535 56.8564 78.6611C56.8564 69.3232 49.5796 67.2011 40.666 65.2607C34.2384 63.8661 31.2061 62.8344 31.2061 59.3174C31.2064 56.2252 34.299 54.2247 39.0283 54.2246C43.5155 54.2246 46.9114 56.4075 47.3965 60.7734H55.8252C55.1582 52.0416 48.8515 47.251 39.0889 47.251ZM178.762 48.0381V91.3936H187.857V75.6885H198.529C207.625 75.6885 213.022 70.1705 213.022 61.9844C213.022 57.9825 211.567 54.5866 209.142 52.1006C206.595 49.4932 202.835 48.0381 197.802 48.0381H178.762ZM118.076 66.0898L114.181 59.0625L109.902 62.042L114.104 68.3818L106.312 68V73.1182L114.181 72.7363L109.826 79.0762L114.486 81.8262L118.076 74.7988L121.59 81.8262L126.25 79.0762L121.972 72.7363L129.688 73.1182V68L121.972 68.3818L126.25 62.042L121.972 59.0625L118.076 66.0898ZM197.074 55.6787C201.44 55.6787 203.987 57.9825 203.987 62.0449C203.987 65.9863 201.562 68.5332 196.953 68.5332H187.857V55.6787H197.074Z' fill='%23B1D418'/></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700;900&family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
   <style>
@@ -579,12 +580,12 @@
           
           // Social Media Posts - Données hardcodées pour démo
           appData.socialPosts = [
-            {id:1,platform:'instagram',content:'Nouveau projet pour @newbusiness 🎨 Direction artistique minimaliste et audacieuse.',scheduledDate:'2026-04-02',scheduledTime:'10:00',status:'scheduled',image:true,hashtags:'#branding #design #phosphor'},
-            {id:2,platform:'linkedin',content:'Retour sur notre collaboration avec Manza. Un défi passionnant : créer une identité premium pour une marque de pastrami artisanal.',scheduledDate:'2026-04-05',scheduledTime:'14:30',status:'scheduled',image:true,hashtags:''},
-            {id:3,platform:'instagram',content:'Behind the scenes 📸 Process créatif pour Whiti.',scheduledDate:'2026-04-08',scheduledTime:'11:00',status:'draft',image:true,hashtags:'#process #creative #studio'},
-            {id:4,platform:'twitter',content:'Design tip: Less is more. Toujours.',scheduledDate:'2026-04-10',scheduledTime:'09:00',status:'draft',image:false,hashtags:'#designtips'},
-            {id:5,platform:'linkedin',content:'Studio Phosphor recrute ! Nous cherchons un·e designer graphique passionné·e pour rejoindre l\'équipe.',scheduledDate:'2026-03-25',scheduledTime:'15:00',status:'published',image:false,hashtags:''},
-            {id:6,platform:'instagram',content:'Lancement de notre nouveau site portfolio ✨',scheduledDate:'2026-03-28',scheduledTime:'12:00',status:'published',image:true,hashtags:'#portfolio #webdesign #phosphor'}
+            {id:1,platforms:['instagram','linkedin'],content:'Nouveau projet pour @newbusiness 🎨 Direction artistique minimaliste et audacieuse.',scheduledDate:'2026-04-02',scheduledTime:'10:00',status:'scheduled',image:true,hashtags:'#branding #design #phosphor'},
+            {id:2,platforms:['linkedin'],content:'Retour sur notre collaboration avec Manza. Un défi passionnant : créer une identité premium pour une marque de pastrami artisanal.',scheduledDate:'2026-04-05',scheduledTime:'14:30',status:'scheduled',image:true,hashtags:''},
+            {id:3,platforms:['instagram'],content:'Behind the scenes 📸 Process créatif pour Whiti.',scheduledDate:'2026-04-08',scheduledTime:'11:00',status:'draft',image:true,hashtags:'#process #creative #studio'},
+            {id:4,platforms:['twitter'],content:'Design tip: Less is more. Toujours.',scheduledDate:'2026-04-10',scheduledTime:'09:00',status:'draft',image:false,hashtags:'#designtips'},
+            {id:5,platforms:['linkedin'],content:'Studio Phosphor recrute ! Nous cherchons un·e designer graphique passionné·e pour rejoindre l\'équipe.',scheduledDate:'2026-03-25',scheduledTime:'15:00',status:'published',image:false,hashtags:''},
+            {id:6,platforms:['instagram','facebook'],content:'Lancement de notre nouveau site portfolio ✨',scheduledDate:'2026-03-28',scheduledTime:'12:00',status:'published',image:true,hashtags:'#portfolio #webdesign #phosphor'}
           ];
           
           const ca = await supabaseGet('monthly_ca');
@@ -1137,12 +1138,10 @@
   <!-- Sidebar -->
   <aside class="sidebar" role="navigation" aria-label="Navigation principale">
     <div class="logo-area">
-      <!-- SVG Logo Placeholder: square with asterisk, NOT the real Phosphor logo -->
-      <svg class="logo-icon" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect x="1" y="1" width="30" height="30" stroke="#B1D418" stroke-width="2"/>
-        <text x="16" y="21" text-anchor="middle" fill="#B1D418" font-size="18" font-weight="900" font-family="sans-serif">✦</text>
+      <!-- Logo Phosphor -->
+      <svg class="logo-icon" viewBox="0 0 237 140" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;max-width:80px;">
+        <path d="M78.75 26.25V0H122.5L157.5 26.25V0H201.251L236.251 26.25V140H188.125L157.5 113.75V140H109.375L78.75 113.75V140H35L0 118.125V0H43.75L78.75 26.25ZM39.0889 47.251C29.4476 47.2511 22.4746 51.6777 22.4746 60.2275C22.4747 69.2625 29.5695 71.3245 37.3311 73.083C43.9403 74.5989 48.0635 75.4478 48.0635 79.6924C48.0633 83.6943 44.1219 85.2705 39.6348 85.2705C33.4498 85.2705 30.4784 83.2089 29.8721 77.9941H21.2617C21.5649 87.1504 28.2353 92.3652 39.999 92.3652C49.7615 92.3651 56.8564 87.4535 56.8564 78.6611C56.8564 69.3232 49.5796 67.2011 40.666 65.2607C34.2384 63.8661 31.2061 62.8344 31.2061 59.3174C31.2064 56.2252 34.299 54.2247 39.0283 54.2246C43.5155 54.2246 46.9114 56.4075 47.3965 60.7734H55.8252C55.1582 52.0416 48.8515 47.251 39.0889 47.251ZM178.762 48.0381V91.3936H187.857V75.6885H198.529C207.625 75.6885 213.022 70.1705 213.022 61.9844C213.022 57.9825 211.567 54.5866 209.142 52.1006C206.595 49.4932 202.835 48.0381 197.802 48.0381H178.762ZM118.076 66.0898L114.181 59.0625L109.902 62.042L114.104 68.3818L106.312 68V73.1182L114.181 72.7363L109.826 79.0762L114.486 81.8262L118.076 74.7988L121.59 81.8262L126.25 79.0762L121.972 72.7363L129.688 73.1182V68L121.972 68.3818L126.25 62.042L121.972 59.0625L118.076 66.0898ZM197.074 55.6787C201.44 55.6787 203.987 57.9825 203.987 62.0449C203.987 65.9863 201.562 68.5332 196.953 68.5332H187.857V55.6787H197.074Z" fill="#B1D418"/>
       </svg>
-      <span class="logo-text">Phosphor</span>
     </div>
 
     <nav class="nav-list" role="menubar">
@@ -1363,7 +1362,7 @@
         { month: 'Nov', amount: 8800, projected: true },
         { month: 'Déc', amount: 10000, projected: true }
       ],
-      monthlyTarget: 8000,
+      monthlyTarget: 6000,
       yearTarget: 120000,
       socialPosts: [], // Chargé depuis Supabase ou données hardcodées
       crmProspects: [] // Chargé depuis CRM_PROSPECTS_DATA
@@ -1733,68 +1732,113 @@ function renderDashboard() {
     </div>
 
     <div class="card">
-      <div class="section-label">Relances urgentes</div>
+      <div class="section-label">CRM · Contacts prioritaires</div>
 
-      <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);">
-        <span class="j-dot j-red"></span>
-        <div style="flex:1">
-          <div style="font-size:13px;font-weight:600;">Bakali Design — FAC-024</div>
-          <div style="font-size:11px;color:var(--text2);">Facture 1 200 € · EN RETARD</div>
-        </div>
-        <span class="badge badge-red">Urgent</span>
-      </div>
-
-      <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);">
-        <span class="j-dot j-orange"></span>
-        <div style="flex:1">
-          <div style="font-size:13px;font-weight:600;">CAM Méditerranée</div>
-          <div style="font-size:11px;color:var(--text2);">J+7 sans contact</div>
-        </div>
-        <span class="badge badge-orange">Relance</span>
-      </div>
-
-      <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);">
-        <span class="j-dot j-red"></span>
-        <div style="flex:1">
-          <div style="font-size:13px;font-weight:600;">Studio Lumière</div>
-          <div style="font-size:11px;color:var(--text2);">J+12 sans contact</div>
-        </div>
-        <span class="badge badge-red">Urgent</span>
-      </div>
+      ${(() => {
+        const now = new Date();
+        // Contacts à relancer (lastContact >= 7j)
+        const toFollowUp = (appData.crmProspects || []).filter(p => {
+          if (!p.lastContact || p.status === 'client' || p.status === 'lost') return false;
+          const daysSince = Math.floor((now - new Date(p.lastContact)) / (1000 * 60 * 60 * 24));
+          return daysSince >= 7;
+        }).slice(0, 3);
+        
+        // Contacts à contacter
+        const toContact = (appData.crmProspects || []).filter(p => p.status === 'to_contact').slice(0, 2);
+        
+        const urgentContacts = [...toFollowUp, ...toContact].slice(0, 4);
+        
+        if (urgentContacts.length === 0) {
+          return '<div style="padding:16px;text-align:center;color:var(--text3);font-size:12px;">Aucun contact prioritaire</div>';
+        }
+        
+        return urgentContacts.map(p => {
+          const isFollowUp = p.lastContact && p.status !== 'to_contact';
+          const daysSince = isFollowUp ? Math.floor((now - new Date(p.lastContact)) / (1000 * 60 * 60 * 24)) : 0;
+          const dotClass = daysSince > 10 ? 'j-red' : (isFollowUp ? 'j-orange' : 'j-blue');
+          const badgeClass = daysSince > 10 ? 'badge-red' : (isFollowUp ? 'badge-orange' : 'badge-blue');
+          const badgeLabel = daysSince > 10 ? 'Urgent' : (isFollowUp ? 'Relance' : 'À contacter');
+          
+          return `
+          <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);">
+            <span class="j-dot ${dotClass}"></span>
+            <div style="flex:1">
+              <div style="font-size:13px;font-weight:600;">${p.firstName} ${p.lastName}</div>
+              <div style="font-size:11px;color:var(--text2);">${p.companyName}${isFollowUp ? ` · J+${daysSince}` : ''}</div>
+            </div>
+            <span class="badge ${badgeClass}">${badgeLabel}</span>
+          </div>
+          `;
+        }).join('');
+      })()}
 
       <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);">
         <button id="btn-see-crm" class="btn btn-ghost btn-sm" style="width:100%">
           Voir le CRM →
         </button>
       </div>
+    </div>
 
-      <div class="divider" style="margin:16px 0 8px;"></div>
-      <div class="section-label">Activité récente</div>
+  </div>
 
-      <div style="display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);">
-        <div style="width:6px;height:6px;border-radius:50%;background:var(--lime);margin-top:5px;flex-shrink:0;"></div>
-        <div style="flex:1">
-          <div style="font-size:12px;color:var(--text);">Maquettes NB homepage terminées · Diego</div>
-          <div style="font-size:10px;color:var(--text3);margin-top:2px;">il y a 2h</div>
-        </div>
+  <div class="grid-2" style="margin-top:20px;">
+    
+    <div class="card">
+      <div class="section-label">📱 Prochaines publications</div>
+      ${(() => {
+        const upcoming = (appData.socialPosts || [])
+          .filter(p => p.status === 'scheduled')
+          .sort((a, b) => new Date(a.scheduledDate + ' ' + a.scheduledTime) - new Date(b.scheduledDate + ' ' + b.scheduledTime))
+          .slice(0, 3);
+        
+        if (upcoming.length === 0) {
+          return '<div style="padding:16px;text-align:center;color:var(--text3);font-size:12px;">Aucune publication programmée</div>';
+        }
+        
+        const platformIcons = {
+          instagram: '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4" fill="#000"/><circle cx="18" cy="6" r="1.5" fill="#000"/></svg>',
+          linkedin: '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M20 3H4a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1zM8.5 18H6V9.5h2.5V18zM7.3 8.4c-.8 0-1.4-.6-1.4-1.4 0-.8.6-1.4 1.4-1.4.8 0 1.4.6 1.4 1.4 0 .8-.6 1.4-1.4 1.4zM18 18h-2.5v-4.3c0-1-.4-1.7-1.3-1.7-.7 0-1.1.5-1.3 1-.1.2-.1.4-.1.7V18H10V9.5h2.5v1.1c.3-.5 1-1.3 2.4-1.3 1.7 0 3 1.1 3 3.6V18z"/></svg>',
+          twitter: '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>',
+          facebook: '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>'
+        };
+        
+        const platformColors = {
+          instagram: '#E4405F',
+          linkedin: '#0A66C2',
+          twitter: '#1DA1F2',
+          facebook: '#1877F2'
+        };
+        
+        return `<div style="display:flex;flex-direction:column;gap:12px;">` + upcoming.map(post => {
+          const platforms = post.platforms || [post.platform];
+          const date = new Date(post.scheduledDate);
+          const dateStr = date.toLocaleDateString('fr-FR', {weekday: 'short', day: '2-digit', month: 'short'});
+          
+          return `
+          <div style="background:var(--bg3);border-radius:8px;padding:12px;border-left:3px solid ${platformColors[platforms[0]]};transition:all 0.2s;cursor:pointer;" onmouseover="this.style.background='var(--bg2)'" onmouseout="this.style.background='var(--bg3)'">
+            <div style="display:flex;align-items:start;gap:12px;">
+              <div style="display:flex;gap:4px;flex-shrink:0;">
+                ${platforms.map(p => `<span style="display:inline-flex;align-items:center;color:${platformColors[p]};" title="${p}">${platformIcons[p] || platformIcons.facebook}</span>`).join('')}
+              </div>
+              <div style="flex:1;min-width:0;">
+                <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:6px;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;line-height:1.4;">${post.content}</div>
+                <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                  <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.03em;">${dateStr}</div>
+                  <div style="font-size:10px;font-weight:700;color:${platformColors[platforms[0]]}">${post.scheduledTime}</div>
+                  ${post.hashtags ? `<div style="font-size:9px;color:var(--blue);">${post.hashtags.split(' ').slice(0,2).join(' ')}</div>` : ''}
+                </div>
+              </div>
+            </div>
+          </div>
+          `;
+        }).join('') + '</div>';
+      })()}
+      
+      <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);">
+        <button id="btn-see-social" class="btn btn-ghost btn-sm" style="width:100%">
+          Voir publications →
+        </button>
       </div>
-
-      <div style="display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);">
-        <div style="width:6px;height:6px;border-radius:50%;background:var(--lime);margin-top:5px;flex-shrink:0;"></div>
-        <div style="flex:1">
-          <div style="font-size:12px;color:var(--text);">FAC-025 envoyée à New Business · 1 200 €</div>
-          <div style="font-size:10px;color:var(--text3);margin-top:2px;">il y a 4h</div>
-        </div>
-      </div>
-
-      <div style="display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);">
-        <div style="width:6px;height:6px;border-radius:50%;background:var(--lime);margin-top:5px;flex-shrink:0;"></div>
-        <div style="flex:1">
-          <div style="font-size:12px;color:var(--text);">Nouvelle tâche ajoutée : Devis Livre interactif · Enzo</div>
-          <div style="font-size:10px;color:var(--text3);margin-top:2px;">hier</div>
-        </div>
-      </div>
-
     </div>
 
   </div>
@@ -1831,6 +1875,7 @@ function initDashboard() {
 
   // Navigate to CRM
   document.getElementById('btn-see-crm')?.addEventListener('click', () => navigate('crm'));
+  document.getElementById('btn-see-social')?.addEventListener('click', () => navigate('social'));
 }
 
 function renderAgenda() {
@@ -3739,23 +3784,35 @@ function renderFinances() {
     <div class="grid-2" style="margin-bottom:24px;">
 
       <div class="finance-block">
-        <div class="finance-title">Chiffre d'affaires 2026</div>
-        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px;">
-          <div>
-            <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;">CA mois en cours</div>
-            <div style="font-size:32px;font-weight:900;color:var(--lime);">${formatEuro(currentMonthCA)}</div>
-          </div>
-          <div style="text-align:right;">
-            <div style="font-size:10px;color:var(--text3);">Objectif mensuel</div>
-            <div style="font-size:14px;font-weight:600;color:var(--text2);">${formatEuro(monthlyTarget)}</div>
-          </div>
+        <div class="finance-title">CA Mensuel 2026 · Objectif 6 000 €/mois</div>
+        <div style="margin-top:16px;">
+          ${monthlyCAReal.map((m, idx) => {
+            const objectif = 6000;
+            const progres = Math.min(Math.round(m.amount / objectif * 100), 100);
+            const diff = m.amount - objectif;
+            const diffColor = diff >= 0 ? 'var(--lime)' : 'var(--red)';
+            const diffLabel = diff >= 0 ? `+${formatEuro(diff)}` : formatEuro(diff);
+            
+            return `
+            <div style="margin-bottom:12px;">
+              <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px;">
+                <span style="font-size:11px;font-weight:600;color:var(--text2);">${m.month}</span>
+                <div style="display:flex;align-items:baseline;gap:8px;">
+                  <span style="font-size:14px;font-weight:700;color:${m.projected ? 'var(--text3)' : 'var(--text)'};">${formatEuro(m.amount)}</span>
+                  <span style="font-size:10px;color:${diffColor};font-weight:600;">${diffLabel}</span>
+                </div>
+              </div>
+              <div style="height:6px;background:var(--bg3);border-radius:3px;overflow:hidden;">
+                <div style="height:100%;background:${m.projected ? 'var(--text3)' : (progres >= 100 ? 'var(--lime)' : 'var(--orange)')};width:${progres}%;border-radius:3px;transition:width 0.3s;"></div>
+              </div>
+            </div>
+            `;
+          }).join('')}
         </div>
-        <div class="chart-months">
-          ${chartBars}
-        </div>
-        <div style="margin-top:8px;font-size:10px;color:var(--text3);">
-          <span style="display:inline-block;width:12px;height:2px;background:var(--lime);margin-right:4px;vertical-align:middle;"></span>Réalisé
-          <span style="display:inline-block;width:12px;height:2px;border-top:1.5px dashed var(--border2);margin-right:4px;margin-left:12px;vertical-align:middle;"></span>Projeté
+        <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border);font-size:10px;color:var(--text3);">
+          <span style="display:inline-block;width:12px;height:4px;background:var(--lime);margin-right:4px;vertical-align:middle;border-radius:2px;"></span>Objectif atteint
+          <span style="display:inline-block;width:12px;height:4px;background:var(--orange);margin-right:4px;margin-left:12px;vertical-align:middle;border-radius:2px;"></span>En cours
+          <span style="display:inline-block;width:12px;height:4px;background:var(--text3);margin-right:4px;margin-left:12px;vertical-align:middle;border-radius:2px;"></span>Projeté
         </div>
       </div>
 
@@ -3834,37 +3891,56 @@ function initFinances() {
           <div class="modal-title">Éditer ${doc.type} <button class="modal-close" onclick="closeModal()">×</button></div>
           
           <div class="form-group">
-            <label class="form-label">Référence</label>
-            <input class="form-input" value="${doc.ref}" disabled>
+            <label class="form-label">Référence *</label>
+            <input class="form-input" id="edit-doc-ref" value="${doc.ref}">
           </div>
           
           <div class="form-group">
             <label class="form-label">Projet</label>
-            <input class="form-input" value="${project.name} (${project.client})" disabled>
+            <input class="form-input" value="${project.name} (${project.client})" disabled style="opacity:0.6;">
           </div>
           
           <div class="form-row">
             <div class="form-group">
-              <label class="form-label">Montant</label>
-              <input class="form-input" value="${doc.amount} €" disabled>
+              <label class="form-label">Montant (€) *</label>
+              <input class="form-input" type="number" id="edit-doc-amount" value="${doc.amount}">
             </div>
             <div class="form-group">
-              <label class="form-label">Date</label>
-              <input class="form-input" value="${new Date(doc.date).toLocaleDateString('fr-FR')}" disabled>
+              <label class="form-label">Date *</label>
+              <input class="form-input" type="date" id="edit-doc-date" value="${doc.date}">
+            </div>
+          </div>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Type *</label>
+              <select class="form-input" id="edit-doc-type">
+                <option value="facture" ${doc.type === 'facture' ? 'selected' : ''}>Facture</option>
+                <option value="devis" ${doc.type === 'devis' ? 'selected' : ''}>Devis</option>
+                <option value="acompte" ${doc.type === 'acompte' ? 'selected' : ''}>Acompte</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Statut *</label>
+              <select class="form-input" id="edit-doc-status">
+                ${statusOptions}
+              </select>
             </div>
           </div>
           
           <div class="form-group">
-            <label class="form-label">Statut *</label>
-            <select class="form-input" id="edit-doc-status">
-              ${statusOptions}
-            </select>
+            <label class="form-label">Lien Facture.net (optionnel)</label>
+            <input class="form-input" id="edit-doc-url" value="${doc.factureNetUrl || ''}" placeholder="https://www.facture.net/...">
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">Référence Facture.net (optionnel)</label>
+            <input class="form-input" id="edit-doc-netref" value="${doc.factureNetRef || ''}" placeholder="FAC-2024-001">
           </div>
           
           ${doc.factureNetUrl ? `
             <div style="margin-top:12px;padding:12px;background:var(--bg2);border-radius:6px;">
-              <div style="font-size:11px;color:var(--text3);margin-bottom:4px;">Lien Facture.net</div>
-              <div style="font-size:13px;">🔗 ${doc.factureNetRef || 'Document Facture.net'}</div>
+              <div style="font-size:11px;color:var(--text3);margin-bottom:4px;">Lien actuel</div>
               <a href="${doc.factureNetUrl}" target="_blank" style="font-size:11px;color:var(--blue);text-decoration:underline;">Voir sur Facture.net →</a>
             </div>
           ` : ''}
@@ -3877,15 +3953,33 @@ function initFinances() {
       `);
       
       document.getElementById('save-edit-doc')?.addEventListener('click', async () => {
+        const newRef = document.getElementById('edit-doc-ref').value.trim();
+        const newAmount = parseFloat(document.getElementById('edit-doc-amount').value);
+        const newDate = document.getElementById('edit-doc-date').value;
+        const newType = document.getElementById('edit-doc-type').value;
         const newStatus = document.getElementById('edit-doc-status').value;
+        const newUrl = document.getElementById('edit-doc-url').value.trim();
+        const newNetRef = document.getElementById('edit-doc-netref').value.trim();
+        
+        // Validation
+        if (!newRef || !newAmount || !newDate) {
+          toast('❌ Référence, montant et date sont obligatoires');
+          return;
+        }
         
         // Mettre à jour document
         const documents = project.documents.map(d => {
           if (d.id === docId) {
             return {
               ...d,
+              ref: newRef,
+              amount: newAmount,
+              date: newDate,
+              type: newType,
               status: newStatus,
-              paid: newStatus === 'payee' // Si payée, marquer paid=true
+              paid: newStatus === 'payee',
+              factureNetUrl: newUrl || null,
+              factureNetRef: newNetRef || null
             };
           }
           return d;
@@ -3893,29 +3987,48 @@ function initFinances() {
         
         const updated = await Supabase.updateProject(projectId, { documents });
         if (updated) {
-          // Si changement vers "payée", recalculer billed
-          if (newStatus === 'payee') {
-            await Supabase.syncProjectBilled(projectId);
-          }
+          // Recalculer billed si changement de montant ou statut payée
+          await Supabase.syncProjectBilled(projectId);
           
-          // Mise à jour LOCALE au lieu de recharger depuis BDD
+          // Mise à jour LOCALE
           const proj = appData.projects.find(p => p.id === projectId);
           if (proj) {
             proj.documents = documents;
-            // Recalculer billed localement si payée
-            if (newStatus === 'payee') {
-              const totalBilled = documents
-                .filter(d => d.paid && (d.type === 'facture' || d.type === 'acompte'))
-                .reduce((s, d) => s + (d.amount || 0), 0);
-              proj.billed = totalBilled;
-            }
+            // Recalculer billed localement
+            const totalBilled = documents
+              .filter(d => d.paid && (d.type === 'facture' || d.type === 'acompte'))
+              .reduce((s, d) => s + (d.amount || 0), 0);
+            proj.billed = totalBilled;
           }
           
           closeModal();
-          toast('✓ Statut mis à jour');
+          toast('✓ Document mis à jour');
           navigate('finances');
         } else {
-          toast('❌ Erreur');
+          toast('❌ Erreur lors de la sauvegarde');
+        }
+      });
+      
+      // Changer options statut selon type
+      document.getElementById('edit-doc-type')?.addEventListener('change', (e) => {
+        const typeSelect = e.target;
+        const statusSelect = document.getElementById('edit-doc-status');
+        const currentStatus = statusSelect.value;
+        
+        if (typeSelect.value === 'devis') {
+          statusSelect.innerHTML = `
+            <option value="a_envoyer" ${currentStatus === 'a_envoyer' ? 'selected' : ''}>À envoyer</option>
+            <option value="a_modifier" ${currentStatus === 'a_modifier' ? 'selected' : ''}>À modifier</option>
+            <option value="accepte" ${currentStatus === 'accepte' ? 'selected' : ''}>Accepté</option>
+            <option value="refuse" ${currentStatus === 'refuse' ? 'selected' : ''}>Refusé</option>
+          `;
+        } else {
+          statusSelect.innerHTML = `
+            <option value="payee" ${currentStatus === 'payee' ? 'selected' : ''}>Payée</option>
+            <option value="en_attente" ${currentStatus === 'en_attente' ? 'selected' : ''}>En attente</option>
+            <option value="a_envoyer" ${currentStatus === 'a_envoyer' ? 'selected' : ''}>À envoyer</option>
+            <option value="a_relancer" ${currentStatus === 'a_relancer' ? 'selected' : ''}>À relancer</option>
+          `;
         }
       });
     });
@@ -4410,12 +4523,12 @@ function renderSocial() {
   // Fonction helper icône plateforme
   const getPlatformIcon = (platform) => {
     const icons = {
-      instagram: '📸',
-      linkedin: '💼',
-      twitter: '🐦',
-      facebook: '👥'
+      instagram: '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4" fill="#000"/><circle cx="18" cy="6" r="1.5" fill="#000"/></svg>',
+      linkedin: '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20 3H4a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1zM8.5 18H6V9.5h2.5V18zM7.3 8.4c-.8 0-1.4-.6-1.4-1.4 0-.8.6-1.4 1.4-1.4.8 0 1.4.6 1.4 1.4 0 .8-.6 1.4-1.4 1.4zM18 18h-2.5v-4.3c0-1-.4-1.7-1.3-1.7-.7 0-1.1.5-1.3 1-.1.2-.1.4-.1.7V18H10V9.5h2.5v1.1c.3-.5 1-1.3 2.4-1.3 1.7 0 3 1.1 3 3.6V18z"/></svg>',
+      twitter: '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>',
+      facebook: '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>'
     };
-    return icons[platform] || '📱';
+    return icons[platform] || '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg>';
   };
   
   const getPlatformColor = (platform) => {
@@ -4453,13 +4566,17 @@ function renderSocial() {
         <tbody>
           ${filtered.map(post => {
             const statusBadge = getStatusBadge(post.status);
-            const platformColor = getPlatformColor(post.platform);
+            // Support ancien format (platform) et nouveau (platforms array)
+            const platforms = post.platforms || [post.platform];
             return `
             <tr style="border-bottom:1px solid var(--border);" class="social-post-row" data-post-id="${post.id}">
               <td style="padding:12px;">
-                <div style="display:flex;align-items:center;gap:8px;">
-                  <span style="font-size:20px;">${getPlatformIcon(post.platform)}</span>
-                  <span style="font-weight:600;font-size:13px;color:${platformColor};text-transform:capitalize;">${post.platform}</span>
+                <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                  ${platforms.map(p => {
+                    const icon = getPlatformIcon(p);
+                    const color = getPlatformColor(p);
+                    return `<span style="font-size:18px;" title="${p}">${icon}</span>`;
+                  }).join('')}
                 </div>
               </td>
               <td style="padding:12px;">
@@ -4589,14 +4706,6 @@ function renderSocial() {
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;">
       
       <div>
-        <label class="form-label">Vue</label>
-        <select class="form-input" id="social-view">
-          <option value="list" ${socialState.view === 'list' ? 'selected' : ''}>Liste</option>
-          <option value="calendar" ${socialState.view === 'calendar' ? 'selected' : ''}>Calendrier</option>
-        </select>
-      </div>
-      
-      <div>
         <label class="form-label">Plateforme</label>
         <select class="form-input" id="social-filter-platform">
           <option value="all" ${socialState.filterPlatform === 'all' ? 'selected' : ''}>Toutes</option>
@@ -4616,6 +4725,8 @@ function renderSocial() {
           <option value="published" ${socialState.filterStatus === 'published' ? 'selected' : ''}>Publié</option>
         </select>
       </div>
+      
+      <div></div>
       
       <div style="display:flex;align-items:flex-end;">
         <button class="btn btn-ghost" style="width:100%;" onclick="socialState.view = socialState.view === 'list' ? 'calendar' : 'list'; navigate('social');">
@@ -4807,7 +4918,10 @@ function initSocial() {
   // Supprimer publication
   document.querySelectorAll('.delete-post-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
+      e.preventDefault();
       e.stopPropagation();
+      e.stopImmediatePropagation();
+      
       if (!confirm('Supprimer cette publication ?')) return;
       
       const postId = parseInt(btn.dataset.postId);
