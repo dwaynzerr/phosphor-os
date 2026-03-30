@@ -600,9 +600,9 @@
         }
       },
       
-      async saveTaskToggle(taskId, done) {
+      async saveTaskToggle(taskId, done, completedAt = null) {
         try {
-          await supabaseUpdate('tasks', taskId, { done });
+          await supabaseUpdate('tasks', taskId, { done, completed_at: completedAt });
           console.log(`✓ Tâche ${taskId} sauvegardée`);
           return true;
         } catch (error) {
@@ -667,9 +667,9 @@
         }
       },
       
-      async saveTaskToggle(taskId, done) {
+      async saveTaskToggle(taskId, done, completedAt = null) {
         try {
-          await supabaseUpdate('tasks', taskId, { done });
+          await supabaseUpdate('tasks', taskId, { done, completed_at: completedAt });
           return true;
         } catch (error) {
           console.error('Erreur toggle tâche:', error);
@@ -1622,8 +1622,17 @@
 function renderDashboard() {
   const today = new Date();
   const pendingTasks = appData.tasks.filter(t => !t.done).length;
-  const activeProjets = appData.projects.length;
-  const overdueInvoices = appData.invoices.filter(i => i.status === 'EN RETARD').length;
+  const activeProjets = appData.projects.filter(p => p.status === 'ongoing').length;
+  
+  // Calculer factures en retard depuis tous les documents des projets
+  const allDocs = appData.projects.flatMap(p => p.documents || []);
+  const overdueInvoices = allDocs.filter(d => {
+    if (d.type === 'devis' || d.paid || d.status === 'payee') return false;
+    const dueDate = new Date(d.date);
+    dueDate.setDate(dueDate.getDate() + 30); // 30j délai paiement
+    return dueDate < today && d.status !== 'a_envoyer';
+  }).length;
+  
   const totalBudget = appData.projects.reduce((s, p) => s + p.budget, 0);
   const currentMonth = appData.monthlyCA[2];
   const monthProgress = Math.round(currentMonth.amount / appData.monthlyTarget * 100);
@@ -1634,8 +1643,16 @@ function renderDashboard() {
   const ytdProgress = Math.round(ytd / appData.yearTarget * 100);
 
   const billedSum = appData.projects.reduce((s, p) => s + p.billed, 0);
+  
+  // Tâches terminées aujourd'hui
+  const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  const tasksCompletedToday = appData.tasks.filter(t => {
+    if (!t.done || !t.completedAt) return false;
+    const completedDate = new Date(t.completedAt);
+    return completedDate >= todayStart;
+  }).length;
 
-  const first5Tasks = appData.tasks.slice(0, 5);
+  const first5Tasks = appData.tasks.filter(t => !t.done).slice(0, 5);
 
   const tagClass = {
     design: 'tag-design',
@@ -1671,8 +1688,8 @@ function renderDashboard() {
         <div class="brief-stat-lbl">Projets actifs</div>
       </div>
       <div class="brief-stat">
-        <div class="brief-stat-val" style="color:var(--red)">${overdueInvoices}</div>
-        <div class="brief-stat-lbl">Facture en retard</div>
+        <div class="brief-stat-val" style="color:${overdueInvoices > 0 ? 'var(--red)' : 'var(--lime)'}">${overdueInvoices}</div>
+        <div class="brief-stat-lbl">${overdueInvoices > 1 ? 'Factures' : 'Facture'} en retard</div>
       </div>
       <div class="brief-stat">
         <div class="brief-stat-val">${monthProgress}%</div>
@@ -1690,7 +1707,7 @@ function renderDashboard() {
       <div class="progress" style="margin:8px 0;">
         <div class="progress-fill" data-value="${monthProgress}"></div>
       </div>
-      <div class="kpi-trend down">−${formatEuro(appData.monthlyTarget - currentMonth.amount)} / objectif</div>
+      <div class="kpi-trend ${currentMonth.amount >= appData.monthlyTarget ? 'up' : 'down'}">${currentMonth.amount >= appData.monthlyTarget ? '+' : '−'}${formatEuro(Math.abs(currentMonth.amount - appData.monthlyTarget))} / objectif</div>
     </div>
 
     <div class="kpi-card">
@@ -1706,15 +1723,15 @@ function renderDashboard() {
     <div class="kpi-card">
       <div class="section-label">Pipeline projets</div>
       <div class="kpi-value">${formatEuro(totalBudget)}</div>
-      <div class="kpi-sub">${activeProjets} projets en cours</div>
+      <div class="kpi-sub">${activeProjets} projet${activeProjets > 1 ? 's' : ''} en cours</div>
       <div class="kpi-trend up">${formatEuro(billedSum)} facturés</div>
     </div>
 
     <div class="kpi-card">
       <div class="section-label">Tâches</div>
       <div class="kpi-value">${pendingTasks}</div>
-      <div class="kpi-sub">tâches restantes</div>
-      <div class="kpi-trend">2 terminées aujourd'hui</div>
+      <div class="kpi-sub">tâche${pendingTasks > 1 ? 's' : ''} restante${pendingTasks > 1 ? 's' : ''}</div>
+      <div class="kpi-trend">${tasksCompletedToday} terminée${tasksCompletedToday > 1 ? 's' : ''} aujourd'hui</div>
     </div>
 
   </div>
@@ -1855,14 +1872,20 @@ function initDashboard() {
       const task = appData.tasks.find(t => t.id === id);
       if (task) {
         task.done = !task.done;
+        if (task.done) {
+          task.completedAt = new Date().toISOString();
+        } else {
+          task.completedAt = null;
+        }
         navigate('dashboard');
         
         // Sauvegarder dans Supabase
-        const saved = await Supabase.saveTaskToggle(id, task.done);
+        const saved = await Supabase.saveTaskToggle(id, task.done, task.completedAt);
         if (saved) {
           toast(task.done ? '✓ Tâche terminée' : 'Tâche rouverte');
         } else {
           task.done = !task.done; // Annuler si erreur
+          task.completedAt = task.done ? new Date().toISOString() : null;
           navigate('dashboard');
           toast('❌ Erreur de sauvegarde');
         }
@@ -2124,12 +2147,18 @@ function initAgenda() {
       const task = appData.tasks.find(t => t.id === id);
       if (task) {
         task.done = !task.done;
+        if (task.done) {
+          task.completedAt = new Date().toISOString();
+        } else {
+          task.completedAt = null;
+        }
         navigate('agenda');
-        const saved = await Supabase.saveTaskToggle(id, task.done);
+        const saved = await Supabase.saveTaskToggle(id, task.done, task.completedAt);
         if (saved) {
           toast(task.done ? '✓ Tâche terminée' : 'Tâche rouverte');
         } else {
           task.done = !task.done;
+          task.completedAt = task.done ? new Date().toISOString() : null;
           navigate('agenda');
           toast('❌ Erreur');
         }
