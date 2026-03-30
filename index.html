@@ -373,7 +373,111 @@
       'Content-Type': 'application/json',
       'Prefer': 'return=representation'
     };
-
+    
+    // === DONNÉES CRM (Démo) ===
+    // En production : charger depuis Supabase table 'crm_prospects'
+    const CRM_PROSPECTS_DATA = [
+      {"id":1,"firstName":"Sebastien","lastName":"Claeys","jobTitle":"Founder & chief executive officer","linkedin":"ACoAAAS99KEBU-29Ga5ByrVfw_cJbGn2ukNAPZU","companyName":"iPaidThat","companyWebsite":"https://ipaidthat.io/","companyLinkedin":"https://www.linkedin.com/company/ipaidthat","description":"Pour les entreprises : iPaidThat vous fournit une solution simple et fiable vous permettant de collecter automatiquement vos factures, de les comparer avec votre banque, et de recevoir des notificatio","city":"Paris","region":"Île-De-France","revenue":"1M-5M","employees":"11-50","status":"to_contact","notes":"","lastContact":null,"createdAt":"2026-03-24"},
+      {"id":2,"firstName":"Jonathan","lastName":"Cohen","jobTitle":"Chief executive officer & founder","linkedin":"ACoAABAcS2EBgVB2b-AefyWYOM_ZnD15DanRc7U","companyName":"Acasi","companyWebsite":"https://www.acasi.io/","companyLinkedin":"https://www.linkedin.com/company/acasi","description":"Acasi est lexpert-comptable en ligne dedie aux freelances et aux independants Nous couvrons 100% de vos besoins administratifs, de la creation de votre societe jusqua votre bilan.  Gagnez du temps sur","city":"Paris","region":"Île-De-France","revenue":"1M-5M","employees":"11-50","status":"to_contact","notes":"","lastContact":null,"createdAt":"2026-03-24"},
+      {"id":3,"firstName":"Sacha","lastName":"Boyer","jobTitle":"Co-fondateur & président","linkedin":"ACoAAAp26ToBhdlCSkjwEl1PCL2HTBhHQUDlmvM","companyName":"MyNotary - Lajuristech","companyWebsite":"https://www.mynotary.fr/","companyLinkedin":"https://www.linkedin.com/company/mynotary---lajuristech","description":"MyNotary, la plateforme juridique tout-en-un qui fait gagner en temps et en securite les professionnels de l'immobilier - Redaction intelligente et guidee de tous vos contrats immobiliers - Assistance","city":"Lyon","region":"Auvergne-Rhône-Alpes","revenue":"1M-5M","employees":"11-50","status":"contacted","notes":"","lastContact":"2026-03-20","createdAt":"2026-03-24"},
+      {"id":4,"firstName":"Emmanuel","lastName":"Daoud","jobTitle":"Associé fondateur","linkedin":"ACoAAAOCVpQBFecTmREcZ_JAX44-_VX_lrOwwb0","companyName":"VIGO, cabinet d'avocats","companyWebsite":"https://www.vigo-avocats.com/","companyLinkedin":"https://www.linkedin.com/company/vigo-cabinet-d'avocats","description":"Avocats consacres aux risques de lentreprise. Vigo rassemble une equipe davocats pluridisciplinaires aptes a exercer leur mission de defense tant dans le conseil quen pre-contentieux et contentieux. N","city":"Paris","region":"Île-De-France","revenue":"1M-5M","employees":"11-50","status":"to_contact","notes":"","lastContact":null,"createdAt":"2026-03-24"},
+      {"id":5,"firstName":"Florent","lastName":"Gastaud","jobTitle":"Founder & chief executive officer","linkedin":"ACoAAAymehABs7lGGefOBBPxkzOI5NUMXXkaJ5k","companyName":"Mon DPO externe","companyWebsite":"https://mon-dpo-externe.com/","companyLinkedin":"https://www.linkedin.com/company/mon-dpo-externe","description":"Mon DPO externe accompagne des entites francaises et internationales dans leur mise en conformite aux reglementations encadrant les traitements de donnees personnelles (RGPD, loi informatique et liber","city":"Paris","region":"Île-De-France","revenue":"1M-5M","employees":"1-10","status":"contacted","notes":"","lastContact":"2026-03-15","createdAt":"2026-03-24"},
+      {"id":6,"firstName":"Cedric","lastName":"Dubucq","jobTitle":"Avocat associé","linkedin":"ACoAAAhmcb8BDI91WP8XWVqxlWllYdPonBsu-hw","companyName":"Bruzzo Dubucq","companyWebsite":"https://www.bruzzodubucq.com/","companyLinkedin":"https://www.linkedin.com/company/bruzzo-dubucq","description":"Depuis 2015, nous servons les interets dune clientele locale et internationale avec rigueur, passion et devouement. Nous accompagnons les dirigeants et entreprises en conseil, contentieux et fiscalite","city":"Aix-En-Provence","region":"N/A","revenue":"1M-5M","employees":"11-50","status":"to_contact","notes":"","lastContact":null,"createdAt":"2026-03-24"},
+      {"id":7,"firstName":"Mamadou","lastName":"Konate","jobTitle":"Avocat associé","linkedin":"ACoAAAEcBeQB8HIj5NdEPXo-UcXfOA7LanoJAhA","companyName":"Jurifis Consult","companyWebsite":"https://www.jurifis.com/","companyLinkedin":"https://www.linkedin.com/company/selarl-jurifis-consult","description":"Jurifis Consult is a Legal Firm based in Paris, Bamako, Douala and Yaounde.","city":"Paris","region":"Bamako","revenue":"1M-5M","employees":"11-50","status":"contacted","notes":"","lastContact":"2026-03-22","createdAt":"2026-03-24"},
+      {"id":8,"firstName":"Houssen","lastName":"Issoufaly","jobTitle":"Founder & chief executive officer","linkedin":"ACoAAAibI08B62XKxPZP8yaQTPdkTYHM1gY-q24","companyName":"HODL CONSULTING","companyWebsite":"https://hodl-consulting.com/","companyLinkedin":"https://www.linkedin.com/company/hodl-consulting-cabinet-d-expertise-comptable-et-de-conseil","description":"Chez HODL Consulting, nous accompagnons les societes evoluant dans la TECH. Fonde par Houssen ISSOUF ALY, expert-comptable inscrit a l'ordre de Paris, Ile-de-France, et qui accompagne plus d'une centa","city":"Paris","region":"Île-De-France","revenue":"0-500K","employees":"1-10","status":"qualified","notes":"","lastContact":"2026-03-27","createdAt":"2026-03-24"},
+      {"id":9,"firstName":"Benjamin","lastName":"Chouai","jobTitle":"Associé","linkedin":"ACoAAAsxC0UBUWCpEhLFfV2vA0Bi0YcbbjzyAEw","companyName":"Saul","companyWebsite":"https://saul-associes.fr/","companyLinkedin":"https://www.linkedin.com/company/saul-associes","description":"Saul est une boutique independante de conseil et de contentieux en droit des affaires.","city":"Paris","region":"Île-De-France","revenue":"1M-5M","employees":"11-50","status":"to_contact","notes":"","lastContact":null,"createdAt":"2026-03-24"},
+      {"id":10,"firstName":"Christophe","lastName":"Buffet","jobTitle":"Associé","linkedin":"ACoAAB1kF0YBUgeKzVQA4hslh7eQXjROl0Xxq08","companyName":"ACR Avocats","companyWebsite":"https://www.acr-avocats.com/","companyLinkedin":"https://www.linkedin.com/company/avocats-conseils-r-unis","description":"Le cabinet ACR Avocats, societe civile professionnelle davocats inscrite au Barreau dAngers, a ete fondee en 1992 lors du rapprochement des deux professions davocat et de conseil juridique ; ont alors","city":"Angers","region":"N/A","revenue":"1M-5M","employees":"11-50","status":"contacted","notes":"","lastContact":"2026-03-18","createdAt":"2026-03-24"},
+      {"id":11,"firstName":"Jean","lastName":"Martinez","jobTitle":"Avocat associé","linkedin":"ACoAAAB0Q0sBH1g1pH3dzIgpodpzMV4h0ByIeqs","companyName":"ONE - Société d'Avocats","companyWebsite":"https://www.oneavocats.com/","companyLinkedin":"https://www.linkedin.com/company/prieur-stuckey-soci-t-d-avocats","description":"ONE est un cabinet francais davocats daffaires passionnes par la vie de lentreprise. DYNAMIQUE ET ENGAGEE, lequipe du Cabinet ONE intervient pour des societes francaises et internationales. Notre prat","city":"Marseille","region":"N/A","revenue":"1M-5M","employees":"11-50","status":"to_contact","notes":"","lastContact":null,"createdAt":"2026-03-24"},
+      {"id":12,"firstName":"Corinne","lastName":"Lepage","jobTitle":"Avocat associé","linkedin":"ACoAABYdkh0BYNCrsH5b6UreqBfTFCV1kWi6odE","companyName":"Huglo Lepage Avocats","companyWebsite":"https://www.huglo-lepage.com/","companyLinkedin":"https://www.linkedin.com/company/huglo-lepage-avocats","description":"Cabinet  full services  en environnement et droit public, pionnier du droit de lenvironnement, Huglo Lepage Avocats se reinvente et integre un large ecosysteme collaboratif dopen innovation.","city":"Paris","region":"Île-De-France","revenue":"1M-5M","employees":"11-50","status":"contacted","notes":"","lastContact":"2026-03-10","createdAt":"2026-03-24"},
+      {"id":13,"firstName":"Guillaume","lastName":"Kaltenbach","jobTitle":"Dirigeant-fondateur","linkedin":"ACoAAAALZc0BVvdTqPYUwsk2csjqSFbeio8cxD8","companyName":"LE DROIT POUR MOI","companyWebsite":"https://www.ledroitpourmoi.fr/","companyLinkedin":"https://www.linkedin.com/company/ledroitpourmoi","description":"Avec lacceleration de la digitalisation et les enjeux lies a la reglementation, la video et le elearning sont des outils incontournables pour communiquer et former. LE DROIT POUR MOI propose des forma","city":"Paris","region":"Île-De-France","revenue":"1M-5M","employees":"11-50","status":"to_contact","notes":"","lastContact":null,"createdAt":"2026-03-24"},
+      {"id":14,"firstName":"Florian","lastName":"Artiglieri","jobTitle":"Chief executive officer & cofounder","linkedin":"ACoAACmBemUBtD73ugyRp6mvuUq43dFZUubg8H8","companyName":"Khompta","companyWebsite":"https://khompta.com/khompta-groupe-developpez-votre-cabinet-dexpertise-comptable/","companyLinkedin":"https://www.linkedin.com/company/khompta","description":"Khompta est la solution innovante concue pour accelerer la croissance de votre cabinet. Nos quatre modules distincts, mais parfaitement complementaires, sont specifiquement concus pour repondre aux be","city":"Levallois-Perret","region":"Île-De-France","revenue":"0-500K","employees":"1-10","status":"proposal_sent","notes":"","lastContact":"2026-03-25","createdAt":"2026-03-24"},
+      {"id":15,"firstName":"Romain","lastName":"Drosne","jobTitle":"Founder - chief executive officer","linkedin":"ACoAAAAQwa0BiHZtaiWxcW-yCxE4tos8bPjJ8es","companyName":"Justice.cool","companyWebsite":"https://www.justice.cool/","companyLinkedin":"https://www.linkedin.com/company/justicecool","description":"Justice.cool makes justice enter a new era. Launched in January 2020, Justice.cool is a legal tech dedicated to mass or serial litigation management. It offers a range of services & tools to the whole","city":"Nogent-Sur-Marne","region":"Île-De-France","revenue":"1M-5M","employees":"1-10","status":"to_contact","notes":"","lastContact":null,"createdAt":"2026-03-24"},
+      {"id":16,"firstName":"Alexandre","lastName":"Fievee","jobTitle":"Avocat associé","linkedin":"ACoAAARYJwkBQ8xrIGlw6-KHe7ggj2fXti1EIv8","companyName":"Derriennic Associés","companyWebsite":"https://www.derriennic.com/","companyLinkedin":"https://www.linkedin.com/company/derriennic","description":"Cabinet d'avocats de droit des affaires et nouvelles technologies : www.derriennic.com => \"Acteur de reference dans les technologies de linformation et de la communication depuis plus de trente ans, D","city":"Paris","region":"Île-De-France","revenue":"1M-5M","employees":"11-50","status":"to_contact","notes":"","lastContact":null,"createdAt":"2026-03-24"},
+      {"id":17,"firstName":"Linda","lastName":"Eikelenboom","jobTitle":"Partner","linkedin":"ACoAAADXBVMB27DWqzKev-VtlLn9u1rkKayZuV4","companyName":"Eurofiscalis","companyWebsite":"https://www.eurofiscalis.com/","companyLinkedin":"https://www.linkedin.com/company/eurofiscalis","description":"We are a recognized multi-disciplinary firm providing international companies with tax, customs and accounting solutions to facilitate their development in Europe.","city":"Oslo","region":"Oslo","revenue":"1M-5M","employees":"11-50","status":"to_contact","notes":"","lastContact":null,"createdAt":"2026-03-24"},
+      {"id":18,"firstName":"Romain","lastName":"Waiss-moreau","jobTitle":"Partner","linkedin":"ACoAAApKxAAB3LnyIl7wTM-Yv-rhsPn2V0FvpF0","companyName":"LWM","companyWebsite":"https://www.lwm-law.com/","companyLinkedin":"https://www.linkedin.com/company/lwmlaw","description":"LWM est le cabinet davocats des entreprises innovantes.  Une regle : vous connaitre et vous comprendre pour mieux vous accompagner.  Un objectif : mettre a votre disposition des competences complement","city":"New York","region":"New York","revenue":"1M-5M","employees":"11-50","status":"to_contact","notes":"","lastContact":null,"createdAt":"2026-03-24"},
+      {"id":19,"firstName":"Mathieu","lastName":"Davy","jobTitle":"Founder and chief executive officer","linkedin":"ACoAAABHcO4B29XbIa-2zkZqPwVX_cvUjXC309I","companyName":"Call A Lawyer","companyWebsite":"https://www.callalawyer.fr/","companyLinkedin":"https://www.linkedin.com/company/call-a-lawyer","description":"Immediatement le bon avocat pour la bonne decision. Call A Lawyer a ete creee en 2016 par Mathieu Davy, Francois Pekly, et Cyril Feraudet. Elle est la premiere plateforme francaise multi-acces de mise","city":"Paris","region":"Île-De-France","revenue":"500K-1M","employees":"1-10","status":"to_contact","notes":"","lastContact":null,"createdAt":"2026-03-24"},
+      {"id":20,"firstName":"Julien","lastName":"Anderson","jobTitle":"Avocat associé","linkedin":"ACoAABT1nVYBx_hDLwnxfpRTvesKHiM1mGmitFA","companyName":"Jaberson Avocats","companyWebsite":"https://www.jaberson-avocats.com/","companyLinkedin":"https://www.linkedin.com/company/jabersonavocats","description":"Congratulations ! You have found a team to advise you on your daily tax and legal issues and your strategic decisions.","city":"Marseille","region":"N/A","revenue":"1M-5M","employees":"11-50","status":"to_contact","notes":"","lastContact":null,"createdAt":"2026-03-24"},
+      {"id":21,"firstName":"David","lastName":"Rigaud","jobTitle":"Avocat associé","linkedin":"ACoAAB6ECdAB1Q323nwNbWnzLDt0gyZfdBtArFA","companyName":"RIGAUD AVOCATS","companyWebsite":"https://rigaudavocats.com/accueil","companyLinkedin":"https://www.linkedin.com/company/rigaud-avocats","description":"Pionnier, RIGAUD AVOCATS est le premier cabinet specialise en droit et strategie des remunerations. Leader, il est classe  Tier 1  par Legal 500 et  Incontournable  par Decideurs Magazine. Il a rempor","city":"Paris","region":"Île-De-France","revenue":"1M-5M","employees":"11-50","status":"to_contact","notes":"","lastContact":null,"createdAt":"2026-03-24"},
+      {"id":22,"firstName":"Jean-baptiste","lastName":"Soufron","jobTitle":"Avocat associé","linkedin":"ACoAAAA-JAUBKGTV6Z6DIcDjKzgcfQ_g3FKLdug","companyName":"FWPA","companyWebsite":"https://www.fwpa-avocats.com/","companyLinkedin":"https://www.linkedin.com/company/fwpa","description":"Issue du Cabinet Warusfel & Associes fonde en 1986, Feltesse Warusfel Pasquier & Associes (FWPA) est une societe d'avocats nee en 2003 du rapprochement entre Jean-Yves Feltesse, avocat specialise en d","city":"Paris","region":"Île-De-France","revenue":"1M-5M","employees":"11-50","status":"to_contact","notes":"","lastContact":null,"createdAt":"2026-03-24"},
+      {"id":23,"firstName":"Thomas","lastName":"Palmieri","jobTitle":"Co-founder & chief operating officer","linkedin":"ACoAABTdv8kBfSmGWYXD8cqp-iDjlQZLVzXELwo","companyName":"Strattt","companyWebsite":"https://strattt.com/","companyLinkedin":"https://www.linkedin.com/company/strattt","description":"Vous cherchez un partenaire pour vous accompagner dans vos decisions de gestion ? Bienvenue chez Strattt, au-dela de vos etats financiers attestes par votre Expert-comptable, notre equipe vous accompa","city":"Lille","region":"Hauts-De-France","revenue":"1M-5M","employees":"11-50","status":"to_contact","notes":"","lastContact":null,"createdAt":"2026-03-24"},
+      {"id":24,"firstName":"Stephane","lastName":"Choisez","jobTitle":"Fondateur","linkedin":"ACoAAAor43cBKWZlzZzRvPNCLVnSwLSrZ5ry_g8","companyName":"CHOISEZ & ASSOCIES","companyWebsite":"https://choisezetassocies.com/","companyLinkedin":"https://www.linkedin.com/company/choisezetassocies","description":"Avec plus de 15 avocats et juristes specialises en droit des assurances, dans les domaines du contentieux et du conseil, CHOISEZ & ASSOCIES dispose d'une expertise juridique reconnue aussi bien en Fra","city":"Paris","region":"Île-De-France","revenue":"1M-5M","employees":"11-50","status":"to_contact","notes":"","lastContact":null,"createdAt":"2026-03-24"},
+      {"id":25,"firstName":"Archibald","lastName":"Celeyron","jobTitle":"Avocat associé","linkedin":"ACoAAB9UWF0B4kys41ghzP5IyyRy9jQcdGyA6FA","companyName":"VingtRue","companyWebsite":"https://vingtrue.com/","companyLinkedin":"https://www.linkedin.com/company/vingtrue","description":"VingtRue protege ses clients face aux nouveaux risques repressifs, reputationnels, environnementaux et economiques, en alliant les expertises de son equipe en droit penal des affaires, en droit public","city":"Paris","region":"Île-De-France","revenue":"1M-5M","employees":"11-50","status":"to_contact","notes":"","lastContact":null,"createdAt":"2026-03-24"},
+      {"id":26,"firstName":"Michel","lastName":"Apostolou","jobTitle":"Co-founder & chief technology officer","linkedin":"ACoAAAXVln4Bk5qc_K3TrsLQ4MCUPxM5MsrXGuY","companyName":"Ytems","companyWebsite":"https://com.ytems.app/","companyLinkedin":"https://www.linkedin.com/company/ytems","description":"Ytems est la solution tout-en-un des experts-comptables pour les professions liberales. Alliance unique de technologie et dexperience utilisateur, Ytems genere instantanement la comptabilite des BNC a","city":"Paris","region":"Île-De-France","revenue":"1M-5M","employees":"11-50","status":"to_contact","notes":"","lastContact":null,"createdAt":"2026-03-24"},
+      {"id":27,"firstName":"Seydi","lastName":"Ba","jobTitle":"Avocat associé","linkedin":"ACoAABvCPXQB4wqCSlV79Tjb6OIO11aUoDLuNdQ","companyName":"JBBA | Cabinet d'avocats","companyWebsite":"https://www.jbba.co/","companyLinkedin":"https://www.linkedin.com/company/jbba","description":"JBBA se veut etre un cabinet davocats a taille humaine accompagnant au mieux ses clients tant en conseil quen contentieux. Forts de leurs experiences dentrepreneurs, avec la creation de Nebedaye, star","city":"Paris","region":"Île-De-France","revenue":"1M-5M","employees":"11-50","status":"to_contact","notes":"","lastContact":null,"createdAt":"2026-03-24"},
+      {"id":28,"firstName":"Jessica","lastName":"Jouan","jobTitle":"Avocat associé","linkedin":"ACoAAA7I4UkBFpihPRtYWPzwLiMXaDmDk5lJB6k","companyName":"GRAMOND AVOCATS","companyWebsite":"https://www.gramond-associes.com/","companyLinkedin":"https://www.linkedin.com/company/gramond-avocats-paris","description":"Gramond & Associes est un cabinet davocats daffaires francais intervenant specifiquement aupres des entrepreneurs, PME, start-up, groupes industriels cotes et non cotes. Gramond & Associes leur apport","city":"Paris","region":"Île-De-France","revenue":"1M-5M","employees":"11-50","status":"to_contact","notes":"","lastContact":null,"createdAt":"2026-03-24"},
+      {"id":29,"firstName":"Jeremie","lastName":"Eskenazi","jobTitle":"Founder and chief executive officer","linkedin":"ACoAAAAWJukBoVcTkrDLjPaXA89KUtOpNKrKV88","companyName":"Wonder.Legal","companyWebsite":"https://www.wonder.legal/","companyLinkedin":"https://www.linkedin.com/company/wonder.legal","description":"Wonder.Legal is an international web site that offers legal documents (letters, contracts, etc.). Wonder.Legal is a market leader in many countries.","city":"Paris","region":"Île-De-France","revenue":"1M-5M","employees":"11-50","status":"to_contact","notes":"","lastContact":null,"createdAt":"2026-03-24"},
+      {"id":30,"firstName":"Kiril","lastName":"Bougartchev","jobTitle":"Managing partner","linkedin":"ACoAAARL0eoB0QU_TIF-WWIJ89pSsK5wAyPwN8Y","companyName":"Bougartchev Moyne Associés","companyWebsite":"https://www.bougartchev-moyne.com/","companyLinkedin":"https://www.linkedin.com/company/bougartchev-moyne-associ%c3%a9s","description":"Apres respectivement 30 et 20 ans dexercice professionnel dans de grandes maisons et des centaines de proces, nous avons choisi de creer un cabinet ambitieux pour nos clients ou independance, liberte,","city":"Paris","region":"Île-De-France","revenue":"1M-5M","employees":"11-50","status":"to_contact","notes":"","lastContact":null,"createdAt":"2026-03-24"},
+      {"id":31,"firstName":"Benjamin","lastName":"Forgette","jobTitle":"Directeur général, associé","linkedin":"ACoAAA7wPxcBcq9m4Z8Bd7Kki8TluwVNT-x2eeE","companyName":"Stengelin","companyWebsite":"https://www.stengelin.fr/","companyLinkedin":"https://www.linkedin.com/company/stengelin","description":"Stengelin est un cabinet d'expertise comptable, de conseils et d'accompagnement des entrepreneurs et auto-entrepreneurs.  Notre mission ? Vous accompagner dans chaque aspect crucial de votre parcours ","city":"Paris","region":"Île-De-France","revenue":"1M-5M","employees":"11-50","status":"to_contact","notes":"","lastContact":null,"createdAt":"2026-03-24"},
+      {"id":32,"firstName":"Jean-baptiste","lastName":"Gouache","jobTitle":"Avocat associé","linkedin":"ACoAAAD7F4EBoAfy6xI2yLRxrA9zF7-4uP2tgUQ","companyName":"Gouache Avocats","companyWebsite":"https://www.gouache.fr/","companyLinkedin":"https://www.linkedin.com/company/gouache-avocats","description":"Attorneys advising franchisors, we build networks and assist them in their development. We have developed recognized skills in: - franchise agreements, commercial contracts - assisting brands internat","city":"Paris","region":"Île-De-France","revenue":"1M-5M","employees":"11-50","status":"to_contact","notes":"","lastContact":null,"createdAt":"2026-03-24"},
+      {"id":33,"firstName":"Vincent","lastName":"Lacroix","jobTitle":"Avocat associé","linkedin":"ACoAAAlDyZwBm0sAMetD6nOrfx5abWz0EAvoHNg","companyName":"Itinéraires Avocats","companyWebsite":"https://www.itineraires-avocats.fr/","companyLinkedin":"https://www.linkedin.com/company/itineraires-avocats","description":"Bienvenue sur la page Itineraires Avocats. Le cabinet Itineraires Avocats consacre son activite au droit public et au droit des collectivites locales. Son champ dexpertise couvre lensemble des themati","city":"Lyon","region":"Auvergne-Rhône-Alpes","revenue":"1M-5M","employees":"11-50","status":"to_contact","notes":"","lastContact":null,"createdAt":"2026-03-24"},
+      {"id":34,"firstName":"Benedicte","lastName":"Querenet-hahn","jobTitle":"Partner, specialized in labour law, risk management and compliance","linkedin":"ACoAAAXZHdoBiahfG_vZhH90SBGgASawHvGdOws","companyName":"GGV Avocats - Rechtsanwälte","companyWebsite":"https://gg-v.fr/","companyLinkedin":"https://www.linkedin.com/company/ggv-avocats-rechtsanwalte","description":"GGV Avocats - Rechtsanwalte is a Franco-German law firm with a strong entrepreneurial DNA. GGV offers customized services, a strategic orientation and a constant commitment to its clients, in consulti","city":"Paris","region":"Île-De-France","revenue":"1M-5M","employees":"11-50","status":"to_contact","notes":"","lastContact":null,"createdAt":"2026-03-24"},
+      {"id":35,"firstName":"Patrick","lastName":"Delbarre","jobTitle":"Associé","linkedin":"ACoAACXrYswBorHwPZgSyPSYhD2u_1uteEJpPQI","companyName":"PASS CONSEILS","companyWebsite":"https://passconseils.com/","companyLinkedin":"https://www.linkedin.com/company/pass-conseils","description":"Specialise en Conseil, Expertise-Comptable et Expertise Sociale/RH, PASS Conseils accompagne: #Les PME ; #Les STARTS UP ; #Les Professions Liberales (Notaires, Professions Medicales...) ; # Les CSE ; ","city":"Paris","region":"Île-De-France","revenue":"1M-5M","employees":"11-50","status":"to_contact","notes":"","lastContact":null,"createdAt":"2026-03-24"},
+      {"id":36,"firstName":"Xavier","lastName":"Matharan","jobTitle":"Associé fondateur","linkedin":"ACoAABhXlC8B-zPFk4nZlPAO5-xoS1JMgKzhPhw","companyName":"PARME Avocats","companyWebsite":"https://www.parme-avocats.com/","companyLinkedin":"https://www.linkedin.com/company/parme-avocats","description":"Parme Avocats est un cabinet expert en Droit public et prive des Affaires, a lidentite affirmee par 25 ans dexperience et par une relation durable avec ses clients, quil accompagne tant en conseil que","city":"Paris","region":"Île-De-France","revenue":"1M-5M","employees":"11-50","status":"to_contact","notes":"","lastContact":null,"createdAt":"2026-03-24"},
+      {"id":37,"firstName":"Thomas","lastName":"Gerard","jobTitle":"Avocat associé","linkedin":"ACoAAA2_-noBSsxya2yMYBsFda1Wnm3XzEfjfMQ","companyName":"AVANTY Avocats","companyWebsite":"https://avanty-avocats.fr/","companyLinkedin":"https://www.linkedin.com/company/avanty-avocats","description":"AVANTY Avocats est un cabinet specialise en droit des politiques de remunerations, de la protection sociale dentreprise et de la distribution et conformite assurantielle. Menes par des associes partic","city":"Paris","region":"Île-De-France","revenue":"1M-5M","employees":"11-50","status":"to_contact","notes":"","lastContact":null,"createdAt":"2026-03-24"},
+      {"id":38,"firstName":"Franck","lastName":"Labarre","jobTitle":"Founder - chief executive officer","linkedin":"ACoAAAR54X8BWeh1i9nyFizFGxo78rix8gr_V78","companyName":"ComptaSecure","companyWebsite":"https://www.comptasecure.fr/","companyLinkedin":"https://www.linkedin.com/company/comptasecure","description":"ComptaSecure, plateforme d'Intelligence Comptable dediee aux professionnels du chiffre, exploite le Fichier des Ecritures Comptables (FEC) pour optimiser les methodes comptables, securiser la fiscalit","city":"Paris","region":"Île-De-France","revenue":"1M-5M","employees":"11-50","status":"to_contact","notes":"","lastContact":null,"createdAt":"2026-03-24"},
+      {"id":39,"firstName":"Valence","lastName":"Borgia","jobTitle":"Partner","linkedin":"ACoAAAArDusBAPzqUvc2egN16FuraFe28xgqzEE","companyName":"Medici Law firm","companyWebsite":"https://medici-law.com/","companyLinkedin":"https://www.linkedin.com/company/medici-law-firm","description":"Medici est un cabinet specialise en arbitrage et contentieux des affaires. Au sein dune structure innovante et souple, nous avons la volonte dincarner les valeurs dexcellence, defficacite, denthousias","city":"Paris","region":"Île-De-France","revenue":"500K-1M","employees":"1-10","status":"to_contact","notes":"","lastContact":null,"createdAt":"2026-03-24"},
+      {"id":40,"firstName":"Lucie","lastName":"Guy-gauthier","jobTitle":"Founder & chief executive officer of abeona - legal expert in professional & family immigration (in france","linkedin":"ACoAABwOMNEBXQrk1kRzmcwGiwzQGcgIj82LSIY","companyName":"ABEONA","companyWebsite":"https://www.abeona-immigration.com/","companyLinkedin":"https://www.linkedin.com/company/abeona-hr","description":"ABEONA help with administrative and legal formalities to facilitate the recruitment of qualified foreign personnel. For any request, lguy@abeona-hr.com","city":"Paris","region":"Île-De-France","revenue":"1M-5M","employees":"1-10","status":"to_contact","notes":"","lastContact":null,"createdAt":"2026-03-24"},
+      {"id":41,"firstName":"Morgan","lastName":"Gizardin","jobTitle":"Avocat associé - partner","linkedin":"ACoAAAB9JQwBkCuuqHlsg-AuESWz9L7n-fxh4DM","companyName":"Le 16 Law","companyWebsite":"https://le16law.com/en/home/","companyLinkedin":"https://www.linkedin.com/company/le-16-law","description":"Le 16 Law is dedicated to the prevention and strategic management of complex business law disputes.","city":"Paris","region":"Île-De-France","revenue":"1M-5M","employees":"11-50","status":"to_contact","notes":"","lastContact":null,"createdAt":"2026-03-24"},
+      {"id":42,"firstName":"Antoine","lastName":"Legendre","jobTitle":"Fondateur","linkedin":"ACoAABOUY2EBfDcbrzCLp5FakuCHK-R7XoDJ8aM","companyName":"Freebe","companyWebsite":"https://www.freebe.me/","companyLinkedin":"https://www.linkedin.com/company/freebe.me","description":"Freebe.me, loutil de gestion intelligent dedie aux independants en Micro-entreprise, EI, EURL, SARL, SASU, SAS Freebe.me est un outil de gestion intelligent et intuitif pour sortir les independants de","city":"Rennes","region":"Bretagne","revenue":"0-500K","employees":"1-10","status":"to_contact","notes":"","lastContact":null,"createdAt":"2026-03-24"},
+      {"id":43,"firstName":"Guillaume","lastName":"Aksil","jobTitle":"Managing partner","linkedin":"ACoAAAMlrIEBgy-OJkJ_0R7YRIj8slUxbPFGeu8","companyName":"LINCOLN AVOCATS CONSEIL","companyWebsite":"https://lincoln-avocats.com/","companyLinkedin":"https://www.linkedin.com/company/lincoln-avocats-conseil","description":"Cabinet d'avocats - Specialistes en Assurance","city":"Paris","region":"Île-De-France","revenue":"1M-5M","employees":"11-50","status":"to_contact","notes":"","lastContact":null,"createdAt":"2026-03-24"},
+      {"id":44,"firstName":"Hicham","lastName":"Alhasan","jobTitle":"Co-founder & chief operating officer","linkedin":"ACoAAA7LCPgBdNPYGhcglvGjfQYF3wHWiQ4SfaY","companyName":"Ytems","companyWebsite":"https://com.ytems.app/","companyLinkedin":"https://www.linkedin.com/company/ytems","description":"Ytems est la solution tout-en-un des experts-comptables pour les professions liberales. Alliance unique de technologie et dexperience utilisateur, Ytems genere instantanement la comptabilite des BNC a","city":"Paris","region":"Île-De-France","revenue":"1M-5M","employees":"11-50","status":"to_contact","notes":"","lastContact":null,"createdAt":"2026-03-24"},
+      {"id":45,"firstName":"Baptiste","lastName":"Robelin","jobTitle":"Associé","linkedin":"ACoAAAfXN2IBFsiXyLw4rB4sUBUZuDwjsv0dAHY","companyName":"Novlaw Avocats","companyWebsite":"https://www.novlaw.fr/","companyLinkedin":"https://www.linkedin.com/company/novlaw","description":"NOVLAW AVOCATS offre un accompagnement global en droit des affaires, droit immobilier, droit public et compliance. Veritable partenaire de nos clients, nous leur apportons des solutions operationnelle","city":"Paris","region":"Île-De-France","revenue":"1M-5M","employees":"11-50","status":"to_contact","notes":"","lastContact":null,"createdAt":"2026-03-24"},
+      {"id":46,"firstName":"Loic","lastName":"Centelles","jobTitle":"Co-founder & chief revenue officer","linkedin":"ACoAABNjz2wBy8EcIQSPokFe2iLWFBqIVEm49lw","companyName":"Comptacrypto","companyWebsite":"https://www.comptacrypto.com/","companyLinkedin":"https://www.linkedin.com/company/comptacrypto","description":"ComptaCrypto est le premier outil concu pour realiser les declarations fiscales et comptables des professionnels de la crypto.","city":"Lyon","region":"Auvergne-Rhône-Alpes","revenue":"0-500K","employees":"1-10","status":"to_contact","notes":"","lastContact":null,"createdAt":"2026-03-24"},
+      {"id":47,"firstName":"Raphael","lastName":"Kaminsky","jobTitle":"Partner","linkedin":"ACoAAAD9rLgBdeLAEr_TucW0zRap6ha9C6rbUDI","companyName":"Teynier Pic","companyWebsite":"https://www.teynier.fr/","companyLinkedin":"https://www.linkedin.com/company/teynier-pic","description":"Founded in 2004 by Eric Teynier and Pierre Pic, Teynier Pic is the first independent boutique firm dedicated to international and domestic dispute resolution in France. Our firm focuses on dispute res","city":"Paris","region":"Île-De-France","revenue":"1M-5M","employees":"11-50","status":"to_contact","notes":"","lastContact":null,"createdAt":"2026-03-24"},
+      {"id":48,"firstName":"Farzana","lastName":"Beeharry","jobTitle":"Founder & director","linkedin":"ACoAAAHO-fMBafKRbz1EHg8xWLGpBxRpZZ8IgxU","companyName":"LegalUnite","companyWebsite":"https://www.legalunite.com/","companyLinkedin":"https://www.linkedin.com/company/legalunite","description":"With over 10 years of experience as lawyers as well as legal recruitment professionals, we at LegalUnite accompany law firms and companies of different sizes and structures to recruit for their legal ","city":"Paris","region":"Île-De-France","revenue":"500K-1M","employees":"1-10","status":"to_contact","notes":"","lastContact":null,"createdAt":"2026-03-24"},
+      {"id":49,"firstName":"Raphael","lastName":"Jabol","jobTitle":"Co-founder","linkedin":"ACoAAAP-1-ABzIjaff_-gC36rkcEMXs7QCr38NQ","companyName":"Ekie","companyWebsite":"https://www.ekie.co/","companyLinkedin":"https://www.linkedin.com/company/getekie","description":"Pioneer of the digitalization of access to legal help (information, advice, document review and legal representation), Ekie is the 1st Legal Care service in Europe. Thanks to its application, Ekie all","city":"Paris","region":"Île-De-France","revenue":"1M-5M","employees":"11-50","status":"to_contact","notes":"","lastContact":null,"createdAt":"2026-03-24"},
+      {"id":50,"firstName":"Bernard-olivier","lastName":"Becker","jobTitle":"Associé","linkedin":"ACoAAAPU10YBYdG6uU7L_lJXORTvx2RgrJ1j590","companyName":"Solferino","companyWebsite":"https://solferinoassocies.com/","companyLinkedin":"https://www.linkedin.com/company/solferino-associ-s","description":"Fonde par cinq avocats issus dun prestigieux cabinet daffaires parisien, Solferino Associes propose a ses clients des solutions sur mesure et des prestations juridiques dexcellence dans le domaine du ","city":"Paris","region":"Île-De-France","revenue":"1M-5M","employees":"11-50","status":"to_contact","notes":"","lastContact":null,"createdAt":"2026-03-24"},
+      {"id":51,"firstName":"Laurent","lastName":"Bidault","jobTitle":"Avocat associé / fondateur","linkedin":"ACoAAAmXhQwBHqEsElFCMvmrtr203cq85MsslU0","companyName":"Novlaw Avocats","companyWebsite":"https://www.novlaw.fr/","companyLinkedin":"https://www.linkedin.com/company/novlaw","description":"NOVLAW AVOCATS offre un accompagnement global en droit des affaires, droit immobilier, droit public et compliance. Veritable partenaire de nos clients, nous leur apportons des solutions operationnelle","city":"Paris","region":"Île-De-France","revenue":"1M-5M","employees":"11-50","status":"to_contact","notes":"","lastContact":null,"createdAt":"2026-03-24"},
+      {"id":52,"firstName":"Gabriele","lastName":"Ruscalla","jobTitle":"Partner | associé","linkedin":"ACoAAAGyrcYB_m4VvWAtFBemWVQofiWhjTLijEU","companyName":"Le 16 Law","companyWebsite":"https://le16law.com/en/home/","companyLinkedin":"https://www.linkedin.com/company/le-16-law","description":"Le 16 Law is dedicated to the prevention and strategic management of complex business law disputes.","city":"Paris","region":"Île-De-France","revenue":"1M-5M","employees":"11-50","status":"to_contact","notes":"","lastContact":null,"createdAt":"2026-03-24"},
+      {"id":53,"firstName":"Modeste","lastName":"Marques","jobTitle":"Avocat associe","linkedin":"ACoAAAvl3psBfPwhf6-DsDac9_QVeDZsgSbS0kA","companyName":"GB2A","companyWebsite":"https://www.gb2a.fr/","companyLinkedin":"https://www.linkedin.com/company/gb2a","description":"Depuis maintenant plus de 15 ans au service des projets dinteret public, GB2A intervient principalement dans les domaines du droit public des affaires et du financement de projets. GB2A est classe par","city":"Paris","region":"Île-De-France","revenue":"1M-5M","employees":"11-50","status":"to_contact","notes":"","lastContact":null,"createdAt":"2026-03-24"},
+      {"id":54,"firstName":"Remi","lastName":"Gagliardi","jobTitle":"Fondateur & chief executive officer","linkedin":"ACoAABqTxDMBL3B4mxI1AsMlQALtt7LB5Jxw1vU","companyName":"LegiVox","companyWebsite":"https://www.legivox.fr/","companyLinkedin":"https://www.linkedin.com/company/legivox","description":"Depuis plus de 10 ans, LegiVox accompagne les professionnels du Droit (Avocats, Commissaires de Justice et Experts) dans l'optimisation de leur production documentaire et de leurs taches de back offic","city":"Paris","region":"Île-De-France","revenue":"1M-5M","employees":"11-50","status":"to_contact","notes":"","lastContact":null,"createdAt":"2026-03-24"},
+      {"id":55,"firstName":"Elias","lastName":"Bourran","jobTitle":"Attorney | partner","linkedin":"ACoAAA0fpXMBeUwUy5O9YgXBgpPDVaKfdAOnlq4","companyName":"Beaubourg Avocats","companyWebsite":"https://beaubourg-avocats.fr/","companyLinkedin":"https://www.linkedin.com/company/beaubourg-avocats","description":"We are a French law firm based in Paris. Our scope of expertise is - Crypto law - Blockchain - NFT","city":"Paris","region":"Île-De-France","revenue":"1M-5M","employees":"11-50","status":"to_contact","notes":"","lastContact":null,"createdAt":"2026-03-24"},
+      {"id":56,"firstName":"Sara","lastName":"Seguin","jobTitle":"Partner","linkedin":"ACoAAAbzKXYBBodEev7WgxZRsyNMsoVipCV1BT8","companyName":"Teynier Pic","companyWebsite":"https://www.teynier.fr/","companyLinkedin":"https://www.linkedin.com/company/teynier-pic","description":"Founded in 2004 by Eric Teynier and Pierre Pic, Teynier Pic is the first independent boutique firm dedicated to international and domestic dispute resolution in France. Our firm focuses on dispute res","city":"Paris","region":"Île-De-France","revenue":"1M-5M","employees":"11-50","status":"to_contact","notes":"","lastContact":null,"createdAt":"2026-03-24"},
+      {"id":57,"firstName":"Zineb","lastName":"Bayali","jobTitle":"Managing partner","linkedin":"ACoAAAWFMDQBW6LCsfolcRgwBwbIUNo03NCKjT4","companyName":"BVTC CONSEIL","companyWebsite":"https://bvtc-conseil.fr/","companyLinkedin":"https://www.linkedin.com/company/bvtc-conseill","description":"Dans un monde qui ne cesse devoluer vers un ecosysteme dinnovation, une reglementation en constante mutation, des controverses socio-economiques ... BVTC Conseil est un cabinet dexpertise comptable a ","city":"Asnières-Sur-Seine","region":"Île-De-France","revenue":"1M-5M","employees":"11-50","status":"to_contact","notes":"","lastContact":null,"createdAt":"2026-03-24"},
+      {"id":58,"firstName":"Anthony","lastName":"Roustan","jobTitle":"Avocat associé","linkedin":"ACoAACZv8YIBwC0ZkWwIKNNb7_c5lIfH3p7DWp4","companyName":"Bruzzo Dubucq","companyWebsite":"https://www.bruzzodubucq.com/","companyLinkedin":"https://www.linkedin.com/company/bruzzo-dubucq","description":"Depuis 2015, nous servons les interets dune clientele locale et internationale avec rigueur, passion et devouement. Nous accompagnons les dirigeants et entreprises en conseil, contentieux et fiscalite","city":"Marseille","region":"N/A","revenue":"1M-5M","employees":"11-50","status":"to_contact","notes":"","lastContact":null,"createdAt":"2026-03-24"},
+      {"id":59,"firstName":"Corentin","lastName":"Boutignon","jobTitle":"Avocat associé","linkedin":"ACoAAB5hhSEBUWddwxMR60ZuxcshyVCzQ4T7mCY","companyName":"DELCADE","companyWebsite":"https://www.delcade.fr/","companyLinkedin":"https://www.linkedin.com/company/delcade","description":"Since 2014, Delcade has been supporting startups, SMEs, mid-sized companies, and large international groups with their legal challenges in France and abroad. With a team of nearly 40 lawyers, Delcade ","city":"Lille","region":"Hauts-De-France","revenue":"1M-5M","employees":"11-50","status":"to_contact","notes":"","lastContact":null,"createdAt":"2026-03-24"},
+      {"id":60,"firstName":"Steeve","lastName":"Lopez","jobTitle":"Associé","linkedin":"ACoAACFeI2sB9-rGwUA6AFpoQhSjvstkyjaMsmg","companyName":"PASS CONSEILS","companyWebsite":"https://passconseils.com/","companyLinkedin":"https://www.linkedin.com/company/pass-conseils","description":"Specialise en Conseil, Expertise-Comptable et Expertise Sociale/RH, PASS Conseils accompagne: #Les PME ; #Les STARTS UP ; #Les Professions Liberales (Notaires, Professions Medicales...) ; # Les CSE ; ","city":"Paris","region":"Île-De-France","revenue":"1M-5M","employees":"11-50","status":"to_contact","notes":"","lastContact":null,"createdAt":"2026-03-24"},
+      {"id":61,"firstName":"Frank","lastName":"Wismer","jobTitle":"Avocat associé","linkedin":"ACoAACVVJMMBPm8Oh1Ps3bD_jjz6BROfFqA-G5g","companyName":"AVANTY Avocats","companyWebsite":"https://avanty-avocats.fr/","companyLinkedin":"https://www.linkedin.com/company/avanty-avocats","description":"AVANTY Avocats est un cabinet specialise en droit des politiques de remunerations, de la protection sociale dentreprise et de la distribution et conformite assurantielle. Menes par des associes partic","city":"Paris","region":"Île-De-France","revenue":"1M-5M","employees":"11-50","status":"to_contact","notes":"","lastContact":null,"createdAt":"2026-03-24"},
+      {"id":62,"firstName":"Olivier","lastName":"Brengues","jobTitle":"Co-founder","linkedin":"ACoAAACEVVAB9LP4e3_u4xmx9FFku4_8sQ-H2ic","companyName":"ComptaSecure","companyWebsite":"https://www.comptasecure.fr/","companyLinkedin":"https://www.linkedin.com/company/comptasecure","description":"ComptaSecure, plateforme d'Intelligence Comptable dediee aux professionnels du chiffre, exploite le Fichier des Ecritures Comptables (FEC) pour optimiser les methodes comptables, securiser la fiscalit","city":"Paris","region":"N/A","revenue":"1M-5M","employees":"11-50","status":"to_contact","notes":"","lastContact":null,"createdAt":"2026-03-24"},
+      {"id":63,"firstName":"Nelly","lastName":"Jean-marie","jobTitle":"Avocate associée / partner","linkedin":"ACoAAAPZsacBULiVdkrjAxBbkpEe5I7w_XVhW9w","companyName":"AVANTY Avocats","companyWebsite":"https://avanty-avocats.fr/","companyLinkedin":"https://www.linkedin.com/company/avanty-avocats","description":"AVANTY Avocats est un cabinet specialise en droit des politiques de remunerations, de la protection sociale dentreprise et de la distribution et conformite assurantielle. Menes par des associes partic","city":"Paris","region":"Île-De-France","revenue":"1M-5M","employees":"11-50","status":"to_contact","notes":"","lastContact":null,"createdAt":"2026-03-24"},
+      {"id":64,"firstName":"Xavier","lastName":"Gramond","jobTitle":"Avocat associé, m & a -private equity","linkedin":"ACoAAASNZ6EB7hCcF1gQ9Q1aelp5D7xTqz0Xm64","companyName":"GRAMOND AVOCATS","companyWebsite":"https://www.gramond-associes.com/","companyLinkedin":"https://www.linkedin.com/company/gramond-avocats-paris","description":"Gramond & Associes est un cabinet davocats daffaires francais intervenant specifiquement aupres des entrepreneurs, PME, start-up, groupes industriels cotes et non cotes. Gramond & Associes leur apport","city":"Paris","region":"Île-De-France","revenue":"1M-5M","employees":"11-50","status":"to_contact","notes":"","lastContact":null,"createdAt":"2026-03-24"},
+      {"id":65,"firstName":"Xavier","lastName":"Pignaud","jobTitle":"Avocat associé","linkedin":"ACoAAB5Me4oBI_99WIbno7d_82vShvwUVHJKg00","companyName":"RIGAUD AVOCATS","companyWebsite":"https://rigaudavocats.com/accueil","companyLinkedin":"https://www.linkedin.com/company/rigaud-avocats","description":"Pionnier, RIGAUD AVOCATS est le premier cabinet specialise en droit et strategie des remunerations. Leader, il est classe  Tier 1  par Legal 500 et  Incontournable  par Decideurs Magazine. Il a rempor","city":"Paris","region":"Île-De-France","revenue":"1M-5M","employees":"11-50","status":"to_contact","notes":"","lastContact":null,"createdAt":"2026-03-24"},
+      {"id":66,"firstName":"Anne-helene","lastName":"Trocquer","jobTitle":"M & a corporate partner","linkedin":"ACoAAAC7aPUBec3G7tTk5hWnbw4q-bh_FxFo6LY","companyName":"Squadra Avocats","companyWebsite":"https://www.squadra-avocats.com/","companyLinkedin":"https://www.linkedin.com/company/squadra-avocats","description":"Squadra Avocats est un cabinet francais independant et pluridisciplinaire fonde en 2003 dune trentaine davocats dont onze associes. Il met au service de ses clients, en France comme a linternational, ","city":"Paris","region":"Île-De-France","revenue":"1M-5M","employees":"11-50","status":"to_contact","notes":"","lastContact":null,"createdAt":"2026-03-24"},
+      {"id":67,"firstName":"Yann","lastName":"Dehaudt-delville","jobTitle":"Partner","linkedin":"ACoAAAaLwqsBaj_uHPqVwvxveqH_-CN-2_CXB9Q","companyName":"Teynier Pic","companyWebsite":"https://www.teynier.fr/","companyLinkedin":"https://www.linkedin.com/company/teynier-pic","description":"Founded in 2004 by Eric Teynier and Pierre Pic, Teynier Pic is the first independent boutique firm dedicated to international and domestic dispute resolution in France. Our firm focuses on dispute res","city":"Paris","region":"Île-De-France","revenue":"1M-5M","employees":"11-50","status":"to_contact","notes":"","lastContact":null,"createdAt":"2026-03-24"},
+      {"id":68,"firstName":"Igor","lastName":"Cheloudiakoff","jobTitle":"Chief executive officer & co-fondateur","linkedin":"ACoAAAh47ZgBtNr2NgP599xoqEBoqvHGv2fGHkk","companyName":"Comptacrypto","companyWebsite":"https://www.comptacrypto.com/","companyLinkedin":"https://www.linkedin.com/company/comptacrypto","description":"ComptaCrypto est le premier outil concu pour realiser les declarations fiscales et comptables des professionnels de la crypto.","city":"Belfort","region":"Bourgogne-Franche-Comté","revenue":"0-500K","employees":"1-10","status":"to_contact","notes":"","lastContact":null,"createdAt":"2026-03-24"},
+      {"id":69,"firstName":"Jean-luc","lastName":"Larribau","jobTitle":"Partner","linkedin":"ACoAAADM_R0BLOCqYEA8w8wj6116jYEoAiO6U0A","companyName":"Le 16 Law","companyWebsite":"https://le16law.com/en/home/","companyLinkedin":"https://www.linkedin.com/company/le-16-law","description":"Le 16 Law is dedicated to the prevention and strategic management of complex business law disputes.","city":"Paris","region":"Île-De-France","revenue":"1M-5M","employees":"11-50","status":"to_contact","notes":"","lastContact":null,"createdAt":"2026-03-24"},
+      {"id":70,"firstName":"Isabelle","lastName":"Gavanon","jobTitle":"Avocat / attorney at law – partner at delcade","linkedin":"ACoAAAOs1icBfK_8Pj-95ZNcKOW_dk5z7Orswuo","companyName":"DELCADE","companyWebsite":"https://www.delcade.fr/","companyLinkedin":"https://www.linkedin.com/company/delcade","description":"Since 2014, Delcade has been supporting startups, SMEs, mid-sized companies, and large international groups with their legal challenges in France and abroad. With a team of nearly 40 lawyers, Delcade ","city":"Paris","region":"Île-De-France","revenue":"1M-5M","employees":"11-50","status":"to_contact","notes":"","lastContact":null,"createdAt":"2026-03-24"},
+      {"id":71,"firstName":"Etienne","lastName":"Feildel","jobTitle":"Avocat associé","linkedin":"ACoAABZ7G2UBFK3SwMVIz5-oNBsnQa1BGZFo8TU","companyName":"Bruzzo Dubucq","companyWebsite":"https://www.bruzzodubucq.com/","companyLinkedin":"https://www.linkedin.com/company/bruzzo-dubucq","description":"Depuis 2015, nous servons les interets dune clientele locale et internationale avec rigueur, passion et devouement. Nous accompagnons les dirigeants et entreprises en conseil, contentieux et fiscalite","city":"Aix-En-Provence","region":"N/A","revenue":"1M-5M","employees":"11-50","status":"to_contact","notes":"","lastContact":null,"createdAt":"2026-03-24"},
+      {"id":72,"firstName":"Xavier","lastName":"Bouillot","jobTitle":"Avocat associé","linkedin":"ACoAAAxxvycBGy8M1rX6DT6lf4FofJ-ky8dTLO4","companyName":"VingtRue","companyWebsite":"https://vingtrue.com/","companyLinkedin":"https://www.linkedin.com/company/vingtrue","description":"VingtRue protege ses clients face aux nouveaux risques repressifs, reputationnels, environnementaux et economiques, en alliant les expertises de son equipe en droit penal des affaires, en droit public","city":"Paris","region":"Île-De-France","revenue":"1M-5M","employees":"11-50","status":"to_contact","notes":"","lastContact":null,"createdAt":"2026-03-24"},
+      {"id":73,"firstName":"Yoan","lastName":"Havard","jobTitle":"Avocat associé / partner","linkedin":"ACoAAAOivZMBC1Wc4rkgHKpfskcAyvw7J89yPcg","companyName":"Squadra Avocats","companyWebsite":"https://www.squadra-avocats.com/","companyLinkedin":"https://www.linkedin.com/company/squadra-avocats","description":"Squadra Avocats est un cabinet francais independant et pluridisciplinaire fonde en 2003 dune trentaine davocats dont onze associes. Il met au service de ses clients, en France comme a linternational, ","city":"Paris","region":"Île-De-France","revenue":"1M-5M","employees":"11-50","status":"to_contact","notes":"","lastContact":null,"createdAt":"2026-03-24"},
+      {"id":74,"firstName":"Benoit","lastName":"Barre","jobTitle":"Partner le 16 law","linkedin":"ACoAAABBXi8BvBsCkZkUMrGpMKsRjLb7l0v29EI","companyName":"Le 16 Law","companyWebsite":"https://le16law.com/en/home/","companyLinkedin":"https://www.linkedin.com/company/le-16-law","description":"Le 16 Law is dedicated to the prevention and strategic management of complex business law disputes.","city":"Paris","region":"Île-De-France","revenue":"1M-5M","employees":"11-50","status":"to_contact","notes":"","lastContact":null,"createdAt":"2026-03-24"},
+      {"id":75,"firstName":"Pamela","lastName":"Gouraud","jobTitle":"Avocat associé","linkedin":"ACoAABXkdgsB9clYGrOYrdWFG4jEQq6yNs5Rc18","companyName":"AVANTY Avocats","companyWebsite":"https://avanty-avocats.fr/","companyLinkedin":"https://www.linkedin.com/company/avanty-avocats","description":"AVANTY Avocats est un cabinet specialise en droit des politiques de remunerations, de la protection sociale dentreprise et de la distribution et conformite assurantielle. Menes par des associes partic","city":"Paris","region":"Île-De-France","revenue":"1M-5M","employees":"11-50","status":"to_contact","notes":"","lastContact":null,"createdAt":"2026-03-24"},
+      {"id":76,"firstName":"Emmanuel","lastName":"Mercinier-pantalacci","jobTitle":"Avocat associé","linkedin":"ACoAABf9VpkBDlEiHNGIyjYudrNh4Y0iqhYVjvI","companyName":"VIGO, cabinet d'avocats","companyWebsite":"https://www.vigo-avocats.com/","companyLinkedin":"https://www.linkedin.com/company/vigo-cabinet-d'avocats","description":"Avocats consacres aux risques de lentreprise. Vigo rassemble une equipe davocats pluridisciplinaires aptes a exercer leur mission de defense tant dans le conseil quen pre-contentieux et contentieux. N","city":"Paris","region":"Île-De-France","revenue":"1M-5M","employees":"11-50","status":"to_contact","notes":"","lastContact":null,"createdAt":"2026-03-24"},
+      {"id":77,"firstName":"Charles","lastName":"Morel","jobTitle":"Avocat associé","linkedin":"ACoAABbTpoABkpnIraRxwJ1bfigFRtwW9HQG9rw","companyName":"Squadra Avocats","companyWebsite":"https://www.squadra-avocats.com/","companyLinkedin":"https://www.linkedin.com/company/squadra-avocats","description":"Squadra Avocats est un cabinet francais independant et pluridisciplinaire fonde en 2003 dune trentaine davocats dont onze associes. Il met au service de ses clients, en France comme a linternational, ","city":"Paris","region":"Île-De-France","revenue":"1M-5M","employees":"11-50","status":"to_contact","notes":"","lastContact":null,"createdAt":"2026-03-24"},
+      {"id":78,"firstName":"Damien","lastName":"Billet","jobTitle":"Avocat associé","linkedin":"ACoAAAZubA8BxxW96ozBBiusweQVTp3So_V23yU","companyName":"Jaberson Avocats","companyWebsite":"https://www.jaberson-avocats.com/","companyLinkedin":"https://www.linkedin.com/company/jabersonavocats","description":"Congratulations ! You have found a team to advise you on your daily tax and legal issues and your strategic decisions.","city":"Marseille","region":"N/A","revenue":"1M-5M","employees":"11-50","status":"to_contact","notes":"","lastContact":null,"createdAt":"2026-03-24"},
+      {"id":79,"firstName":"Bruno","lastName":"Guillier","jobTitle":"Avocat associé","linkedin":"ACoAAAm7XdkBXN_XMrV7V5aL87hRGvxz8ZYBDQ4","companyName":"Novlaw Avocats","companyWebsite":"https://www.novlaw.fr/","companyLinkedin":"https://www.linkedin.com/company/novlaw","description":"NOVLAW AVOCATS offre un accompagnement global en droit des affaires, droit immobilier, droit public et compliance. Veritable partenaire de nos clients, nous leur apportons des solutions operationnelle","city":"Paris","region":"Île-De-France","revenue":"1M-5M","employees":"11-50","status":"to_contact","notes":"","lastContact":null,"createdAt":"2026-03-24"},
+      {"id":80,"firstName":"Samuel","lastName":"Sauphanor","jobTitle":"Partner","linkedin":"ACoAAAn1AfMBguT2wxk-SYdG0HakhhupN75oLxs","companyName":"Le 16 Law","companyWebsite":"https://le16law.com/en/home/","companyLinkedin":"https://www.linkedin.com/company/le-16-law","description":"Le 16 Law is dedicated to the prevention and strategic management of complex business law disputes.","city":"Paris","region":"Île-De-France","revenue":"1M-5M","employees":"11-50","status":"to_contact","notes":"","lastContact":null,"createdAt":"2026-03-24"},
+      {"id":81,"firstName":"Edward","lastName":"Huylebrouck","jobTitle":"Partner, former secretary of the conference","linkedin":"ACoAAAmJ8WMB5wmasU-K31juy7wQKYCvlHQ4GgE","companyName":"Bougartchev Moyne Associés","companyWebsite":"https://www.bougartchev-moyne.com/","companyLinkedin":"https://www.linkedin.com/company/bougartchev-moyne-associ%c3%a9s","description":"Apres respectivement 30 et 20 ans dexercice professionnel dans de grandes maisons et des centaines de proces, nous avons choisi de creer un cabinet ambitieux pour nos clients ou independance, liberte,","city":"Paris","region":"Île-De-France","revenue":"1M-5M","employees":"11-50","status":"to_contact","notes":"","lastContact":null,"createdAt":"2026-03-24"},
+      {"id":82,"firstName":"Kim","lastName":"Linard","jobTitle":"Partner lawyer","linkedin":"ACoAAArvSTUBBNXorJRyfj6hzC8M10UT2QpZpCM","companyName":"GGV Avocats - Rechtsanwälte","companyWebsite":"https://gg-v.fr/","companyLinkedin":"https://www.linkedin.com/company/ggv-avocats-rechtsanwalte","description":"GGV Avocats - Rechtsanwalte is a Franco-German law firm with a strong entrepreneurial DNA. GGV offers customized services, a strategic orientation and a constant commitment to its clients, in consulti","city":"Paris","region":"Île-De-France","revenue":"1M-5M","employees":"11-50","status":"to_contact","notes":"","lastContact":null,"createdAt":"2026-03-24"},
+      {"id":83,"firstName":"Johanna","lastName":"Heron","jobTitle":"Avocat associé","linkedin":"ACoAACco1VkBHZX7aQ2Yy8eZKCBLU-2sC6voKmk","companyName":"Jaberson Avocats","companyWebsite":"https://www.jaberson-avocats.com/","companyLinkedin":"https://www.linkedin.com/company/jabersonavocats","description":"Congratulations ! You have found a team to advise you on your daily tax and legal issues and your strategic decisions.","city":"N/A","region":"N/A","revenue":"1M-5M","employees":"11-50","status":"to_contact","notes":"","lastContact":null,"createdAt":"2026-03-24"},
+      {"id":84,"firstName":"Antoine","lastName":"Aubert","jobTitle":"Avocat associé","linkedin":"ACoAACBFExEBom6sr97aLq5GKOu6QqPq6k5wOBg","companyName":"Jaberson Avocats","companyWebsite":"https://www.jaberson-avocats.com/","companyLinkedin":"https://www.linkedin.com/company/jabersonavocats","description":"Congratulations ! You have found a team to advise you on your daily tax and legal issues and your strategic decisions.","city":"Marseille","region":"N/A","revenue":"1M-5M","employees":"11-50","status":"to_contact","notes":"","lastContact":null,"createdAt":"2026-03-24"},
+      {"id":85,"firstName":"Francois-pierre","lastName":"Lani","jobTitle":"Partner","linkedin":"ACoAAAAZvuMBqskiW69mNmXaEFQAfUKnZdmx_I4","companyName":"Derriennic Associés","companyWebsite":"https://www.derriennic.com/","companyLinkedin":"https://www.linkedin.com/company/derriennic","description":"Cabinet d'avocats de droit des affaires et nouvelles technologies : www.derriennic.com => \"Acteur de reference dans les technologies de linformation et de la communication depuis plus de trente ans, D","city":"Paris","region":"Île-De-France","revenue":"1M-5M","employees":"11-50","status":"to_contact","notes":"","lastContact":null,"createdAt":"2026-03-24"},
+      {"id":86,"firstName":"Jeremy","lastName":"Cardenas","jobTitle":"Avocat, partner","linkedin":"ACoAAAQI6u4BX1rk5GZDoUhCA4JDMLLuz1Ob1H4","companyName":"Derriennic Associés","companyWebsite":"https://www.derriennic.com/","companyLinkedin":"https://www.linkedin.com/company/derriennic","description":"Cabinet d'avocats de droit des affaires et nouvelles technologies : www.derriennic.com => \"Acteur de reference dans les technologies de linformation et de la communication depuis plus de trente ans, D","city":"Paris","region":"Île-De-France","revenue":"1M-5M","employees":"11-50","status":"to_contact","notes":"","lastContact":null,"createdAt":"2026-03-24"},
+      {"id":87,"firstName":"Guillaume","lastName":"Buge","jobTitle":"Associé","linkedin":"ACoAAALLVAkBM4wks4eNm8Xyc3ad4giJ3kIh-pQ","companyName":"Solferino","companyWebsite":"https://solferinoassocies.com/","companyLinkedin":"https://www.linkedin.com/company/solferino-associ-s","description":"Fonde par cinq avocats issus dun prestigieux cabinet daffaires parisien, Solferino Associes propose a ses clients des solutions sur mesure et des prestations juridiques dexcellence dans le domaine du ","city":"Paris","region":"Île-De-France","revenue":"1M-5M","employees":"11-50","status":"to_contact","notes":"","lastContact":null,"createdAt":"2026-03-24"},
+      {"id":88,"firstName":"Virginie","lastName":"Cadouin","jobTitle":"Avocat associé","linkedin":"ACoAABZhw8MBYSEmS3GuVuP9J-tMitB2PPC6uLs","companyName":"Bruzzo Dubucq","companyWebsite":"https://www.bruzzodubucq.com/","companyLinkedin":"https://www.linkedin.com/company/bruzzo-dubucq","description":"Depuis 2015, nous servons les interets dune clientele locale et internationale avec rigueur, passion et devouement. Nous accompagnons les dirigeants et entreprises en conseil, contentieux et fiscalite","city":"Marseille","region":"N/A","revenue":"1M-5M","employees":"11-50","status":"to_contact","notes":"","lastContact":null,"createdAt":"2026-03-24"},
+      {"id":89,"firstName":"Emilie","lastName":"Allegrini","jobTitle":"Avocat associée","linkedin":"ACoAABN_fLwBEYUJu8651-bRsGOlfXgqo10TAOg","companyName":"ONE - Société d'Avocats","companyWebsite":"https://www.oneavocats.com/","companyLinkedin":"https://www.linkedin.com/company/prieur-stuckey-soci-t-d-avocats","description":"ONE est un cabinet francais davocats daffaires passionnes par la vie de lentreprise. DYNAMIQUE ET ENGAGEE, lequipe du Cabinet ONE intervient pour des societes francaises et internationales. Notre prat","city":"Marseille","region":"N/A","revenue":"1M-5M","employees":"11-50","status":"to_contact","notes":"","lastContact":null,"createdAt":"2026-03-24"},
+      {"id":90,"firstName":"Jennifer","lastName":"Paty","jobTitle":"Partner","linkedin":"ACoAABQ-yzABnAL4gKH8bQspiZfZBy-L75kutww","companyName":"DELCADE","companyWebsite":"https://www.delcade.fr/","companyLinkedin":"https://www.linkedin.com/company/delcade","description":"Since 2014, Delcade has been supporting startups, SMEs, mid-sized companies, and large international groups with their legal challenges in France and abroad. With a team of nearly 40 lawyers, Delcade ","city":"Paris","region":"Île-De-France","revenue":"1M-5M","employees":"11-50","status":"to_contact","notes":"","lastContact":null,"createdAt":"2026-03-24"},
+      {"id":91,"firstName":"Julie","lastName":"Piquet","jobTitle":"Avocat associé","linkedin":"ACoAAAQ2xLYBFiuFvdqX61TJ-TJmCOV_YuUkfFA","companyName":"DELCADE","companyWebsite":"https://www.delcade.fr/","companyLinkedin":"https://www.linkedin.com/company/delcade","description":"Since 2014, Delcade has been supporting startups, SMEs, mid-sized companies, and large international groups with their legal challenges in France and abroad. With a team of nearly 40 lawyers, Delcade ","city":"Paris","region":"Île-De-France","revenue":"1M-5M","employees":"11-50","status":"to_contact","notes":"","lastContact":null,"createdAt":"2026-03-24"},
+      {"id":92,"firstName":"Alexandre","lastName":"Tessonneau","jobTitle":"Partner","linkedin":"ACoAAAJ0pfgBeK2xpQLOKYFj9cQ9TEL71hHsK2E","companyName":"Squadra Avocats","companyWebsite":"https://www.squadra-avocats.com/","companyLinkedin":"https://www.linkedin.com/company/squadra-avocats","description":"Squadra Avocats est un cabinet francais independant et pluridisciplinaire fonde en 2003 dune trentaine davocats dont onze associes. Il met au service de ses clients, en France comme a linternational, ","city":"Paris","region":"Île-De-France","revenue":"1M-5M","employees":"11-50","status":"to_contact","notes":"","lastContact":null,"createdAt":"2026-03-24"},
+      {"id":93,"firstName":"Ludovic","lastName":"Cuzzi","jobTitle":"Avocat associé","linkedin":"ACoAAAKt9e8BHxgovTGkXgNSFpeShRU9JcMVsz8","companyName":"PARME Avocats","companyWebsite":"https://www.parme-avocats.com/","companyLinkedin":"https://www.linkedin.com/company/parme-avocats","description":"Parme Avocats est un cabinet expert en Droit public et prive des Affaires, a lidentite affirmee par 25 ans dexperience et par une relation durable avec ses clients, quil accompagne tant en conseil que","city":"Paris","region":"Île-De-France","revenue":"1M-5M","employees":"11-50","status":"to_contact","notes":"","lastContact":null,"createdAt":"2026-03-24"},
+      {"id":94,"firstName":"Olivier","lastName":"Mourain","jobTitle":"Avocat associé","linkedin":"ACoAAAOMIJgBwWOOumblK90xDF7qoiFzZfbendc","companyName":"Squadra Avocats","companyWebsite":"https://www.squadra-avocats.com/","companyLinkedin":"https://www.linkedin.com/company/squadra-avocats","description":"Squadra Avocats est un cabinet francais independant et pluridisciplinaire fonde en 2003 dune trentaine davocats dont onze associes. Il met au service de ses clients, en France comme a linternational, ","city":"Paris","region":"Île-De-France","revenue":"1M-5M","employees":"11-50","status":"to_contact","notes":"","lastContact":null,"createdAt":"2026-03-24"},
+      {"id":95,"firstName":"Claire","lastName":"Froger","jobTitle":"Avocat associé","linkedin":"ACoAABILsssBFWY5_SRwj1-2LyUGiKhn5FeZxsA","companyName":"Jaberson Avocats","companyWebsite":"https://www.jaberson-avocats.com/","companyLinkedin":"https://www.linkedin.com/company/jabersonavocats","description":"Congratulations ! You have found a team to advise you on your daily tax and legal issues and your strategic decisions.","city":"Marseille","region":"N/A","revenue":"1M-5M","employees":"11-50","status":"to_contact","notes":"","lastContact":null,"createdAt":"2026-03-24"},
+      {"id":96,"firstName":"Caroline","lastName":"Letellier","jobTitle":"Avocat associé","linkedin":"ACoAABd6LbQBakqOyKevPO0RILOn8W19d94HmhM","companyName":"AVANTY Avocats","companyWebsite":"https://avanty-avocats.fr/","companyLinkedin":"https://www.linkedin.com/company/avanty-avocats","description":"AVANTY Avocats est un cabinet specialise en droit des politiques de remunerations, de la protection sociale dentreprise et de la distribution et conformite assurantielle. Menes par des associes partic","city":"Paris","region":"Île-De-France","revenue":"1M-5M","employees":"11-50","status":"to_contact","notes":"","lastContact":null,"createdAt":"2026-03-24"},
+      {"id":97,"firstName":"Pascal","lastName":"Rouiller","jobTitle":"Avocat associé","linkedin":"ACoAAESk6iMBrb2g8JZC7Usw4BLrwrPMoXpRjw4","companyName":"ACR Avocats","companyWebsite":"https://www.acr-avocats.com/","companyLinkedin":"https://www.linkedin.com/company/avocats-conseils-r-unis","description":"Le cabinet ACR Avocats, societe civile professionnelle davocats inscrite au Barreau dAngers, a ete fondee en 1992 lors du rapprochement des deux professions davocat et de conseil juridique ; ont alors","city":"Angers","region":"N/A","revenue":"1M-5M","employees":"11-50","status":"to_contact","notes":"","lastContact":null,"createdAt":"2026-03-24"},
+      {"id":98,"firstName":"Pierre-yves","lastName":"Margnoux","jobTitle":"Avocat associé","linkedin":"ACoAAAU5dGIBkQMQmH0wNn0lJ4PYQ_Naqjn8rGQ","companyName":"Derriennic Associés","companyWebsite":"https://www.derriennic.com/","companyLinkedin":"https://www.linkedin.com/company/derriennic","description":"Cabinet d'avocats de droit des affaires et nouvelles technologies : www.derriennic.com => \"Acteur de reference dans les technologies de linformation et de la communication depuis plus de trente ans, D","city":"Paris","region":"Île-De-France","revenue":"1M-5M","employees":"11-50","status":"to_contact","notes":"","lastContact":null,"createdAt":"2026-03-24"},
+      {"id":99,"firstName":"Frederic","lastName":"Gorce","jobTitle":"Avocat associé","linkedin":"ACoAAAAFq9EBgyNaLt3s0EFbDChbTbooXh2LZwo","companyName":"DELCADE","companyWebsite":"https://www.delcade.fr/","companyLinkedin":"https://www.linkedin.com/company/delcade","description":"Since 2014, Delcade has been supporting startups, SMEs, mid-sized companies, and large international groups with their legal challenges in France and abroad. With a team of nearly 40 lawyers, Delcade ","city":"Paris","region":"Île-De-France","revenue":"1M-5M","employees":"11-50","status":"to_contact","notes":"","lastContact":null,"createdAt":"2026-03-24"},
+      {"id":100,"firstName":"Emmanuel","lastName":"Benoit","jobTitle":"Avocat associé","linkedin":"ACoAAAVpdW4BVPN2qPUziLB5ZOyhLXT2BajAqDw","companyName":"Derriennic Associés","companyWebsite":"https://www.derriennic.com/","companyLinkedin":"https://www.linkedin.com/company/derriennic","description":"Cabinet d'avocats de droit des affaires et nouvelles technologies : www.derriennic.com => \"Acteur de reference dans les technologies de linformation et de la communication depuis plus de trente ans, D","city":"Paris","region":"Île-De-France","revenue":"1M-5M","employees":"11-50","status":"to_contact","notes":"","lastContact":null,"createdAt":"2026-03-24"},
+    ];
     async function supabaseGet(table) {
       const response = await fetch(`${SUPABASE_URL}/rest/v1/${table}?select=*`, { headers: supabaseHeaders });
       if (!response.ok) throw new Error(`Erreur GET ${table}`);
@@ -468,6 +572,20 @@
             stage: p.stage, daysSince: p.days_since, email: p.email,
             linkedin: p.linkedin, notes: p.notes
           }));
+          
+          // CRM Prospects - Données hardcodées pour démo
+          // En production : await supabaseGet('crm_prospects')
+          appData.crmProspects = CRM_PROSPECTS_DATA;
+          
+          // Social Media Posts - Données hardcodées pour démo
+          appData.socialPosts = [
+            {id:1,platform:'instagram',content:'Nouveau projet pour @newbusiness 🎨 Direction artistique minimaliste et audacieuse.',scheduledDate:'2026-04-02',scheduledTime:'10:00',status:'scheduled',image:true,hashtags:'#branding #design #phosphor'},
+            {id:2,platform:'linkedin',content:'Retour sur notre collaboration avec Manza. Un défi passionnant : créer une identité premium pour une marque de pastrami artisanal.',scheduledDate:'2026-04-05',scheduledTime:'14:30',status:'scheduled',image:true,hashtags:''},
+            {id:3,platform:'instagram',content:'Behind the scenes 📸 Process créatif pour Whiti.',scheduledDate:'2026-04-08',scheduledTime:'11:00',status:'draft',image:true,hashtags:'#process #creative #studio'},
+            {id:4,platform:'twitter',content:'Design tip: Less is more. Toujours.',scheduledDate:'2026-04-10',scheduledTime:'09:00',status:'draft',image:false,hashtags:'#designtips'},
+            {id:5,platform:'linkedin',content:'Studio Phosphor recrute ! Nous cherchons un·e designer graphique passionné·e pour rejoindre l\'équipe.',scheduledDate:'2026-03-25',scheduledTime:'15:00',status:'published',image:false,hashtags:''},
+            {id:6,platform:'instagram',content:'Lancement de notre nouveau site portfolio ✨',scheduledDate:'2026-03-28',scheduledTime:'12:00',status:'published',image:true,hashtags:'#portfolio #webdesign #phosphor'}
+          ];
           
           const ca = await supabaseGet('monthly_ca');
           appData.monthlyCA = ca.sort((a, b) => a.display_order - b.display_order)
@@ -1096,6 +1214,18 @@
         <span class="nav-label">CRM</span>
       </button>
 
+      <button class="nav-item" data-section="social" role="menuitem">
+        <span class="nav-icon">
+          <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <rect x="3" y="3" width="7" height="7" rx="1" stroke-width="2"/>
+            <rect x="14" y="3" width="7" height="7" rx="1" stroke-width="2"/>
+            <rect x="3" y="14" width="7" height="7" rx="1" stroke-width="2"/>
+            <rect x="14" y="14" width="7" height="7" rx="1" stroke-width="2"/>
+          </svg>
+        </span>
+        <span class="nav-label">Social</span>
+      </button>
+
     </nav>
 
     <div class="team-section">
@@ -1147,6 +1277,7 @@
       <div class="section-view" data-section-view="project" style="display:none"></div>
       <div class="section-view" data-section-view="finances" style="display:none"></div>
       <div class="section-view" data-section-view="crm" style="display:none"></div>
+      <div class="section-view" data-section-view="social" style="display:none"></div>
     </main>
   </div>
 
@@ -1233,7 +1364,9 @@
         { month: 'Déc', amount: 10000, projected: true }
       ],
       monthlyTarget: 8000,
-      yearTarget: 120000
+      yearTarget: 120000,
+      socialPosts: [], // Chargé depuis Supabase ou données hardcodées
+      crmProspects: [] // Chargé depuis CRM_PROSPECTS_DATA
     };
 
     // === STATE ===
@@ -1254,6 +1387,32 @@
         year: new Date().getFullYear(),  // Année en cours par défaut
         client: 'all'                     // Tous clients
       }
+    };
+    
+    // État Finance (tri, filtres, pagination)
+    const financeState = {
+      sort: 'date_desc', // date_desc, date_asc, amount_desc, amount_asc
+      filterStatus: 'all', // all, payee, en_attente, a_relancer, a_envoyer
+      filterYear: new Date().getFullYear(),
+      filterClient: 'all',
+      itemsPerPage: 20, // 20, 50, 100
+      currentPage: 1
+    };
+    
+    // État CRM (tri, filtres)
+    const crmState = {
+      sort: 'recent', // recent, name_asc, name_desc, company_asc
+      filterStatus: 'all', // all, to_contact, contacted, qualified, proposal_sent, client, lost
+      filterCity: 'all',
+      filterRevenue: 'all',
+      search: ''
+    };
+    
+    // État Social Media
+    const socialState = {
+      view: 'list', // 'list' ou 'calendar'
+      filterPlatform: 'all', // all, instagram, linkedin, twitter, facebook
+      filterStatus: 'all' // all, draft, scheduled, published
     };
 
     // === HELPERS ===
@@ -1413,7 +1572,8 @@
       maintenance: 'Maintenance',
       project: 'Projet',
       finances: 'Finances & Facturation',
-      crm: 'Démarchage CRM'
+      crm: 'Démarchage CRM',
+      social: 'Réseaux Sociaux'
     };
 
     const actionLabels = {
@@ -1423,7 +1583,8 @@
       maintenance: '+ Maintenance',
       project: '+ Document',
       finances: '+ Facture',
-      crm: '+ Prospect'
+      crm: '+ Prospect',
+      social: '+ Publication'
     };
 
     function navigate(section) {
@@ -2439,11 +2600,12 @@ function renderProjectPage() {
                     </div>
                     ${d.factureNetUrl ? `<a href="${d.factureNetUrl}" target="_blank" style="font-size:10px;color:var(--blue);text-decoration:underline;">Voir sur Facture.net →</a>` : ''}
                   </div>
-                  <div style="text-align:right;display:flex;align-items:center;gap:12px;">
-                    <div>
+                  <div style="text-align:right;display:flex;align-items:center;gap:8px;">
+                    <div style="margin-right:8px;">
                       <div style="font-size:14px;font-weight:700;color:${status.class === 'badge-lime' ? 'var(--lime)' : 'var(--text)'};">${formatEuro(d.amount)}</div>
                     </div>
-                    <button class="doc-delete" data-doc-id="${d.id}" style="background:transparent;border:none;cursor:pointer;font-size:11px;color:var(--red);padding:4px;">×</button>
+                    <button class="doc-edit btn btn-ghost btn-sm" data-doc-id="${d.id}" data-doc-type="facture">Éditer</button>
+                    <button class="doc-delete" data-doc-id="${d.id}" style="background:transparent;border:none;cursor:pointer;font-size:16px;color:var(--red);padding:4px;line-height:1;">×</button>
                   </div>
                 </div>
               `;}).join('')}
@@ -2470,11 +2632,12 @@ function renderProjectPage() {
                   </div>
                   ${d.factureNetUrl ? `<a href="${d.factureNetUrl}" target="_blank" style="font-size:10px;color:var(--blue);text-decoration:underline;">Voir sur Facture.net →</a>` : ''}
                 </div>
-                <div style="text-align:right;display:flex;align-items:center;gap:12px;">
-                  <div>
+                <div style="text-align:right;display:flex;align-items:center;gap:8px;">
+                  <div style="margin-right:8px;">
                     <div style="font-size:14px;font-weight:700;">${formatEuro(d.amount)}</div>
                   </div>
-                  <button class="doc-delete" data-doc-id="${d.id}" style="background:transparent;border:none;cursor:pointer;font-size:11px;color:var(--red);padding:4px;">×</button>
+                  <button class="doc-edit btn btn-ghost btn-sm" data-doc-id="${d.id}" data-doc-type="devis">Éditer</button>
+                  <button class="doc-delete" data-doc-id="${d.id}" style="background:transparent;border:none;cursor:pointer;font-size:16px;color:var(--red);padding:4px;line-height:1;">×</button>
                 </div>
               </div>
             `;}).join('')}
@@ -2501,11 +2664,12 @@ function renderProjectPage() {
                   </div>
                   ${d.factureNetUrl ? `<a href="${d.factureNetUrl}" target="_blank" style="font-size:10px;color:var(--blue);text-decoration:underline;">Voir sur Facture.net →</a>` : ''}
                 </div>
-                <div style="text-align:right;display:flex;align-items:center;gap:12px;">
-                  <div>
+                <div style="text-align:right;display:flex;align-items:center;gap:8px;">
+                  <div style="margin-right:8px;">
                     <div style="font-size:14px;font-weight:700;color:${status.class === 'badge-lime' ? 'var(--lime)' : 'var(--text)'};">${formatEuro(d.amount)}</div>
                   </div>
-                  <button class="doc-delete" data-doc-id="${d.id}" style="background:transparent;border:none;cursor:pointer;font-size:11px;color:var(--red);padding:4px;">×</button>
+                  <button class="doc-edit btn btn-ghost btn-sm" data-doc-id="${d.id}" data-doc-type="facture">Éditer</button>
+                  <button class="doc-delete" data-doc-id="${d.id}" style="background:transparent;border:none;cursor:pointer;font-size:16px;color:var(--red);padding:4px;line-height:1;">×</button>
                 </div>
               </div>
             `;}).join('')}
@@ -2532,11 +2696,12 @@ function renderProjectPage() {
                   </div>
                   ${d.factureNetUrl ? `<a href="${d.factureNetUrl}" target="_blank" style="font-size:10px;color:var(--blue);text-decoration:underline;">Voir sur Facture.net →</a>` : ''}
                 </div>
-                <div style="text-align:right;display:flex;align-items:center;gap:12px;">
-                  <div>
+                <div style="text-align:right;display:flex;align-items:center;gap:8px;">
+                  <div style="margin-right:8px;">
                     <div style="font-size:14px;font-weight:700;color:${status.class === 'badge-lime' ? 'var(--lime)' : 'var(--blue)'};">${formatEuro(d.amount)}</div>
                   </div>
-                  <button class="doc-delete" data-doc-id="${d.id}" style="background:transparent;border:none;cursor:pointer;font-size:11px;color:var(--red);padding:4px;">×</button>
+                  <button class="doc-edit btn btn-ghost btn-sm" data-doc-id="${d.id}" data-doc-type="acompte">Éditer</button>
+                  <button class="doc-delete" data-doc-id="${d.id}" style="background:transparent;border:none;cursor:pointer;font-size:16px;color:var(--red);padding:4px;line-height:1;">×</button>
                 </div>
               </div>
             `;}).join('')}
@@ -3230,6 +3395,106 @@ function initProjectPage() {
   document.getElementById('btn-add-acompte')?.addEventListener('click', () => addDocHandler('acompte'));
   document.getElementById('btn-add-facture-maint')?.addEventListener('click', () => addDocHandler('facture'));
   
+  // Éditer document
+  document.querySelectorAll('.doc-edit').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const docId = parseInt(btn.dataset.docId);
+      const docType = btn.dataset.docType;
+      
+      const project = appData.projects.find(p => p.id === projectId);
+      if (!project) return;
+      
+      const doc = (project.documents || []).find(d => d.id === docId);
+      if (!doc) return;
+      
+      // Options statut selon type
+      let statusOptions = '';
+      if (docType === 'devis') {
+        statusOptions = `
+          <option value="a_envoyer" ${doc.status === 'a_envoyer' ? 'selected' : ''}>À envoyer</option>
+          <option value="a_modifier" ${doc.status === 'a_modifier' ? 'selected' : ''}>À modifier</option>
+          <option value="accepte" ${doc.status === 'accepte' ? 'selected' : ''}>Accepté</option>
+          <option value="refuse" ${doc.status === 'refuse' ? 'selected' : ''}>Refusé</option>
+        `;
+      } else {
+        statusOptions = `
+          <option value="en_attente" ${doc.status === 'en_attente' ? 'selected' : ''}>En attente</option>
+          <option value="a_envoyer" ${doc.status === 'a_envoyer' ? 'selected' : ''}>À envoyer</option>
+          <option value="a_relancer" ${doc.status === 'a_relancer' ? 'selected' : ''}>À relancer</option>
+          <option value="payee" ${doc.status === 'payee' ? 'selected' : ''}>Payée</option>
+        `;
+      }
+      
+      openModal(`
+        <div class="modal-box">
+          <div class="modal-title">Éditer ${docType}<button class="modal-close" onclick="closeModal()">×</button></div>
+          <div class="form-group"><label class="form-label">Référence</label><input class="form-input" id="edit-doc-ref" value="${doc.ref}"></div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Montant (€)</label><input class="form-input" type="number" id="edit-doc-amount" value="${doc.amount}"></div>
+            <div class="form-group"><label class="form-label">Date</label><input class="form-input" type="date" id="edit-doc-date" value="${doc.date}"></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Statut</label>
+            <select class="form-input" id="edit-doc-status">
+              ${statusOptions}
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Lien Facture.net</label>
+            <input type="url" id="edit-doc-facturenet-url" class="form-input" value="${doc.factureNetUrl || ''}" placeholder="https://app.facture.net/documents/...">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Réf. Facture.net</label>
+            <input type="text" id="edit-doc-facturenet-ref" class="form-input" value="${doc.factureNetRef || ''}" placeholder="FAC-2026-001">
+          </div>
+          <div style="display:flex;gap:8px;margin-top:20px;">
+            <button class="btn btn-lime" id="save-doc-edit">Sauvegarder</button>
+            <button class="btn btn-ghost" onclick="closeModal()">Annuler</button>
+          </div>
+        </div>
+      `);
+      
+      document.getElementById('save-doc-edit')?.addEventListener('click', async () => {
+        const status = document.getElementById('edit-doc-status').value;
+        
+        const updatedDoc = {
+          ...doc,
+          ref: document.getElementById('edit-doc-ref').value.trim(),
+          amount: parseInt(document.getElementById('edit-doc-amount').value) || 0,
+          date: document.getElementById('edit-doc-date').value,
+          status: status,
+          paid: status === 'payee',
+          factureNetUrl: document.getElementById('edit-doc-facturenet-url').value.trim() || null,
+          factureNetRef: document.getElementById('edit-doc-facturenet-ref').value.trim() || null
+        };
+        
+        const documents = project.documents.map(d => d.id === docId ? updatedDoc : d);
+        
+        const updated = await Supabase.updateProject(projectId, { documents });
+        if (updated) {
+          // Recalculer billed si changement de statut payé
+          const totalBilled = documents
+            .filter(d => d.paid && (d.type === 'facture' || d.type === 'acompte'))
+            .reduce((s, d) => s + (d.amount || 0), 0);
+          await Supabase.updateProject(projectId, { billed: totalBilled });
+          
+          // Mise à jour locale
+          const proj = appData.projects.find(p => p.id === projectId);
+          if (proj) {
+            proj.documents = documents;
+            proj.billed = totalBilled;
+          }
+          
+          closeModal();
+          toast('✓ Document mis à jour');
+          navigate('project');
+        } else {
+          toast('❌ Erreur');
+        }
+      });
+    });
+  });
+  
   // Marquer document payé
   document.querySelectorAll('.doc-mark-paid').forEach(btn => {
     btn.addEventListener('click', async () => {
@@ -3702,258 +3967,871 @@ function initFinances() {
 
     // --- CRM ---
 function renderCRM() {
-  const stages = ['IDENTIFIÉ', 'CONTACTÉ', 'EN DISCUSSION', 'PROPOSITION', 'SIGNÉ'];
-
-  // KPI computations
-  const active = appData.prospects.filter(p => p.stage !== 'SIGNÉ' && p.stage !== 'PERDU');
-  const pipeline = active.reduce((s, p) => s + p.budgetEst, 0);
-  const urgent = appData.prospects.filter(p => p.daysSince > 5 && p.stage !== 'SIGNÉ' && p.stage !== 'PERDU').length;
-  const signed = appData.prospects.filter(p => p.stage === 'SIGNÉ').length;
-  const total = appData.prospects.length;
-  const convRate = Math.round(signed / total * 100);
-
-  // Urgent relances list (for banner)
-  const urgentProspects = appData.prospects.filter(p => p.daysSince > 5 && p.stage !== 'SIGNÉ' && p.stage !== 'PERDU');
-
-  // Kanban columns
-  const stageColors = {
-    'IDENTIFIÉ':     { bg: 'rgba(208,208,208,0.12)', color: 'var(--text2)' },
-    'CONTACTÉ':      { bg: 'rgba(140,183,248,0.15)', color: 'var(--blue)' },
-    'EN DISCUSSION': { bg: 'rgba(151,140,248,0.15)', color: 'var(--purple)' },
-    'PROPOSITION':   { bg: 'rgba(232,130,12,0.15)',  color: 'var(--orange)' },
-    'SIGNÉ':         { bg: 'rgba(177,212,24,0.15)',  color: 'var(--lime)' }
+  const prospects = appData.crmProspects || [];
+  
+  // Filtrer
+  let filtered = prospects.filter(p => {
+    if (crmState.filterStatus !== 'all' && p.status !== crmState.filterStatus) return false;
+    if (crmState.filterCity !== 'all' && p.city !== crmState.filterCity) return false;
+    if (crmState.search) {
+      const search = crmState.search.toLowerCase();
+      return p.firstName.toLowerCase().includes(search) ||
+             p.lastName.toLowerCase().includes(search) ||
+             p.companyName.toLowerCase().includes(search);
+    }
+    return true;
+  });
+  
+  // Trier
+  if (crmState.sort === 'name_asc') {
+    filtered.sort((a, b) => a.lastName.localeCompare(b.lastName));
+  } else if (crmState.sort === 'name_desc') {
+    filtered.sort((a, b) => b.lastName.localeCompare(a.lastName));
+  } else if (crmState.sort === 'company_asc') {
+    filtered.sort((a, b) => a.companyName.localeCompare(b.companyName));
+  } else {
+    filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  }
+  
+  const cities = [...new Set(prospects.map(p => p.city))].sort();
+  
+  const stats = {
+    total: prospects.length,
+    toContact: prospects.filter(p => p.status === 'to_contact').length,
+    contacted: prospects.filter(p => p.status === 'contacted').length,
+    qualified: prospects.filter(p => p.status === 'qualified').length,
+    proposalSent: prospects.filter(p => p.status === 'proposal_sent').length,
+    clients: prospects.filter(p => p.status === 'client').length
   };
-
+  
   return `
-    <div id="section-crm">
-
-      <!-- Header -->
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
-        <div>
-          <h2 style="font-size:22px;font-weight:900;text-transform:uppercase;letter-spacing:-0.02em;color:var(--text);">Pipeline</h2>
-          <div style="font-size:11px;color:var(--text2);margin-top:2px;">Démarchage & Prospection</div>
-        </div>
-        <button class="btn btn-lime" id="add-prospect-btn">+ Prospect</button>
-      </div>
-
-      <!-- Urgent relances banner (only if urgent > 0) -->
-      ${urgentProspects.length > 0 ? `
-        <div class="relance-banner">
-          <div class="relance-banner-title">⚡ ${urgentProspects.length} relance${urgentProspects.length > 1 ? 's' : ''} urgente${urgentProspects.length > 1 ? 's' : ''}</div>
-          <div class="relance-chips">
-            ${urgentProspects.map(p => `
-              <div class="relance-chip banner-relance-btn" data-id="${p.id}">
-                <span class="j-dot ${urgencyClass(p.daysSince)}"></span>
-                ${p.name} — ${urgencyLabel(p.daysSince)}
-              </div>
-            `).join('')}
+<div style="padding:24px;">
+  
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
+    <div>
+      <h2 style="font-size:24px;font-weight:700;margin:0;">CRM</h2>
+      <div style="font-size:13px;color:var(--text2);margin-top:4px;">${filtered.length} prospect(s) · ${stats.total} total</div>
+    </div>
+  </div>
+  
+  <div style="display:flex;gap:12px;margin-bottom:24px;">
+    <div class="kpi-card" style="flex:1;">
+      <div class="kpi-value">${stats.toContact}</div>
+      <div class="kpi-sub">À contacter</div>
+    </div>
+    <div class="kpi-card" style="flex:1;">
+      <div class="kpi-value">${stats.contacted}</div>
+      <div class="kpi-sub">Contactés</div>
+    </div>
+    <div class="kpi-card" style="flex:1;">
+      <div class="kpi-value">${stats.qualified + stats.proposalSent}</div>
+      <div class="kpi-sub">Qualifiés</div>
+    </div>
+    <div class="kpi-card" style="flex:1;">
+      <div class="kpi-value" style="color:var(--lime);">${stats.clients}</div>
+      <div class="kpi-sub">Clients</div>
+    </div>
+  </div>
+  
+  <!-- Actions prioritaires -->
+  ${(() => {
+    const now = new Date();
+    const toContactList = prospects.filter(p => p.status === 'to_contact').slice(0, 5);
+    const toFollowUp = prospects.filter(p => {
+      if (!p.lastContact || p.status === 'client' || p.status === 'lost') return false;
+      const lastContactDate = new Date(p.lastContact);
+      const daysSince = Math.floor((now - lastContactDate) / (1000 * 60 * 60 * 24));
+      return daysSince >= 7; // Relancer après 7 jours
+    }).sort((a, b) => new Date(a.lastContact) - new Date(b.lastContact)).slice(0, 5);
+    
+    if (toContactList.length === 0 && toFollowUp.length === 0) return '';
+    
+    return `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;">
+      
+      ${toFollowUp.length > 0 ? `
+      <div class="card" style="border-left:3px solid var(--orange);">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+          <div style="width:32px;height:32px;background:var(--orange);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:18px;">⚡</div>
+          <div>
+            <div style="font-weight:700;font-size:14px;">À relancer</div>
+            <div style="font-size:11px;color:var(--text2);">${toFollowUp.length} contact(s) sans réponse</div>
           </div>
         </div>
-      ` : ''}
-
-      <!-- KPI Row -->
-      <div class="kpi-grid">
-        <div class="kpi-card">
-          <div class="kpi-value">${active.length}</div>
-          <div class="kpi-sub">Prospects actifs</div>
-          <div class="kpi-trend" style="color:var(--text2);font-size:10px;margin-top:4px;">${total} au total</div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-value" style="font-size:22px;">${formatEuro(pipeline)}</div>
-          <div class="kpi-sub">Pipeline estimé</div>
-          <div class="kpi-trend up">Hors signé</div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-value" style="color:${urgent > 0 ? 'var(--red)' : 'var(--lime)'}">${urgent}</div>
-          <div class="kpi-sub">Relances urgentes</div>
-          <div class="kpi-trend ${urgent > 0 ? 'down' : ''}"> &gt; 5j sans contact</div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-value">${convRate}%</div>
-          <div class="kpi-sub">Taux conversion</div>
-          <div class="kpi-trend up">${signed} signé${signed > 1 ? 's' : ''} / ${total}</div>
-        </div>
-      </div>
-
-      <!-- Kanban Pipeline -->
-      <div class="section-label">Pipeline de prospection</div>
-      <div class="kanban-board">
-        ${stages.map(stage => {
-          const col = stageColors[stage];
-          const cards = appData.prospects.filter(p => p.stage === stage);
-          const colPipeline = cards.reduce((s, p) => s + p.budgetEst, 0);
-          return `
-            <div class="kanban-col">
-              <div class="kanban-header" style="background:${col.bg};color:${col.color};">
-                <span>${stage}</span>
-                <span style="font-weight:400;opacity:0.7;">${cards.length}</span>
-              </div>
-              <div class="kanban-body">
-                ${cards.length === 0 ? `<div style="padding:16px;text-align:center;color:var(--text3);font-size:11px;">—</div>` : ''}
-                ${cards.map(p => {
-                  const urgencyColor = urgencyBarColor(p.daysSince);
-                  const textUrgClass = urgencyTextClass(p.daysSince);
-                  const isSigné = stage === 'SIGNÉ';
-                  return `
-                    <div class="prospect-card" data-prospect-id="${p.id}">
-                      <div style="display:flex;justify-content:space-between;align-items:flex-start;">
-                        <div>
-                          <div class="prospect-name">${p.name}</div>
-                          <div class="prospect-co">${p.city} · ${p.sector}</div>
-                        </div>
-                        <span style="font-size:12px;font-weight:800;" class="${textUrgClass}">${urgencyLabel(p.daysSince)}</span>
-                      </div>
-                      <div class="prospect-budget">~${formatEuro(p.budgetEst)}</div>
-                      <div class="urgency-bar" style="background:${urgencyColor};"></div>
-                      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;">
-                        <span class="source-badge">${p.source}</span>
-                        ${isSigné
-                          ? `<span style="font-size:11px;font-weight:700;color:var(--lime);">✓ Signé</span>`
-                          : `<button class="btn btn-ghost btn-sm relancer-btn" data-prospect-id="${p.id}" data-name="${p.name}" style="font-size:10px;padding:4px 8px;">Relancer →</button>`
-                        }
-                      </div>
-                    </div>
-                  `;
-                }).join('')}
-              </div>
-              <div class="kanban-footer">
-                ${stage === 'SIGNÉ' ? 'Fermé' : 'Pipeline'}: ${formatEuro(colPipeline)}
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          ${toFollowUp.map(p => {
+            const daysSince = Math.floor((now - new Date(p.lastContact)) / (1000 * 60 * 60 * 24));
+            return `
+            <div class="prospect-quick-card" data-prospect-id="${p.id}" style="background:var(--bg3);border-radius:6px;padding:10px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='var(--bg2)'" onmouseout="this.style.background='var(--bg3)'">
+              <div style="display:flex;justify-content:space-between;align-items:start;">
+                <div style="flex:1;">
+                  <div style="font-weight:600;font-size:13px;">${p.firstName} ${p.lastName}</div>
+                  <div style="font-size:11px;color:var(--text2);">${p.companyName}</div>
+                </div>
+                <div style="text-align:right;">
+                  <div style="font-size:10px;color:var(--orange);font-weight:700;">J+${daysSince}</div>
+                  <div style="font-size:9px;color:var(--text3);">${new Date(p.lastContact).toLocaleDateString('fr-FR', {day: '2-digit', month: 'short'})}</div>
+                </div>
               </div>
             </div>
+            `;
+          }).join('')}
+        </div>
+      </div>
+      ` : ''}
+      
+      ${toContactList.length > 0 ? `
+      <div class="card" style="border-left:3px solid var(--blue);">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+          <div style="width:32px;height:32px;background:var(--blue);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:18px;">📧</div>
+          <div>
+            <div style="font-weight:700;font-size:14px;">À contacter</div>
+            <div style="font-size:11px;color:var(--text2);">${stats.toContact} prospect(s) jamais contactés</div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          ${toContactList.map(p => `
+            <div class="prospect-quick-card" data-prospect-id="${p.id}" style="background:var(--bg3);border-radius:6px;padding:10px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='var(--bg2)'" onmouseout="this.style.background='var(--bg3)'">
+              <div style="display:flex;justify-content:space-between;align-items:start;">
+                <div style="flex:1;">
+                  <div style="font-weight:600;font-size:13px;">${p.firstName} ${p.lastName}</div>
+                  <div style="font-size:11px;color:var(--text2);">${p.companyName} · ${p.city}</div>
+                </div>
+                <div style="text-align:right;">
+                  <div style="font-size:10px;color:var(--text3);">${p.revenue}</div>
+                  <div style="font-size:9px;color:var(--text3);">${p.employees}</div>
+                </div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+      ` : ''}
+      
+    </div>
+    `;
+  })()}
+  
+  <div class="card" style="margin-bottom:16px;">
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;">
+      <div>
+        <label class="form-label">Recherche</label>
+        <input type="text" class="form-input" id="crm-search" placeholder="Nom, entreprise..." value="${crmState.search}">
+      </div>
+      <div>
+        <label class="form-label">Statut</label>
+        <select class="form-input" id="crm-filter-status">
+          <option value="all" ${crmState.filterStatus === 'all' ? 'selected' : ''}>Tous</option>
+          <option value="to_contact" ${crmState.filterStatus === 'to_contact' ? 'selected' : ''}>À contacter</option>
+          <option value="contacted" ${crmState.filterStatus === 'contacted' ? 'selected' : ''}>Contacté</option>
+          <option value="qualified" ${crmState.filterStatus === 'qualified' ? 'selected' : ''}>Qualifié</option>
+          <option value="proposal_sent" ${crmState.filterStatus === 'proposal_sent' ? 'selected' : ''}>Devis envoyé</option>
+          <option value="client" ${crmState.filterStatus === 'client' ? 'selected' : ''}>Client</option>
+          <option value="lost" ${crmState.filterStatus === 'lost' ? 'selected' : ''}>Perdu</option>
+        </select>
+      </div>
+      <div>
+        <label class="form-label">Ville</label>
+        <select class="form-input" id="crm-filter-city">
+          <option value="all" ${crmState.filterCity === 'all' ? 'selected' : ''}>Toutes</option>
+          ${cities.map(c => `<option value="${c}" ${crmState.filterCity === c ? 'selected' : ''}>${c}</option>`).join('')}
+        </select>
+      </div>
+      <div>
+        <label class="form-label">Trier par</label>
+        <select class="form-input" id="crm-sort">
+          <option value="recent" ${crmState.sort === 'recent' ? 'selected' : ''}>Plus récent</option>
+          <option value="name_asc" ${crmState.sort === 'name_asc' ? 'selected' : ''}>Nom A→Z</option>
+          <option value="name_desc" ${crmState.sort === 'name_desc' ? 'selected' : ''}>Nom Z→A</option>
+          <option value="company_asc" ${crmState.sort === 'company_asc' ? 'selected' : ''}>Entreprise A→Z</option>
+        </select>
+      </div>
+    </div>
+  </div>
+  
+  <div class="card">
+    <table style="width:100%;border-collapse:collapse;">
+      <thead>
+        <tr style="border-bottom:2px solid var(--border);">
+          <th style="text-align:left;padding:12px;font-size:11px;font-weight:600;color:var(--text2);">CONTACT</th>
+          <th style="text-align:left;padding:12px;font-size:11px;font-weight:600;color:var(--text2);">ENTREPRISE</th>
+          <th style="text-align:left;padding:12px;font-size:11px;font-weight:600;color:var(--text2);">LOCALISATION</th>
+          <th style="text-align:left;padding:12px;font-size:11px;font-weight:600;color:var(--text2);">TAILLE</th>
+          <th style="text-align:left;padding:12px;font-size:11px;font-weight:600;color:var(--text2);">STATUT</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${filtered.map(p => {
+          const statusBadge = {
+            to_contact: { class: 'badge-gray', label: 'À contacter' },
+            contacted: { class: 'badge-blue', label: 'Contacté' },
+            qualified: { class: 'badge-orange', label: 'Qualifié' },
+            proposal_sent: { class: 'badge-purple', label: 'Devis envoyé' },
+            client: { class: 'badge-lime', label: 'Client' },
+            lost: { class: 'badge-red', label: 'Perdu' }
+          }[p.status] || { class: 'badge-gray', label: 'Inconnu' };
+          
+          return `
+          <tr style="border-bottom:1px solid var(--border);cursor:pointer;" class="prospect-row" data-prospect-id="${p.id}">
+            <td style="padding:12px;">
+              <div style="font-weight:600;font-size:13px;">${p.firstName} ${p.lastName}</div>
+              <div style="font-size:11px;color:var(--text2);margin-top:2px;">${p.jobTitle}</div>
+              ${p.linkedin ? `<a href="https://linkedin.com/in/${p.linkedin}" target="_blank" style="font-size:10px;color:var(--blue);" onclick="event.stopPropagation();">LinkedIn →</a>` : ''}
+            </td>
+            <td style="padding:12px;">
+              <div style="font-weight:600;font-size:13px;">${p.companyName}</div>
+              ${p.companyWebsite ? `<a href="${p.companyWebsite}" target="_blank" style="font-size:11px;color:var(--blue);" onclick="event.stopPropagation();">${p.companyWebsite.replace('https://', '').replace('http://', '').slice(0, 30)} →</a>` : ''}
+            </td>
+            <td style="padding:12px;">
+              <div style="font-size:12px;">${p.city}</div>
+              <div style="font-size:10px;color:var(--text3);">${p.region}</div>
+            </td>
+            <td style="padding:12px;">
+              <div style="font-size:11px;">${p.revenue}</div>
+              <div style="font-size:10px;color:var(--text3);">${p.employees}</div>
+            </td>
+            <td style="padding:12px;">
+              <span class="badge ${statusBadge.class}">${statusBadge.label}</span>
+            </td>
+          </tr>
           `;
         }).join('')}
-      </div>
-
-    </div>
+      </tbody>
+    </table>
+    
+    ${filtered.length === 0 ? `
+      <div style="text-align:center;padding:40px;color:var(--text3);">Aucun prospect trouvé</div>
+    ` : ''}
+  </div>
+  
+</div>
   `;
 }
 
 function initCRM() {
-  // Relancer buttons (on cards)
-  document.querySelectorAll('.relancer-btn').forEach(btn => {
-    btn.addEventListener('click', e => {
-      e.stopPropagation();
-      const id = parseInt(btn.dataset.prospectId);
-      const p = appData.prospects.find(x => x.id === id);
-      if (!p) return;
-
+  // Recherche avec debounce
+  let searchTimeout;
+  document.getElementById('crm-search')?.addEventListener('input', (e) => {
+    crmState.search = e.target.value;
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+      navigate('crm');
+    }, 300); // Attendre 300ms après la dernière frappe
+  });
+  
+  // Filtres (rechargement immédiat)
+  document.getElementById('crm-filter-status')?.addEventListener('change', (e) => {
+    crmState.filterStatus = e.target.value;
+    navigate('crm');
+  });
+  
+  document.getElementById('crm-filter-city')?.addEventListener('change', (e) => {
+    crmState.filterCity = e.target.value;
+    navigate('crm');
+  });
+  
+  document.getElementById('crm-sort')?.addEventListener('change', (e) => {
+    crmState.sort = e.target.value;
+    navigate('crm');
+  });
+  
+  // Clic sur ligne prospect = édition
+  document.querySelectorAll('.prospect-row').forEach(row => {
+    row.addEventListener('click', () => {
+      const prospectId = parseInt(row.dataset.prospectId);
+      const prospect = appData.crmProspects.find(p => p.id === prospectId);
+      if (!prospect) return;
+      
       openModal(`
         <div class="modal-box">
           <div class="modal-title">
-            Relancer — ${p.name}
+            Éditer prospect
             <button class="modal-close" onclick="closeModal()">×</button>
           </div>
-          <div style="background:var(--bg3);border-radius:4px;padding:12px;margin-bottom:16px;">
-            <div style="display:flex;gap:16px;flex-wrap:wrap;">
-              <div><span style="font-size:10px;color:var(--text3);text-transform:uppercase;">Dernier contact</span><br><strong class="${urgencyTextClass(p.daysSince)}">${urgencyLabel(p.daysSince)}</strong></div>
-              <div><span style="font-size:10px;color:var(--text3);text-transform:uppercase;">Budget estimé</span><br><strong style="color:var(--lime);">${formatEuro(p.budgetEst)}</strong></div>
-              <div><span style="font-size:10px;color:var(--text3);text-transform:uppercase;">Secteur</span><br><strong>${p.sector}</strong></div>
-              <div><span style="font-size:10px;color:var(--text3);text-transform:uppercase;">Source</span><br><strong>${p.source}</strong></div>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Prénom</label>
+              <input type="text" class="form-input" id="edit-firstName" value="${prospect.firstName}">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Nom</label>
+              <input type="text" class="form-input" id="edit-lastName" value="${prospect.lastName}">
             </div>
           </div>
+          
           <div class="form-group">
-            <label class="form-label">Message de relance (copy-paste ready)</label>
-            <textarea class="form-textarea" id="relance-msg" style="min-height:180px;">Bonjour,
-
-Je me permets de revenir vers vous suite à notre dernier échange concernant votre projet de ${p.sector}.
-
-Chez Studio Phosphor, nous créons des identités visuelles percutantes qui distinguent les marques qui ont quelque chose à dire. Votre projet m'intéresse particulièrement.
-
-Seriez-vous disponible pour un échange de 20 minutes cette semaine ?
-
-Cordialement,
-Enzo Derny
-Studio Phosphor — phosphor.art
-enzo@phosphor.art</textarea>
+            <label class="form-label">Poste</label>
+            <input type="text" class="form-input" id="edit-jobTitle" value="${prospect.jobTitle}">
           </div>
-          <div style="display:flex;gap:8px;margin-top:16px;flex-wrap:wrap;">
-            <button class="btn btn-lime" id="confirm-relance-btn" data-id="${p.id}">✓ Marquer comme relancé</button>
-            <button class="btn btn-ghost" onclick="
-              navigator.clipboard?.writeText(document.getElementById('relance-msg')?.value||'');
-              toast('Message copié !');
-            ">Copier le message</button>
+          
+          <div class="form-group">
+            <label class="form-label">Entreprise</label>
+            <input type="text" class="form-input" id="edit-companyName" value="${prospect.companyName}">
+          </div>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Ville</label>
+              <input type="text" class="form-input" id="edit-city" value="${prospect.city}">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Région</label>
+              <input type="text" class="form-input" id="edit-region" value="${prospect.region}">
+            </div>
+          </div>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Site web</label>
+              <input type="text" class="form-input" id="edit-website" value="${prospect.companyWebsite || ''}">
+            </div>
+            <div class="form-group">
+              <label class="form-label">LinkedIn</label>
+              <input type="text" class="form-input" id="edit-linkedin" value="${prospect.linkedin || ''}">
+            </div>
+          </div>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">CA estimé</label>
+              <select class="form-input" id="edit-revenue">
+                <option ${prospect.revenue === '0-500K' ? 'selected' : ''}>0-500K</option>
+                <option ${prospect.revenue === '500K-1M' ? 'selected' : ''}>500K-1M</option>
+                <option ${prospect.revenue === '1M-5M' ? 'selected' : ''}>1M-5M</option>
+                <option ${prospect.revenue === '5M-10M' ? 'selected' : ''}>5M-10M</option>
+                <option ${prospect.revenue === '10M+' ? 'selected' : ''}>10M+</option>
+                <option ${prospect.revenue === 'N/A' ? 'selected' : ''}>N/A</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Employés</label>
+              <select class="form-input" id="edit-employees">
+                <option ${prospect.employees === '1-10' ? 'selected' : ''}>1-10</option>
+                <option ${prospect.employees === '11-50' ? 'selected' : ''}>11-50</option>
+                <option ${prospect.employees === '51-200' ? 'selected' : ''}>51-200</option>
+                <option ${prospect.employees === '201-500' ? 'selected' : ''}>201-500</option>
+                <option ${prospect.employees === '500+' ? 'selected' : ''}>500+</option>
+                <option ${prospect.employees === 'N/A' ? 'selected' : ''}>N/A</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">Statut</label>
+            <select class="form-input" id="edit-status">
+              <option value="to_contact" ${prospect.status === 'to_contact' ? 'selected' : ''}>À contacter</option>
+              <option value="contacted" ${prospect.status === 'contacted' ? 'selected' : ''}>Contacté</option>
+              <option value="qualified" ${prospect.status === 'qualified' ? 'selected' : ''}>Qualifié</option>
+              <option value="proposal_sent" ${prospect.status === 'proposal_sent' ? 'selected' : ''}>Devis envoyé</option>
+              <option value="client" ${prospect.status === 'client' ? 'selected' : ''}>Client</option>
+              <option value="lost" ${prospect.status === 'lost' ? 'selected' : ''}>Perdu</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">Notes</label>
+            <textarea class="form-textarea" id="edit-notes" style="min-height:80px;">${prospect.notes || ''}</textarea>
+          </div>
+          
+          <div style="display:flex;gap:8px;margin-top:16px;">
+            <button class="btn btn-lime" id="save-prospect-edit-btn">Sauvegarder</button>
             <button class="btn btn-ghost" onclick="closeModal()">Annuler</button>
           </div>
         </div>
       `);
-
-      document.getElementById('confirm-relance-btn')?.addEventListener('click', () => {
-        const prospect = appData.prospects.find(x => x.id === parseInt(document.getElementById('confirm-relance-btn').dataset.id));
-        if (prospect) prospect.daysSince = 0;
+      
+      // Handler sauvegarde
+      document.getElementById('save-prospect-edit-btn')?.addEventListener('click', async () => {
+        // Mettre à jour dans appData
+        prospect.firstName = document.getElementById('edit-firstName')?.value || prospect.firstName;
+        prospect.lastName = document.getElementById('edit-lastName')?.value || prospect.lastName;
+        prospect.jobTitle = document.getElementById('edit-jobTitle')?.value || prospect.jobTitle;
+        prospect.companyName = document.getElementById('edit-companyName')?.value || prospect.companyName;
+        prospect.city = document.getElementById('edit-city')?.value || prospect.city;
+        prospect.region = document.getElementById('edit-region')?.value || prospect.region;
+        prospect.companyWebsite = document.getElementById('edit-website')?.value || '';
+        prospect.linkedin = document.getElementById('edit-linkedin')?.value || '';
+        prospect.revenue = document.getElementById('edit-revenue')?.value || prospect.revenue;
+        prospect.employees = document.getElementById('edit-employees')?.value || prospect.employees;
+        prospect.status = document.getElementById('edit-status')?.value || prospect.status;
+        prospect.notes = document.getElementById('edit-notes')?.value || '';
+        
+        // TODO: Sauvegarder dans Supabase
+        // await supabaseUpdate('crm_prospects', prospectId, prospect);
+        
         closeModal();
-        toast('Relance enregistrée · J+0 ✓');
+        toast('✓ Prospect mis à jour !');
         navigate('crm');
       });
     });
   });
-
-  // Banner relance chips
-  document.querySelectorAll('.banner-relance-btn').forEach(chip => {
-    chip.addEventListener('click', () => {
-      const id = parseInt(chip.dataset.id);
-      const p = appData.prospects.find(x => x.id === id);
-      if (!p) return;
-      // Find the corresponding relancer button and trigger click
-      const relBtn = document.querySelector(`.relancer-btn[data-prospect-id="${id}"]`);
-      if (relBtn) relBtn.click();
-    });
-  });
-
-  // "+ Prospect" button
-  document.getElementById('add-prospect-btn')?.addEventListener('click', () => {
-    openModal(`
-      <div class="modal-box">
-        <div class="modal-title">Nouveau prospect <button class="modal-close" onclick="closeModal()">×</button></div>
-        <div class="form-row">
-          <div class="form-group"><label class="form-label">Nom / Entreprise *</label><input class="form-input" id="new-name" placeholder="Atelier Lumière" required></div>
-          <div class="form-group"><label class="form-label">Ville</label><input class="form-input" id="new-city" placeholder="Montpellier"></div>
-        </div>
-        <div class="form-row">
-          <div class="form-group"><label class="form-label">Secteur</label><input class="form-input" id="new-sector" placeholder="Restauration, Mode..."></div>
-          <div class="form-group"><label class="form-label">Budget estimé (€)</label><input class="form-input" type="number" id="new-budget" placeholder="3000"></div>
-        </div>
-        <div class="form-row">
-          <div class="form-group"><label class="form-label">Email</label><input class="form-input" type="email" id="new-email" placeholder="contact@..."></div>
-          <div class="form-group"><label class="form-label">Source</label><select class="form-select" id="new-source"><option value="LinkedIn">LinkedIn</option><option value="Réseau">Réseau</option><option value="Entrant">Entrant</option><option value="Autre">Autre</option></select></div>
-        </div>
-        <div class="form-group"><label class="form-label">Notes</label><textarea class="form-textarea" id="new-notes" placeholder="Contexte du projet..."></textarea></div>
-        <div style="display:flex;gap:8px;margin-top:20px;">
-          <button class="btn btn-lime" id="save-prospect-btn">Ajouter le prospect</button>
-          <button class="btn btn-ghost" onclick="closeModal()">Annuler</button>
-        </div>
-      </div>
-    `);
-
-    document.getElementById('save-prospect-btn')?.addEventListener('click', async () => {
-      const name = document.getElementById('new-name')?.value.trim();
-      if (!name) { toast('Nom requis'); return; }
+  
+  // Handler cartes rapides (à relancer + à contacter)
+  document.querySelectorAll('.prospect-quick-card').forEach(card => {
+    card.addEventListener('click', () => {
+      const prospectId = parseInt(card.dataset.prospectId);
+      const prospect = appData.crmProspects.find(p => p.id === prospectId);
+      if (!prospect) return;
       
-      // Sauvegarder dans Supabase
-      const newProspect = await Supabase.addProspect({
-        name,
-        company: name,
-        city: document.getElementById('new-city')?.value || '',
-        sector: document.getElementById('new-sector')?.value || '',
-        budgetEst: parseInt(document.getElementById('new-budget')?.value) || 0,
-        source: document.getElementById('new-source')?.value || 'Autre',
-        stage: 'IDENTIFIÉ',
-        daysSince: 0,
-        email: document.getElementById('new-email')?.value || '',
-        linkedin: '',
-        notes: document.getElementById('new-notes')?.value || ''
-      });
-      
-      if (newProspect) {
-        await Supabase.loadAllData();
-        closeModal();
-        toast('✓ Prospect ajouté !');
-        navigate('crm');
-      } else {
-        toast('❌ Erreur de sauvegarde');
+      // Ouvrir modal édition (réutiliser le code existant)
+      const row = document.querySelector(`.prospect-row[data-prospect-id="${prospectId}"]`);
+      if (row) {
+        row.click(); // Déclencher le clic sur la ligne correspondante
       }
     });
   });
 }
+
+function renderSocial() {
+  console.log('🎨 renderSocial() appelé');
+  console.log('📊 socialPosts:', appData.socialPosts);
+  const posts = appData.socialPosts || [];
+  console.log('✓ Posts chargés:', posts.length);
+  
+  // Filtrer
+  let filtered = posts.filter(p => {
+    if (socialState.filterPlatform !== 'all' && p.platform !== socialState.filterPlatform) return false;
+    if (socialState.filterStatus !== 'all' && p.status !== socialState.filterStatus) return false;
+    return true;
+  });
+  
+  // Trier par date (plus récent d'abord)
+  filtered.sort((a, b) => new Date(b.scheduledDate + ' ' + b.scheduledTime) - new Date(a.scheduledDate + ' ' + a.scheduledTime));
+  
+  // Stats
+  const stats = {
+    total: posts.length,
+    scheduled: posts.filter(p => p.status === 'scheduled').length,
+    draft: posts.filter(p => p.status === 'draft').length,
+    published: posts.filter(p => p.status === 'published').length
+  };
+  
+  // Fonction helper icône plateforme
+  const getPlatformIcon = (platform) => {
+    const icons = {
+      instagram: '📸',
+      linkedin: '💼',
+      twitter: '🐦',
+      facebook: '👥'
+    };
+    return icons[platform] || '📱';
+  };
+  
+  const getPlatformColor = (platform) => {
+    const colors = {
+      instagram: '#E4405F',
+      linkedin: '#0A66C2',
+      twitter: '#1DA1F2',
+      facebook: '#1877F2'
+    };
+    return colors[platform] || 'var(--text2)';
+  };
+  
+  const getStatusBadge = (status) => {
+    const badges = {
+      draft: { class: 'badge-gray', label: 'Brouillon' },
+      scheduled: { class: 'badge-blue', label: 'Programmé' },
+      published: { class: 'badge-lime', label: 'Publié' }
+    };
+    return badges[status] || { class: 'badge-gray', label: 'Inconnu' };
+  };
+  
+  // VUE LISTE
+  const renderListView = () => `
+    <div class="card">
+      <table style="width:100%;border-collapse:collapse;">
+        <thead>
+          <tr style="border-bottom:2px solid var(--border);">
+            <th style="text-align:left;padding:12px;font-size:11px;font-weight:600;color:var(--text2);">PLATEFORME</th>
+            <th style="text-align:left;padding:12px;font-size:11px;font-weight:600;color:var(--text2);">CONTENU</th>
+            <th style="text-align:left;padding:12px;font-size:11px;font-weight:600;color:var(--text2);">DATE</th>
+            <th style="text-align:left;padding:12px;font-size:11px;font-weight:600;color:var(--text2);">STATUT</th>
+            <th style="text-align:left;padding:12px;font-size:11px;font-weight:600;color:var(--text2);">ACTIONS</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${filtered.map(post => {
+            const statusBadge = getStatusBadge(post.status);
+            const platformColor = getPlatformColor(post.platform);
+            return `
+            <tr style="border-bottom:1px solid var(--border);" class="social-post-row" data-post-id="${post.id}">
+              <td style="padding:12px;">
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <span style="font-size:20px;">${getPlatformIcon(post.platform)}</span>
+                  <span style="font-weight:600;font-size:13px;color:${platformColor};text-transform:capitalize;">${post.platform}</span>
+                </div>
+              </td>
+              <td style="padding:12px;">
+                <div style="font-size:13px;color:var(--text);max-width:400px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${post.content}</div>
+                ${post.hashtags ? `<div style="font-size:10px;color:var(--blue);margin-top:4px;">${post.hashtags}</div>` : ''}
+                ${post.image ? `<div style="font-size:10px;color:var(--text3);margin-top:4px;">📎 Image jointe</div>` : ''}
+              </td>
+              <td style="padding:12px;">
+                <div style="font-size:12px;font-weight:600;">${new Date(post.scheduledDate).toLocaleDateString('fr-FR', {day: '2-digit', month: 'short'})}</div>
+                <div style="font-size:11px;color:var(--text3);">${post.scheduledTime}</div>
+              </td>
+              <td style="padding:12px;">
+                <span class="badge ${statusBadge.class}">${statusBadge.label}</span>
+              </td>
+              <td style="padding:12px;">
+                <div style="display:flex;gap:4px;">
+                  <button class="btn btn-ghost btn-sm edit-post-btn" data-post-id="${post.id}">Éditer</button>
+                  <button class="btn btn-ghost btn-sm delete-post-btn" data-post-id="${post.id}" style="color:var(--red);">×</button>
+                </div>
+              </td>
+            </tr>
+            `;
+          }).join('')}
+        </tbody>
+      </table>
+      
+      ${filtered.length === 0 ? `
+        <div style="text-align:center;padding:40px;color:var(--text3);">
+          Aucune publication trouvée
+        </div>
+      ` : ''}
+    </div>
+  `;
+  
+  // VUE CALENDRIER
+  const renderCalendarView = () => {
+    // Grouper par semaine
+    const weeks = {};
+    filtered.forEach(post => {
+      const date = new Date(post.scheduledDate);
+      const weekStart = new Date(date);
+      weekStart.setDate(date.getDate() - date.getDay() + 1); // Lundi
+      const weekKey = weekStart.toISOString().split('T')[0];
+      if (!weeks[weekKey]) weeks[weekKey] = [];
+      weeks[weekKey].push(post);
+    });
+    
+    const sortedWeeks = Object.keys(weeks).sort().reverse();
+    
+    return `
+      <div style="display:flex;flex-direction:column;gap:24px;">
+        ${sortedWeeks.map(weekKey => {
+          const weekPosts = weeks[weekKey];
+          const weekStart = new Date(weekKey);
+          const weekEnd = new Date(weekStart);
+          weekEnd.setDate(weekStart.getDate() + 6);
+          
+          return `
+          <div class="card">
+            <div style="font-weight:700;font-size:14px;margin-bottom:16px;color:var(--text2);">
+              Semaine du ${weekStart.toLocaleDateString('fr-FR', {day: '2-digit', month: 'long'})} au ${weekEnd.toLocaleDateString('fr-FR', {day: '2-digit', month: 'long'})}
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(7, 1fr);gap:8px;">
+              ${[...Array(7)].map((_, dayIndex) => {
+                const day = new Date(weekStart);
+                day.setDate(weekStart.getDate() + dayIndex);
+                const dayKey = day.toISOString().split('T')[0];
+                const dayPosts = weekPosts.filter(p => p.scheduledDate === dayKey);
+                
+                return `
+                <div style="background:var(--bg3);border-radius:6px;padding:12px;min-height:120px;">
+                  <div style="font-size:11px;font-weight:700;color:var(--text2);margin-bottom:8px;">
+                    ${day.toLocaleDateString('fr-FR', {weekday: 'short', day: '2-digit'})}
+                  </div>
+                  ${dayPosts.map(post => {
+                    const platformColor = getPlatformColor(post.platform);
+                    const statusBadge = getStatusBadge(post.status);
+                    return `
+                    <div class="social-post-card" data-post-id="${post.id}" style="background:var(--bg2);border-left:3px solid ${platformColor};border-radius:4px;padding:8px;margin-bottom:6px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background='var(--bg2)'">
+                      <div style="display:flex;align-items:center;gap:4px;margin-bottom:4px;">
+                        <span style="font-size:12px;">${getPlatformIcon(post.platform)}</span>
+                        <span style="font-size:9px;font-weight:600;color:${platformColor};text-transform:uppercase;">${post.platform}</span>
+                      </div>
+                      <div style="font-size:10px;color:var(--text);margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">${post.content}</div>
+                      <div style="font-size:9px;color:var(--text3);">${post.scheduledTime}</div>
+                    </div>
+                    `;
+                  }).join('')}
+                </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+          `;
+        }).join('')}
+      </div>
+    `;
+  };
+  
+  return `
+<div style="padding:24px;">
+  
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
+    <div>
+      <h2 style="font-size:24px;font-weight:700;margin:0;">Réseaux Sociaux</h2>
+      <div style="font-size:13px;color:var(--text2);margin-top:4px;">${filtered.length} publication(s) · ${stats.total} total</div>
+    </div>
+    <button class="btn btn-lime" id="add-post-btn">+ Publication</button>
+  </div>
+  
+  <div style="display:flex;gap:12px;margin-bottom:24px;">
+    <div class="kpi-card" style="flex:1;">
+      <div class="kpi-value">${stats.scheduled}</div>
+      <div class="kpi-sub">Programmées</div>
+    </div>
+    <div class="kpi-card" style="flex:1;">
+      <div class="kpi-value">${stats.draft}</div>
+      <div class="kpi-sub">Brouillons</div>
+    </div>
+    <div class="kpi-card" style="flex:1;">
+      <div class="kpi-value" style="color:var(--lime);">${stats.published}</div>
+      <div class="kpi-sub">Publiées</div>
+    </div>
+  </div>
+  
+  <div class="card" style="margin-bottom:16px;">
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;">
+      
+      <div>
+        <label class="form-label">Vue</label>
+        <select class="form-input" id="social-view">
+          <option value="list" ${socialState.view === 'list' ? 'selected' : ''}>Liste</option>
+          <option value="calendar" ${socialState.view === 'calendar' ? 'selected' : ''}>Calendrier</option>
+        </select>
+      </div>
+      
+      <div>
+        <label class="form-label">Plateforme</label>
+        <select class="form-input" id="social-filter-platform">
+          <option value="all" ${socialState.filterPlatform === 'all' ? 'selected' : ''}>Toutes</option>
+          <option value="instagram" ${socialState.filterPlatform === 'instagram' ? 'selected' : ''}>Instagram</option>
+          <option value="linkedin" ${socialState.filterPlatform === 'linkedin' ? 'selected' : ''}>LinkedIn</option>
+          <option value="twitter" ${socialState.filterPlatform === 'twitter' ? 'selected' : ''}>Twitter</option>
+          <option value="facebook" ${socialState.filterPlatform === 'facebook' ? 'selected' : ''}>Facebook</option>
+        </select>
+      </div>
+      
+      <div>
+        <label class="form-label">Statut</label>
+        <select class="form-input" id="social-filter-status">
+          <option value="all" ${socialState.filterStatus === 'all' ? 'selected' : ''}>Tous</option>
+          <option value="draft" ${socialState.filterStatus === 'draft' ? 'selected' : ''}>Brouillon</option>
+          <option value="scheduled" ${socialState.filterStatus === 'scheduled' ? 'selected' : ''}>Programmé</option>
+          <option value="published" ${socialState.filterStatus === 'published' ? 'selected' : ''}>Publié</option>
+        </select>
+      </div>
+      
+      <div style="display:flex;align-items:flex-end;">
+        <button class="btn btn-ghost" style="width:100%;" onclick="socialState.view = socialState.view === 'list' ? 'calendar' : 'list'; navigate('social');">
+          ${socialState.view === 'list' ? '📅 Calendrier' : '📋 Liste'}
+        </button>
+      </div>
+      
+    </div>
+  </div>
+  
+  ${socialState.view === 'list' ? renderListView() : renderCalendarView()}
+  
+</div>
+  `;
+}
+
+function initSocial() {
+  // Filtres
+  document.getElementById('social-view')?.addEventListener('change', (e) => {
+    socialState.view = e.target.value;
+    navigate('social');
+  });
+  
+  document.getElementById('social-filter-platform')?.addEventListener('change', (e) => {
+    socialState.filterPlatform = e.target.value;
+    navigate('social');
+  });
+  
+  document.getElementById('social-filter-status')?.addEventListener('change', (e) => {
+    socialState.filterStatus = e.target.value;
+    navigate('social');
+  });
+  
+  // Bouton ajouter publication
+  document.getElementById('add-post-btn')?.addEventListener('click', () => {
+    openModal(`
+      <div class="modal-box">
+        <div class="modal-title">
+          Nouvelle publication
+          <button class="modal-close" onclick="closeModal()">×</button>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Plateforme</label>
+          <select class="form-input" id="new-platform">
+            <option value="instagram">Instagram</option>
+            <option value="linkedin">LinkedIn</option>
+            <option value="twitter">Twitter</option>
+            <option value="facebook">Facebook</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Contenu</label>
+          <textarea class="form-textarea" id="new-content" style="min-height:100px;" placeholder="Votre publication..."></textarea>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Hashtags</label>
+          <input type="text" class="form-input" id="new-hashtags" placeholder="#design #branding">
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Date</label>
+            <input type="date" class="form-input" id="new-date">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Heure</label>
+            <input type="time" class="form-input" id="new-time" value="10:00">
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Statut</label>
+          <select class="form-input" id="new-status">
+            <option value="draft">Brouillon</option>
+            <option value="scheduled">Programmé</option>
+          </select>
+        </div>
+        
+        <div style="display:flex;gap:8px;margin-top:16px;">
+          <button class="btn btn-lime" id="save-post-btn">Créer</button>
+          <button class="btn btn-ghost" onclick="closeModal()">Annuler</button>
+        </div>
+      </div>
+    `);
+    
+    document.getElementById('save-post-btn')?.addEventListener('click', () => {
+      const newPost = {
+        id: Date.now(),
+        platform: document.getElementById('new-platform')?.value || 'instagram',
+        content: document.getElementById('new-content')?.value || '',
+        hashtags: document.getElementById('new-hashtags')?.value || '',
+        scheduledDate: document.getElementById('new-date')?.value || new Date().toISOString().split('T')[0],
+        scheduledTime: document.getElementById('new-time')?.value || '10:00',
+        status: document.getElementById('new-status')?.value || 'draft',
+        image: false
+      };
+      
+      appData.socialPosts.push(newPost);
+      // TODO: Sauvegarder dans Supabase
+      
+      closeModal();
+      toast('✓ Publication créée !');
+      navigate('social');
+    });
+  });
+  
+  // Éditer publication
+  document.querySelectorAll('.edit-post-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const postId = parseInt(btn.dataset.postId);
+      const post = appData.socialPosts.find(p => p.id === postId);
+      if (!post) return;
+      
+      openModal(`
+        <div class="modal-box">
+          <div class="modal-title">
+            Éditer publication
+            <button class="modal-close" onclick="closeModal()">×</button>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">Plateforme</label>
+            <select class="form-input" id="edit-platform">
+              <option value="instagram" ${post.platform === 'instagram' ? 'selected' : ''}>Instagram</option>
+              <option value="linkedin" ${post.platform === 'linkedin' ? 'selected' : ''}>LinkedIn</option>
+              <option value="twitter" ${post.platform === 'twitter' ? 'selected' : ''}>Twitter</option>
+              <option value="facebook" ${post.platform === 'facebook' ? 'selected' : ''}>Facebook</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">Contenu</label>
+            <textarea class="form-textarea" id="edit-content" style="min-height:100px;">${post.content}</textarea>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">Hashtags</label>
+            <input type="text" class="form-input" id="edit-hashtags" value="${post.hashtags}">
+          </div>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Date</label>
+              <input type="date" class="form-input" id="edit-date" value="${post.scheduledDate}">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Heure</label>
+              <input type="time" class="form-input" id="edit-time" value="${post.scheduledTime}">
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">Statut</label>
+            <select class="form-input" id="edit-status">
+              <option value="draft" ${post.status === 'draft' ? 'selected' : ''}>Brouillon</option>
+              <option value="scheduled" ${post.status === 'scheduled' ? 'selected' : ''}>Programmé</option>
+              <option value="published" ${post.status === 'published' ? 'selected' : ''}>Publié</option>
+            </select>
+          </div>
+          
+          <div style="display:flex;gap:8px;margin-top:16px;">
+            <button class="btn btn-lime" id="update-post-btn">Sauvegarder</button>
+            <button class="btn btn-ghost" onclick="closeModal()">Annuler</button>
+          </div>
+        </div>
+      `);
+      
+      document.getElementById('update-post-btn')?.addEventListener('click', () => {
+        post.platform = document.getElementById('edit-platform')?.value || post.platform;
+        post.content = document.getElementById('edit-content')?.value || post.content;
+        post.hashtags = document.getElementById('edit-hashtags')?.value || '';
+        post.scheduledDate = document.getElementById('edit-date')?.value || post.scheduledDate;
+        post.scheduledTime = document.getElementById('edit-time')?.value || post.scheduledTime;
+        post.status = document.getElementById('edit-status')?.value || post.status;
+        
+        // TODO: Sauvegarder dans Supabase
+        
+        closeModal();
+        toast('✓ Publication mise à jour !');
+        navigate('social');
+      });
+    });
+  });
+  
+  // Supprimer publication
+  document.querySelectorAll('.delete-post-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (!confirm('Supprimer cette publication ?')) return;
+      
+      const postId = parseInt(btn.dataset.postId);
+      const index = appData.socialPosts.findIndex(p => p.id === postId);
+      if (index !== -1) {
+        appData.socialPosts.splice(index, 1);
+        // TODO: Supprimer dans Supabase
+        toast('✓ Publication supprimée');
+        navigate('social');
+      }
+    });
+  });
+  
+  // Clic sur carte calendrier
+  document.querySelectorAll('.social-post-card').forEach(card => {
+    card.addEventListener('click', () => {
+      const postId = parseInt(card.dataset.postId);
+      const editBtn = document.querySelector(`.edit-post-btn[data-post-id="${postId}"]`);
+      if (editBtn) editBtn.click();
+    });
+  });
+}
+
+
 
 
     // === SECTION RENDERERS MAP ===
@@ -3964,7 +4842,8 @@ enzo@phosphor.art</textarea>
       maintenance: { render: renderMaintenance, init: initMaintenance },
       project: { render: renderProjectPage, init: initProjectPage },
       finances: { render: renderFinances, init: initFinances },
-      crm: { render: renderCRM, init: initCRM }
+      crm: { render: renderCRM, init: initCRM },
+      social: { render: renderSocial, init: initSocial }
     };
 
     // === CONTEXT-SENSITIVE ACTION BUTTON ===
@@ -3974,7 +4853,8 @@ enzo@phosphor.art</textarea>
         agenda: () => document.getElementById('btn-add-event')?.click(),
         projects: () => document.getElementById('btn-add-project')?.click(),
         finances: () => document.getElementById('btn-add-invoice')?.click(),
-        crm: () => document.getElementById('add-prospect-btn')?.click()
+        crm: () => document.getElementById('add-prospect-btn')?.click(),
+        social: () => document.getElementById('add-post-btn')?.click()
       };
       const fn = actions[state.activeSection];
       if (fn) fn();
