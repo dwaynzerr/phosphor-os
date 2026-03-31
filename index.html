@@ -1318,26 +1318,26 @@
         { id: 4, ref: 'FAC-023', client: 'MD Courtage', amount: 1200, type: 'Facture', status: 'PAYÉE', statusClass: 'badge-lime' }
       ],
       tasks: [
-        { id: 1, text: 'Préparer brief client Manza', done: false, tag: 'client', assignee: 'enzo' },
-        { id: 2, text: 'Finaliser charte Whiti v2', done: false, tag: 'design', assignee: 'diego' },
-        { id: 3, text: 'Relancer Bakali Design (FAC-024)', done: false, tag: 'admin', assignee: 'enzo' },
-        { id: 4, text: 'Maquettes NB homepage', done: true, tag: 'design', assignee: 'diego' },
-        { id: 5, text: 'Devis Livre interactif', done: false, tag: 'admin', assignee: 'enzo' },
-        { id: 6, text: 'Review dev Framer', done: false, tag: 'dev', assignee: 'enzo' },
-        { id: 7, text: 'Icônes Manza finales', done: false, tag: 'design', assignee: 'diego' },
-        { id: 8, text: 'Update portfolio phosphor.art', done: false, tag: 'dev', assignee: 'enzo' },
-        { id: 9, text: 'Export assets NB v3', done: true, tag: 'design', assignee: 'enzo' },
-        { id: 10, text: 'Call Studio Lumière', done: false, tag: 'client', assignee: 'diego' }
+        { id: 1, text: 'Préparer brief client Manza', done: false, tag: 'client', assignee: 'enzo', deadline: '2026-04-02', priority: 'Haute' },
+        { id: 2, text: 'Finaliser charte Whiti v2', done: false, tag: 'design', assignee: 'diego', deadline: '2026-04-05', priority: 'Moyenne' },
+        { id: 3, text: 'Relancer Bakali Design (FAC-024)', done: false, tag: 'admin', assignee: 'enzo', deadline: '2026-03-31', priority: 'Haute' },
+        { id: 4, text: 'Maquettes NB homepage', done: true, tag: 'design', assignee: 'diego', priority: 'Moyenne' },
+        { id: 5, text: 'Devis Livre interactif', done: false, tag: 'admin', assignee: 'enzo', deadline: '2026-04-01', priority: 'Moyenne' },
+        { id: 6, text: 'Review dev Framer', done: false, tag: 'dev', assignee: 'enzo', deadline: '2026-04-03', priority: 'Basse' },
+        { id: 7, text: 'Icônes Manza finales', done: false, tag: 'design', assignee: 'diego', priority: 'Moyenne' },
+        { id: 8, text: 'Update portfolio phosphor.art', done: false, tag: 'dev', assignee: 'enzo', priority: 'Basse' },
+        { id: 9, text: 'Export assets NB v3', done: true, tag: 'design', assignee: 'enzo', priority: 'Moyenne' },
+        { id: 10, text: 'Call Studio Lumière', done: false, tag: 'client', assignee: 'diego', deadline: '2026-04-04', priority: 'Haute' }
       ],
       events: [
-        { id: 1, title: 'Call Manza', day: 'lun', hour: '9h', type: 'client', assignee: 'enzo' },
-        { id: 2, title: 'Design sprint Whiti', day: 'lun', hour: '14h', type: 'design', assignee: 'diego' },
-        { id: 3, title: 'Dev Framer', day: 'mar', hour: '9h', type: 'dev', assignee: 'enzo' },
-        { id: 4, title: 'Présentation NB', day: 'mer', hour: '11h', type: 'client', assignee: 'enzo' },
-        { id: 5, title: 'Compta / Factures', day: 'jeu', hour: '9h', type: 'admin', assignee: 'enzo' },
-        { id: 6, title: 'Design review Manza', day: 'jeu', hour: '14h', type: 'design', assignee: 'diego' },
-        { id: 7, title: 'Call prospection', day: 'ven', hour: '11h', type: 'client', assignee: 'enzo' },
-        { id: 8, title: 'Sprint interactif', day: 'sam', hour: '9h', type: 'dev', assignee: 'enzo' }
+        { id: 1, title: 'Call Manza', date: '2026-03-31', startTime: '09:00', type: 'client', assignee: 'enzo' },
+        { id: 2, title: 'Design sprint Whiti', date: '2026-03-31', startTime: '14:00', type: 'design', assignee: 'diego' },
+        { id: 3, title: 'Dev Framer', date: '2026-04-01', startTime: '09:00', type: 'dev', assignee: 'enzo' },
+        { id: 4, title: 'Présentation NB', date: '2026-04-02', startTime: '11:00', type: 'client', assignee: 'enzo' },
+        { id: 5, title: 'Compta / Factures', date: '2026-04-03', startTime: '09:00', type: 'admin', assignee: 'enzo' },
+        { id: 6, title: 'Design review Manza', date: '2026-04-03', startTime: '14:00', type: 'design', assignee: 'diego' },
+        { id: 7, title: 'Call prospection', date: '2026-04-04', startTime: '11:00', type: 'client', assignee: 'enzo' },
+        { id: 8, title: 'Sprint interactif', date: '2026-04-05', startTime: '09:00', type: 'dev', assignee: 'enzo' }
       ],
       prospects: [
         { id: 1, name: 'Maison Léa', company: 'Maison Léa', city: 'Montpellier', sector: 'Déco', budgetEst: 2000, source: 'Réseau', stage: 'IDENTIFIÉ', daysSince: -2, email: '', linkedin: '', notes: '' },
@@ -1373,6 +1373,7 @@
       activeSection: 'dashboard',
       filterTag: 'all',
       filterAssignee: 'all',
+      weekOffset: 0,  // Pour navigation calendrier (0 = semaine actuelle)
       // Filtres pour les tâches
       taskFilters: {
         type: 'all',      // 'all', 'design', 'dev', 'client', 'admin'
@@ -1456,6 +1457,38 @@
           projected: index > currentMonth
         };
       });
+    }
+    
+    // Calculer dates de la semaine (lun-dim) à partir d'un offset
+    function getWeekDates(weekOffset = 0) {
+      const today = new Date();
+      const dayOfWeek = today.getDay(); // 0=dim, 1=lun, ..., 6=sam
+      const diff = (dayOfWeek === 0 ? -6 : 1 - dayOfWeek); // Décalage vers lundi
+      
+      const monday = new Date(today);
+      monday.setDate(today.getDate() + diff + (weekOffset * 7));
+      
+      const week = [];
+      for (let i = 0; i < 7; i++) {
+        const day = new Date(monday);
+        day.setDate(monday.getDate() + i);
+        week.push(day);
+      }
+      
+      return week;
+    }
+    
+    // Formater date pour affichage calendrier
+    function formatCalendarDate(date) {
+      const days = ['DIM', 'LUN', 'MAR', 'MER', 'JEU', 'VEN', 'SAM'];
+      return `${days[date.getDay()]} ${date.getDate()}`;
+    }
+    
+    // Vérifier si deux dates sont le même jour
+    function isSameDay(d1, d2) {
+      return d1.getDate() === d2.getDate() &&
+             d1.getMonth() === d2.getMonth() &&
+             d1.getFullYear() === d2.getFullYear();
     }
 
     // Filter tasks based on current filters
@@ -1942,39 +1975,89 @@ function initDashboard() {
 }
 
 function renderAgenda() {
-  const hours = ['9h', '11h', '14h', '16h', '18h'];
-  const days = ['lun', 'mar', 'mer', 'jeu', 'ven', 'sam'];
-  const dayLabels = ['LUN 23', 'MAR 24', 'MER 25', 'JEU 26', 'VEN 27', 'SAM 28'];
-  const todayDay = 'lun';
+  // Calculer semaine actuelle
+  const weekDates = getWeekDates(state.weekOffset);
+  const today = new Date();
+  
+  // Formater dates pour affichage
+  const weekStart = weekDates[0];
+  const weekEnd = weekDates[6];
+  const months = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
+  const weekLabel = weekStart.getMonth() === weekEnd.getMonth()
+    ? `Semaine du ${weekStart.getDate()} au ${weekEnd.getDate()} ${months[weekStart.getMonth()]} ${weekStart.getFullYear()}`
+    : `Semaine du ${weekStart.getDate()} ${months[weekStart.getMonth()]} au ${weekEnd.getDate()} ${months[weekEnd.getMonth()]} ${weekStart.getFullYear()}`;
+  
+  // Créneaux horaires
+  const timeSlots = [
+    { hour: '09:00', label: '9h' },
+    { hour: '10:00', label: '10h' },
+    { hour: '11:00', label: '11h' },
+    { hour: '12:00', label: '12h' },
+    { hour: '14:00', label: '14h' },
+    { hour: '15:00', label: '15h' },
+    { hour: '16:00', label: '16h' },
+    { hour: '17:00', label: '17h' },
+    { hour: '18:00', label: '18h' }
+  ];
 
-  // Calendar
+  // Header calendrier
   let calHeader = `<div class="cal-th cal-hour-cell"></div>`;
-  days.forEach((day, i) => {
-    const isToday = day === todayDay;
-    calHeader += `<div class="cal-th${isToday ? ' today' : ''}">${dayLabels[i]}${isToday ? ' ★' : ''}</div>`;
+  weekDates.forEach(date => {
+    const isToday = isSameDay(date, today);
+    const dayLabel = formatCalendarDate(date);
+    calHeader += `<div class="cal-th${isToday ? ' today' : ''}">${dayLabel}${isToday ? ' ★' : ''}</div>`;
   });
 
+  // Grille calendrier
   let calRows = '';
-  hours.forEach(hour => {
-    let row = `<div class="cal-hour-cell">${hour}</div>`;
-    days.forEach(day => {
-      const events = appData.events.filter(e => e.day === day && e.hour === hour);
-      let cellContent = '';
-      events.forEach(ev => {
-        cellContent += `<div class="cal-event ev-${ev.type}"><span>${ev.title}</span><span class="avatar av-${ev.assignee}"></span></div>`;
+  timeSlots.forEach(slot => {
+    let row = `<div class="cal-hour-cell">${slot.label}</div>`;
+    
+    weekDates.forEach(date => {
+      // Trouver événements ce jour à cette heure
+      const dateStr = date.toISOString().split('T')[0];
+      const eventsAtSlot = (appData.events || []).filter(e => {
+        if (!e.date) return false;
+        const eventDate = e.date.split('T')[0];
+        const eventTime = e.startTime || '09:00';
+        return eventDate === dateStr && eventTime === slot.hour;
       });
-      row += `<div class="cal-cell">${cellContent}</div>`;
+      
+      // Trouver tâches avec deadline ce jour (affichées à 9h)
+      const tasksAtDay = slot.hour === '09:00' ? appData.tasks.filter(t => {
+        if (!t.deadline || t.done) return false;
+        const taskDate = new Date(t.deadline);
+        return isSameDay(taskDate, date);
+      }) : [];
+      
+      let cellContent = '';
+      
+      // Afficher événements
+      eventsAtSlot.forEach(ev => {
+        cellContent += `<div class="cal-event ev-${ev.type}" title="${ev.title}">
+          <span>${ev.title}</span>
+          <span class="avatar av-${ev.assignee}"></span>
+        </div>`;
+      });
+      
+      // Afficher tâches (à 9h seulement)
+      tasksAtDay.forEach(task => {
+        cellContent += `<div class="cal-event ev-${task.tag}" style="opacity:0.7;font-size:11px;" title="Tâche: ${task.text}">
+          <span>📋 ${task.text}</span>
+        </div>`;
+      });
+      
+      row += `<div class="cal-cell" data-date="${dateStr}" data-time="${slot.hour}">${cellContent}</div>`;
     });
+    
     calRows += row;
   });
 
-  // Appliquer filtres + tri
+  // Filtrer et trier tâches
   let filteredTasks = filterTasks(appData.tasks);
   
-  // Tri automatique : non réalisées d'abord
   filteredTasks.sort((a, b) => {
     if (a.done === b.done) {
-      // Même statut → tri selon state.taskSort
       if (state.taskSort === 'date') {
         if (!a.deadline && !b.deadline) return 0;
         if (!a.deadline) return 1;
@@ -1990,13 +2073,9 @@ function renderAgenda() {
       }
       return 0;
     }
-    // Statut différent → non réalisées d'abord
     return a.done ? 1 : -1;
   });
-  
-  const doneTasks = filteredTasks.filter(t => t.done).length;
 
-  // Couleurs types
   const typeColors = {
     design: '#8CB7F8',
     dev: '#978CF8',
@@ -2004,14 +2083,13 @@ function renderAgenda() {
     admin: '#D0D0D0'
   };
 
-  // Couleurs priorités
   const priorityColors = {
     'Haute': '#D4361B',
     'Moyenne': '#E88608',
     'Basse': '#D0D0D0'
   };
 
-  // Filtres sur UNE ligne
+  // Filtres
   const typeFilters = [
     { value: 'all', label: 'Tous' },
     { value: 'design', label: 'Design' },
@@ -2041,12 +2119,11 @@ function renderAgenda() {
     `<button class="btn btn-sm task-filter-status${state.taskFilters.status === f.value ? ' btn-lime' : ' btn-ghost'}" data-value="${f.value}">${f.label}</button>`
   ).join('');
 
-  // Tri
   const sortBtns = ['date', 'priority', 'urgence'].map(s =>
     `<button class="btn btn-sm task-sort-btn${state.taskSort === s ? ' btn-lime' : ' btn-ghost'}" data-sort="${s}">${s === 'date' ? 'Date' : s === 'priority' ? 'Priorité' : 'Urgence'}</button>`
   ).join('');
 
-  // Tasks list - VERSION finale
+  // Liste tâches
   const taskItems = filteredTasks.map(task => {
     const deadlineText = task.deadline ? formatDate(task.deadline) : '';
     const isOverdue = task.deadline && new Date(task.deadline) < new Date() && !task.done;
@@ -2075,7 +2152,6 @@ function renderAgenda() {
 
   const emptyState = filteredTasks.length === 0 ? `<div style="color:var(--text2);padding:32px;text-align:center;"><div style="font-size:48px;margin-bottom:12px;">📋</div><div>Aucune tâche</div></div>` : '';
 
-  // Distribution
   const enzoTasks = appData.tasks.filter(t => t.assignee === 'enzo').length;
   const diegoTasks = appData.tasks.filter(t => t.assignee === 'diego').length;
   const total = enzoTasks + diegoTasks || 1;
@@ -2087,67 +2163,50 @@ function renderAgenda() {
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
         <div style="display:flex;align-items:center;gap:12px;">
           <button class="btn btn-ghost btn-sm" id="cal-prev">&#8592;</button>
-          <span class="section-label" style="margin:0;">Semaine du 23 mars 2026</span>
+          <span class="section-label" style="margin:0;">${weekLabel}</span>
           <button class="btn btn-ghost btn-sm" id="cal-next">&#8594;</button>
         </div>
         <button class="btn btn-lime btn-sm" id="btn-add-event">+ Événement</button>
       </div>
-      <div class="cal-grid" style="display:grid;grid-template-columns:60px repeat(6,1fr);gap:2px;">${calHeader}${calRows}</div>
+      <div class="cal-grid" style="display:grid;grid-template-columns:60px repeat(7,1fr);gap:2px;">${calHeader}${calRows}</div>
     </div>
 
     <div class="divider"></div>
 
     <div class="card" style="margin-bottom:20px;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
-        <div class="section-label">Tâches · ${filteredTasks.length} · ${doneTasks} ✓</div>
-        <button class="btn btn-lime btn-sm" id="btn-add-task">+ Nouvelle tâche</button>
+        <div class="section-label" style="margin:0;">Tâches (${filteredTasks.length})</div>
+        <button class="btn btn-lime btn-sm" id="btn-add-task">+ Tâche</button>
       </div>
 
-      <!-- Filtres + Tri avec labels -->
-      <div style="display:flex;gap:24px;margin-bottom:16px;flex-wrap:wrap;">
-        <div>
-          <div style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--text3);margin-bottom:6px;">Type</div>
-          <div style="display:flex;gap:4px;">${typeFilterBtns}</div>
-        </div>
-        <div>
-          <div style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--text3);margin-bottom:6px;">Assigné</div>
-          <div style="display:flex;gap:4px;">${assigneeFilterBtns}</div>
-        </div>
-        <div>
-          <div style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--text3);margin-bottom:6px;">Statut</div>
-          <div style="display:flex;gap:4px;">${statusFilterBtns}</div>
-        </div>
-        <div>
-          <div style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--text3);margin-bottom:6px;">Tri</div>
-          <div style="display:flex;gap:4px;">${sortBtns}</div>
-        </div>
+      <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--border);">
+        <div style="display:flex;gap:4px;flex-wrap:wrap;">${typeFilterBtns}</div>
+        <div style="display:flex;gap:4px;flex-wrap:wrap;">${assigneeFilterBtns}</div>
+        <div style="display:flex;gap:4px;flex-wrap:wrap;">${statusFilterBtns}</div>
+        <div style="margin-left:auto;display:flex;gap:4px;">${sortBtns}</div>
       </div>
 
-      <div style="display:flex;flex-direction:column;gap:6px;">${taskItems}${emptyState}</div>
+      ${taskItems}${emptyState}
     </div>
 
-    <div class="divider"></div>
-
     <div class="card">
-      <div class="section-label">Répartition équipe</div>
-      <div style="display:flex;flex-direction:column;gap:14px;margin-top:8px;">
-        <div>
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
-            <div style="display:flex;align-items:center;gap:8px;"><span class="avatar av-enzo"></span><span>Enzo</span></div>
-            <span class="badge badge-gray">${enzoTasks} tâche${enzoTasks !== 1 ? 's' : ''} (${enzoPercent}%)</span>
+      <div class="section-label">Distribution</div>
+      <div style="display:flex;gap:20px;margin-top:12px;">
+        <div style="flex:1;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+            <div class="avatar av-enzo" style="width:20px;height:20px;font-size:9px;">ED</div>
+            <span style="font-size:13px;font-weight:600;">Enzo</span>
+            <span style="margin-left:auto;font-size:13px;color:var(--text2);">${enzoTasks} tâches</span>
           </div>
-          <div style="height:8px;background:var(--border);border-radius:4px;overflow:hidden;">
-            <div style="height:100%;width:${enzoPercent}%;background:var(--lime);border-radius:4px;transition:width 0.4s;"></div>
-          </div>
+          <div class="progress"><div class="progress-fill" data-value="${enzoPercent}"></div></div>
         </div>
-        <div>
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
-            <div style="display:flex;align-items:center;gap:8px;"><span class="avatar av-diego"></span><span>Diego</span></div>
-            <span class="badge badge-blue">${diegoTasks} tâche${diegoTasks !== 1 ? 's' : ''} (${diegoPercent}%)</span>
+        <div style="flex:1;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+            <div class="avatar av-diego" style="width:20px;height:20px;font-size:9px;">DH</div>
+            <span style="font-size:13px;font-weight:600;">Diego</span>
+            <span style="margin-left:auto;font-size:13px;color:var(--text2);">${diegoTasks} tâches</span>
           </div>
-          <div style="height:8px;background:var(--border);border-radius:4px;overflow:hidden;">
-            <div style="height:100%;width:${diegoPercent}%;background:var(--blue);border-radius:4px;transition:width 0.4s;"></div>
-          </div>
+          <div class="progress"><div class="progress-fill" data-value="${diegoPercent}"></div></div>
         </div>
       </div>
     </div>
@@ -2155,6 +2214,189 @@ function renderAgenda() {
 }
 
 function initAgenda() {
+  // Navigation calendrier
+  document.getElementById('cal-prev')?.addEventListener('click', () => {
+    state.weekOffset--;
+    navigate('agenda');
+  });
+  
+  document.getElementById('cal-next')?.addEventListener('click', () => {
+    state.weekOffset++;
+    navigate('agenda');
+  });
+  
+  // Bouton + Événement
+  document.getElementById('btn-add-event')?.addEventListener('click', () => {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const tomorrowStr = tomorrow.toISOString().split('T')[0];
+    
+    openModal(`
+      <div class="modal-box">
+        <div class="modal-title">Nouvel événement <button class="modal-close" onclick="closeModal()">×</button></div>
+        
+        <div class="form-group">
+          <label class="form-label">Titre *</label>
+          <input class="form-input" id="new-event-title" placeholder="Réunion client, Call, Sprint...">
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Date *</label>
+            <input type="date" class="form-input" id="new-event-date" value="${tomorrowStr}">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Heure début *</label>
+            <input type="time" class="form-input" id="new-event-start" value="09:00">
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Type</label>
+            <select class="form-input" id="new-event-type">
+              <option value="client">Client</option>
+              <option value="design">Design</option>
+              <option value="dev">Dev</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Assigné à</label>
+            <select class="form-input" id="new-event-assignee">
+              <option value="enzo">Enzo</option>
+              <option value="diego">Diego</option>
+            </select>
+          </div>
+        </div>
+        
+        <div style="display:flex;gap:8px;margin-top:16px;">
+          <button class="btn btn-lime" id="save-event-btn">Créer</button>
+          <button class="btn btn-ghost" onclick="closeModal()">Annuler</button>
+        </div>
+      </div>
+    `);
+    
+    document.getElementById('save-event-btn')?.addEventListener('click', () => {
+      const title = document.getElementById('new-event-title').value.trim();
+      const date = document.getElementById('new-event-date').value;
+      const startTime = document.getElementById('new-event-start').value;
+      const type = document.getElementById('new-event-type').value;
+      const assignee = document.getElementById('new-event-assignee').value;
+      
+      if (!title || !date) {
+        toast('❌ Titre et date obligatoires');
+        return;
+      }
+      
+      const newEvent = {
+        id: Date.now(),
+        title,
+        date,
+        startTime,
+        type,
+        assignee
+      };
+      
+      appData.events = appData.events || [];
+      appData.events.push(newEvent);
+      // TODO: Sauvegarder dans Supabase
+      
+      closeModal();
+      toast('✓ Événement créé');
+      navigate('agenda');
+    });
+  });
+  
+  // Bouton + Tâche
+  document.getElementById('btn-add-task')?.addEventListener('click', () => {
+    openModal(`
+      <div class="modal-box">
+        <div class="modal-title">Nouvelle tâche <button class="modal-close" onclick="closeModal()">×</button></div>
+        
+        <div class="form-group">
+          <label class="form-label">Titre *</label>
+          <input class="form-input" id="new-task-text" placeholder="Préparer brief client, Finaliser charte...">
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Type</label>
+            <select class="form-input" id="new-task-tag">
+              <option value="design">Design</option>
+              <option value="dev">Dev</option>
+              <option value="client">Client</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Priorité</label>
+            <select class="form-input" id="new-task-priority">
+              <option value="Moyenne">Moyenne</option>
+              <option value="Haute">Haute</option>
+              <option value="Basse">Basse</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Assigné à</label>
+            <select class="form-input" id="new-task-assignee">
+              <option value="enzo">Enzo</option>
+              <option value="diego">Diego</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Deadline (optionnel)</label>
+            <input type="date" class="form-input" id="new-task-deadline">
+          </div>
+        </div>
+        
+        <div style="display:flex;gap:8px;margin-top:16px;">
+          <button class="btn btn-lime" id="save-task-btn">Créer</button>
+          <button class="btn btn-ghost" onclick="closeModal()">Annuler</button>
+        </div>
+      </div>
+    `);
+    
+    document.getElementById('save-task-btn')?.addEventListener('click', async () => {
+      const text = document.getElementById('new-task-text').value.trim();
+      const tag = document.getElementById('new-task-tag').value;
+      const priority = document.getElementById('new-task-priority').value;
+      const assignee = document.getElementById('new-task-assignee').value;
+      const deadline = document.getElementById('new-task-deadline').value || null;
+      
+      if (!text) {
+        toast('❌ Titre obligatoire');
+        return;
+      }
+      
+      const newTask = {
+        id: Date.now(),
+        text,
+        tag,
+        priority,
+        assignee,
+        deadline,
+        done: false,
+        completedAt: null
+      };
+      
+      appData.tasks.push(newTask);
+      
+      // Sauvegarder dans Supabase
+      const saved = await Supabase.addTask(newTask);
+      if (saved) {
+        closeModal();
+        toast('✓ Tâche créée');
+        navigate('agenda');
+      } else {
+        toast('❌ Erreur de sauvegarde');
+      }
+    });
+  });
+  
   // Filtres type
   document.querySelectorAll('.task-filter-type').forEach(btn => {
     btn.addEventListener('click', () => {
