@@ -578,15 +578,21 @@
           // En production : await supabaseGet('crm_prospects')
           appData.crmProspects = CRM_PROSPECTS_DATA;
           
-          // Social Media Posts - Données hardcodées pour démo
-          appData.socialPosts = [
-            {id:1,platforms:['instagram','linkedin'],content:'Nouveau projet pour @newbusiness 🎨 Direction artistique minimaliste et audacieuse.',scheduledDate:'2026-04-02',scheduledTime:'10:00',status:'scheduled',image:true,hashtags:'#branding #design #phosphor'},
-            {id:2,platforms:['linkedin'],content:'Retour sur notre collaboration avec Manza. Un défi passionnant : créer une identité premium pour une marque de pastrami artisanal.',scheduledDate:'2026-04-05',scheduledTime:'14:30',status:'scheduled',image:true,hashtags:''},
-            {id:3,platforms:['instagram'],content:'Behind the scenes 📸 Process créatif pour Whiti.',scheduledDate:'2026-04-08',scheduledTime:'11:00',status:'draft',image:true,hashtags:'#process #creative #studio'},
-            {id:4,platforms:['twitter'],content:'Design tip: Less is more. Toujours.',scheduledDate:'2026-04-10',scheduledTime:'09:00',status:'draft',image:false,hashtags:'#designtips'},
-            {id:5,platforms:['linkedin'],content:'Studio Phosphor recrute ! Nous cherchons un·e designer graphique passionné·e pour rejoindre l\'équipe.',scheduledDate:'2026-03-25',scheduledTime:'15:00',status:'published',image:false,hashtags:''},
-            {id:6,platforms:['instagram','facebook'],content:'Lancement de notre nouveau site portfolio ✨',scheduledDate:'2026-03-28',scheduledTime:'12:00',status:'published',image:true,hashtags:'#portfolio #webdesign #phosphor'}
-          ];
+          // Social Media Posts - Charger depuis localStorage ou données par défaut
+          const savedPosts = localStorage.getItem('socialPosts');
+          if (savedPosts) {
+            appData.socialPosts = JSON.parse(savedPosts);
+          } else {
+            appData.socialPosts = [
+              {id:1,platforms:['instagram','linkedin'],content:'Nouveau projet pour @newbusiness 🎨 Direction artistique minimaliste et audacieuse.',scheduledDate:'2026-04-02',scheduledTime:'10:00',status:'scheduled',image:true,hashtags:'#branding #design #phosphor'},
+              {id:2,platforms:['linkedin'],content:'Retour sur notre collaboration avec Manza. Un défi passionnant : créer une identité premium pour une marque de pastrami artisanal.',scheduledDate:'2026-04-05',scheduledTime:'14:30',status:'scheduled',image:true,hashtags:''},
+              {id:3,platforms:['instagram'],content:'Behind the scenes 📸 Process créatif pour Whiti.',scheduledDate:'2026-04-08',scheduledTime:'11:00',status:'draft',image:true,hashtags:'#process #creative #studio'},
+              {id:4,platforms:['twitter'],content:'Design tip: Less is more. Toujours.',scheduledDate:'2026-04-10',scheduledTime:'09:00',status:'draft',image:false,hashtags:'#designtips'},
+              {id:5,platforms:['linkedin'],content:'Studio Phosphor recrute ! Nous cherchons un·e designer graphique passionné·e pour rejoindre l\'équipe.',scheduledDate:'2026-03-25',scheduledTime:'15:00',status:'published',image:false,hashtags:''},
+              {id:6,platforms:['instagram','facebook'],content:'Lancement de notre nouveau site portfolio ✨',scheduledDate:'2026-03-28',scheduledTime:'12:00',status:'published',image:true,hashtags:'#portfolio #webdesign #phosphor'}
+            ];
+            localStorage.setItem('socialPosts', JSON.stringify(appData.socialPosts));
+          }
           
           const ca = await supabaseGet('monthly_ca');
           appData.monthlyCA = ca.sort((a, b) => a.display_order - b.display_order)
@@ -5023,6 +5029,8 @@ function renderSocial() {
           <option value="linkedin" ${socialState.filterPlatform === 'linkedin' ? 'selected' : ''}>LinkedIn</option>
           <option value="twitter" ${socialState.filterPlatform === 'twitter' ? 'selected' : ''}>Twitter</option>
           <option value="facebook" ${socialState.filterPlatform === 'facebook' ? 'selected' : ''}>Facebook</option>
+          <option value="behance" ${socialState.filterPlatform === 'behance' ? 'selected' : ''}>Behance</option>
+          <option value="dribbble" ${socialState.filterPlatform === 'dribbble' ? 'selected' : ''}>Dribbble</option>
         </select>
       </div>
       
@@ -5081,24 +5089,15 @@ function initSocial() {
         
         <div class="form-group">
           <label class="form-label">Plateformes *</label>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
-              <input type="checkbox" value="instagram" class="new-platform-checkbox" checked>
-              <span>Instagram</span>
-            </label>
-            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
-              <input type="checkbox" value="linkedin" class="new-platform-checkbox">
-              <span>LinkedIn</span>
-            </label>
-            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
-              <input type="checkbox" value="twitter" class="new-platform-checkbox">
-              <span>Twitter</span>
-            </label>
-            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
-              <input type="checkbox" value="facebook" class="new-platform-checkbox">
-              <span>Facebook</span>
-            </label>
-          </div>
+          <select multiple class="form-input" id="new-platforms" style="height:120px;">
+            <option value="instagram" selected>Instagram</option>
+            <option value="linkedin">LinkedIn</option>
+            <option value="twitter">Twitter</option>
+            <option value="facebook">Facebook</option>
+            <option value="behance">Behance</option>
+            <option value="dribbble">Dribbble</option>
+          </select>
+          <small style="color:var(--text3);font-size:11px;">Maintiens Ctrl (Cmd sur Mac) pour sélectionner plusieurs</small>
         </div>
         
         <div class="form-group">
@@ -5138,9 +5137,9 @@ function initSocial() {
     `);
     
     document.getElementById('save-post-btn')?.addEventListener('click', () => {
-      // Récupérer plateformes cochées
-      const selectedPlatforms = Array.from(document.querySelectorAll('.new-platform-checkbox:checked'))
-        .map(cb => cb.value);
+      // Récupérer plateformes sélectionnées (select multiple)
+      const selectEl = document.getElementById('new-platforms');
+      const selectedPlatforms = Array.from(selectEl.selectedOptions).map(opt => opt.value);
       
       if (selectedPlatforms.length === 0) {
         toast('❌ Sélectionne au moins une plateforme');
@@ -5159,7 +5158,8 @@ function initSocial() {
       };
       
       appData.socialPosts.push(newPost);
-      // TODO: Sauvegarder dans Supabase
+      // Sauvegarder dans localStorage
+      localStorage.setItem('socialPosts', JSON.stringify(appData.socialPosts));
       
       closeModal();
       toast('✓ Publication créée !');
@@ -5184,24 +5184,15 @@ function initSocial() {
           
           <div class="form-group">
             <label class="form-label">Plateformes *</label>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-              <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
-                <input type="checkbox" value="instagram" class="edit-platform-checkbox" ${(post.platforms || [post.platform]).includes('instagram') ? 'checked' : ''}>
-                <span>Instagram</span>
-              </label>
-              <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
-                <input type="checkbox" value="linkedin" class="edit-platform-checkbox" ${(post.platforms || [post.platform]).includes('linkedin') ? 'checked' : ''}>
-                <span>LinkedIn</span>
-              </label>
-              <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
-                <input type="checkbox" value="twitter" class="edit-platform-checkbox" ${(post.platforms || [post.platform]).includes('twitter') ? 'checked' : ''}>
-                <span>Twitter</span>
-              </label>
-              <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
-                <input type="checkbox" value="facebook" class="edit-platform-checkbox" ${(post.platforms || [post.platform]).includes('facebook') ? 'checked' : ''}>
-                <span>Facebook</span>
-              </label>
-            </div>
+            <select multiple class="form-input" id="edit-platforms" style="height:120px;">
+              <option value="instagram" ${(post.platforms || [post.platform]).includes('instagram') ? 'selected' : ''}>Instagram</option>
+              <option value="linkedin" ${(post.platforms || [post.platform]).includes('linkedin') ? 'selected' : ''}>LinkedIn</option>
+              <option value="twitter" ${(post.platforms || [post.platform]).includes('twitter') ? 'selected' : ''}>Twitter</option>
+              <option value="facebook" ${(post.platforms || [post.platform]).includes('facebook') ? 'selected' : ''}>Facebook</option>
+              <option value="behance" ${(post.platforms || [post.platform]).includes('behance') ? 'selected' : ''}>Behance</option>
+              <option value="dribbble" ${(post.platforms || [post.platform]).includes('dribbble') ? 'selected' : ''}>Dribbble</option>
+            </select>
+            <small style="color:var(--text3);font-size:11px;">Maintiens Ctrl (Cmd sur Mac) pour sélectionner plusieurs</small>
           </div>
           
           <div class="form-group">
@@ -5211,7 +5202,7 @@ function initSocial() {
           
           <div class="form-group">
             <label class="form-label">Hashtags</label>
-            <input type="text" class="form-input" id="edit-hashtags" value="${post.hashtags}">
+            <input type="text" class="form-input" id="edit-hashtags" value="${post.hashtags || ''}">
           </div>
           
           <div class="form-row">
@@ -5242,9 +5233,9 @@ function initSocial() {
       `);
       
       document.getElementById('update-post-btn')?.addEventListener('click', () => {
-        // Récupérer plateformes cochées
-        const selectedPlatforms = Array.from(document.querySelectorAll('.edit-platform-checkbox:checked'))
-          .map(cb => cb.value);
+        // Récupérer plateformes sélectionnées (select multiple)
+        const selectEl = document.getElementById('edit-platforms');
+        const selectedPlatforms = Array.from(selectEl.selectedOptions).map(opt => opt.value);
         
         if (selectedPlatforms.length === 0) {
           toast('❌ Sélectionne au moins une plateforme');
@@ -5259,7 +5250,8 @@ function initSocial() {
         post.scheduledTime = document.getElementById('edit-time')?.value || post.scheduledTime;
         post.status = document.getElementById('edit-status')?.value || post.status;
         
-        // TODO: Sauvegarder dans Supabase
+        // Sauvegarder dans localStorage
+        localStorage.setItem('socialPosts', JSON.stringify(appData.socialPosts));
         
         closeModal();
         toast('✓ Publication mise à jour !');
@@ -5277,7 +5269,8 @@ function initSocial() {
     const index = appData.socialPosts.findIndex(p => p.id === postId);
     if (index !== -1) {
       appData.socialPosts.splice(index, 1);
-      // TODO: Supprimer dans Supabase
+      // Sauvegarder dans localStorage
+      localStorage.setItem('socialPosts', JSON.stringify(appData.socialPosts));
       toast('✓ Publication supprimée');
       navigate('social');
     }
