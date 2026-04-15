@@ -761,6 +761,66 @@
         }
       },
       
+      // CRM CONTACTS
+      async addCRMContact(contact) {
+        try {
+          const data = {
+            first_name: contact.firstName,
+            last_name: contact.lastName,
+            company_name: contact.companyName,
+            email: contact.email || null,
+            phone: contact.phone || null,
+            city: contact.city || null,
+            sector: contact.sector || null,
+            status: contact.status || 'to_contact',
+            source: contact.source || null,
+            notes: contact.notes || null,
+            last_contacted_at: contact.lastContactedAt || null
+          };
+          const result = await supabaseInsert('crm_contacts', data);
+          console.log('✓ Contact CRM créé dans Supabase');
+          return result[0];
+        } catch (error) {
+          console.error('Erreur création contact CRM:', error);
+          return null;
+        }
+      },
+      
+      async updateCRMContact(contactId, updates) {
+        try {
+          const data = {};
+          if (updates.firstName) data.first_name = updates.firstName;
+          if (updates.lastName) data.last_name = updates.lastName;
+          if (updates.companyName) data.company_name = updates.companyName;
+          if (updates.email !== undefined) data.email = updates.email || null;
+          if (updates.phone !== undefined) data.phone = updates.phone || null;
+          if (updates.city !== undefined) data.city = updates.city || null;
+          if (updates.sector !== undefined) data.sector = updates.sector || null;
+          if (updates.status) data.status = updates.status;
+          if (updates.source !== undefined) data.source = updates.source || null;
+          if (updates.notes !== undefined) data.notes = updates.notes || null;
+          if (updates.lastContactedAt !== undefined) data.last_contacted_at = updates.lastContactedAt;
+          
+          await supabaseUpdate('crm_contacts', contactId, data);
+          console.log(`✓ Contact CRM ${contactId} mis à jour dans Supabase`);
+          return true;
+        } catch (error) {
+          console.log(`⚠ Contact CRM ${contactId} non mis à jour (existe seulement localement)`);
+          return true;
+        }
+      },
+      
+      async deleteCRMContact(contactId) {
+        try {
+          await supabaseDelete('crm_contacts', contactId);
+          console.log(`✓ Contact CRM ${contactId} supprimé de Supabase`);
+          return true;
+        } catch (error) {
+          console.log(`⚠ Contact CRM ${contactId} non supprimé de base (existe seulement localement)`);
+          return true;
+        }
+      },
+      
       // PROJECTS
       async addProject(project) {
         try {
@@ -4534,6 +4594,7 @@ function renderCRM() {
       <h2 style="font-size:24px;font-weight:700;margin:0;">CRM</h2>
       <div style="font-size:13px;color:var(--text2);margin-top:4px;">${filtered.length} prospect(s) · ${stats.total} total</div>
     </div>
+    <button class="btn btn-lime" id="btn-add-contact">+ Contact</button>
   </div>
   
   <div style="display:flex;gap:12px;margin-bottom:24px;">
@@ -4731,6 +4792,146 @@ function renderCRM() {
 }
 
 function initCRM() {
+  // Bouton + Contact
+  document.getElementById('btn-add-contact')?.addEventListener('click', () => {
+    openModal(`
+      <div class="modal-box">
+        <div class="modal-title">
+          Nouveau contact
+          <button class="modal-close" onclick="closeModal()">×</button>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Prénom *</label>
+            <input type="text" class="form-input" id="new-firstName" placeholder="Jean">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Nom *</label>
+            <input type="text" class="form-input" id="new-lastName" placeholder="Dupont">
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Entreprise *</label>
+          <input type="text" class="form-input" id="new-companyName" placeholder="Entreprise SARL">
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Email</label>
+            <input type="email" class="form-input" id="new-email" placeholder="contact@entreprise.fr">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Téléphone</label>
+            <input type="tel" class="form-input" id="new-phone" placeholder="06 12 34 56 78">
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Ville</label>
+            <input type="text" class="form-input" id="new-city" placeholder="Paris">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Secteur</label>
+            <select class="form-input" id="new-sector">
+              <option value="">-- Sélectionner --</option>
+              <option value="Tech">Tech</option>
+              <option value="Retail">Retail</option>
+              <option value="Services">Services</option>
+              <option value="Santé">Santé</option>
+              <option value="Finance">Finance</option>
+              <option value="Industrie">Industrie</option>
+              <option value="Immobilier">Immobilier</option>
+              <option value="Culture">Culture</option>
+              <option value="Autre">Autre</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Statut</label>
+            <select class="form-input" id="new-status">
+              <option value="to_contact">À contacter</option>
+              <option value="contacted">Contacté</option>
+              <option value="qualified">Qualifié</option>
+              <option value="proposal_sent">Proposition envoyée</option>
+              <option value="client">Client</option>
+              <option value="lost">Perdu</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Source</label>
+            <select class="form-input" id="new-source">
+              <option value="">-- Sélectionner --</option>
+              <option value="LinkedIn">LinkedIn</option>
+              <option value="Site web">Site web</option>
+              <option value="Recommandation">Recommandation</option>
+              <option value="Événement">Événement</option>
+              <option value="Cold outreach">Cold outreach</option>
+              <option value="Autre">Autre</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Notes</label>
+          <textarea class="form-textarea" id="new-notes" placeholder="Informations complémentaires..." style="min-height:80px;"></textarea>
+        </div>
+        
+        <div style="display:flex;gap:8px;margin-top:16px;">
+          <button class="btn btn-lime" id="save-new-contact">Créer</button>
+          <button class="btn btn-ghost" onclick="closeModal()">Annuler</button>
+        </div>
+      </div>
+    `);
+    
+    document.getElementById('save-new-contact')?.addEventListener('click', async () => {
+      const firstName = document.getElementById('new-firstName')?.value.trim();
+      const lastName = document.getElementById('new-lastName')?.value.trim();
+      const companyName = document.getElementById('new-companyName')?.value.trim();
+      
+      if (!firstName || !lastName || !companyName) {
+        toast('❌ Prénom, nom et entreprise sont obligatoires');
+        return;
+      }
+      
+      const newContact = {
+        firstName,
+        lastName,
+        companyName,
+        email: document.getElementById('new-email')?.value.trim() || '',
+        phone: document.getElementById('new-phone')?.value.trim() || '',
+        city: document.getElementById('new-city')?.value.trim() || '',
+        sector: document.getElementById('new-sector')?.value || '',
+        status: document.getElementById('new-status')?.value || 'to_contact',
+        source: document.getElementById('new-source')?.value || '',
+        notes: document.getElementById('new-notes')?.value.trim() || '',
+        createdAt: new Date().toISOString(),
+        lastContactedAt: null
+      };
+      
+      // Sauvegarder dans Supabase
+      const saved = await Supabase.addCRMContact(newContact);
+      
+      if (saved) {
+        // Ajouter avec l'ID retourné par Supabase
+        appData.crmProspects.push({ ...newContact, id: saved.id });
+        closeModal();
+        toast('✓ Contact créé !');
+        navigate('crm');
+      } else {
+        // Fallback local si Supabase échoue
+        appData.crmProspects.push({ ...newContact, id: Date.now() });
+        closeModal();
+        toast('⚠ Contact créé localement (pas sauvegardé en base)');
+        navigate('crm');
+      }
+    });
+  });
+  
   // Recherche avec debounce
   let searchTimeout;
   document.getElementById('crm-search')?.addEventListener('input', (e) => {
@@ -4865,22 +5066,27 @@ function initCRM() {
       
       // Handler sauvegarde
       document.getElementById('save-prospect-edit-btn')?.addEventListener('click', async () => {
-        // Mettre à jour dans appData
-        prospect.firstName = document.getElementById('edit-firstName')?.value || prospect.firstName;
-        prospect.lastName = document.getElementById('edit-lastName')?.value || prospect.lastName;
-        prospect.jobTitle = document.getElementById('edit-jobTitle')?.value || prospect.jobTitle;
-        prospect.companyName = document.getElementById('edit-companyName')?.value || prospect.companyName;
-        prospect.city = document.getElementById('edit-city')?.value || prospect.city;
-        prospect.region = document.getElementById('edit-region')?.value || prospect.region;
-        prospect.companyWebsite = document.getElementById('edit-website')?.value || '';
-        prospect.linkedin = document.getElementById('edit-linkedin')?.value || '';
-        prospect.revenue = document.getElementById('edit-revenue')?.value || prospect.revenue;
-        prospect.employees = document.getElementById('edit-employees')?.value || prospect.employees;
-        prospect.status = document.getElementById('edit-status')?.value || prospect.status;
-        prospect.notes = document.getElementById('edit-notes')?.value || '';
+        // Préparer les modifications
+        const updates = {
+          firstName: document.getElementById('edit-firstName')?.value,
+          lastName: document.getElementById('edit-lastName')?.value,
+          jobTitle: document.getElementById('edit-jobTitle')?.value,
+          companyName: document.getElementById('edit-companyName')?.value,
+          city: document.getElementById('edit-city')?.value,
+          region: document.getElementById('edit-region')?.value,
+          companyWebsite: document.getElementById('edit-website')?.value || '',
+          linkedin: document.getElementById('edit-linkedin')?.value || '',
+          revenue: document.getElementById('edit-revenue')?.value,
+          employees: document.getElementById('edit-employees')?.value,
+          status: document.getElementById('edit-status')?.value,
+          notes: document.getElementById('edit-notes')?.value || ''
+        };
         
-        // TODO: Sauvegarder dans Supabase
-        // await supabaseUpdate('crm_prospects', prospectId, prospect);
+        // Mettre à jour localement
+        Object.assign(prospect, updates);
+        
+        // Sauvegarder dans Supabase
+        await Supabase.updateCRMContact(prospectId, updates);
         
         closeModal();
         toast('✓ Prospect mis à jour !');
